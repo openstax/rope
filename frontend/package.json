@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "npm run server:dev",
     "prod": "npm run lint && npm run build && npm run server:prod",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "server": "vite --host",
     "server:dev": "npm run server",
     "server:prod": "cross-env NODE_ENV=production npm run server",
