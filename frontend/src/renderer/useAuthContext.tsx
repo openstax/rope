@@ -17,6 +17,6 @@ export interface AuthState {
 export const AuthContext = React.createContext<AuthState>({ status: AuthStatus.Unknown, isAdmin: false, isManager: false, email: undefined })
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function useAuthContext() {
+export function useAuthContext(): AuthState {
   return useContext(AuthContext)
 }

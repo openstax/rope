@@ -1,16 +1,15 @@
 // https://vike.dev/onRenderHtml
-export { onRenderHtml }
-
 import ReactDOMServer from 'react-dom/server'
 import { PageShell } from './PageShell'
 import { escapeInject, dangerouslySkipEscape } from 'vike/server'
 import logoUrl from './logo.svg'
 import type { OnRenderHtmlAsync } from 'vike/types'
 
-const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRenderHtmlAsync> => {
+export const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRenderHtmlAsync> => {
   const { Page, pageProps } = pageContext
   // This onRenderHtml() hook only supports SSR, see https://vike.dev/render-modes for how to modify
   // onRenderHtml() to support SPA
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (!Page) throw new Error('My render() hook expects pageContext.Page to be defined')
   const pageHtml = ReactDOMServer.renderToString(
     <PageShell pageContext={pageContext}>
@@ -20,8 +19,8 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRender
 
   // See https://vike.dev/head
   const { documentProps } = pageContext.exports
-  const title = (documentProps && documentProps.title) || 'Vite SSR app'
-  const desc = (documentProps && documentProps.description) || 'App using Vite + Vike'
+  const title = (documentProps?.title) ?? 'Vite SSR app'
+  const desc = (documentProps?.description) ?? 'App using Vite + Vike'
 
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="en">

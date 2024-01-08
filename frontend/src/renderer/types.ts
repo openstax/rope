@@ -1,7 +1,6 @@
-export type { PageProps }
-
 // https://vike.dev/pageContext#typescript
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Vike {
     interface PageContext {
       Page: Page
@@ -18,4 +17,4 @@ declare global {
 }
 
 type Page = (pageProps: PageProps) => React.ReactElement
-type PageProps = Record<string, unknown>
+export type PageProps = Record<string, unknown>

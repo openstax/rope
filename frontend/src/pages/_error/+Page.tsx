@@ -1,6 +1,4 @@
-export { Page }
-
-function Page({ is404 }: { is404: boolean }) {
+export function Page({ is404 }: { is404: boolean }): JSX.Element {
   if (is404) {
     return (
       <>

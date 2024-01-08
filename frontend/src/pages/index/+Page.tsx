@@ -1,8 +1,6 @@
 import { Counter } from './Counter'
 
-export { Page }
-
-function Page() {
+export function Page(): JSX.Element {
   return (
     <>
       <h1>Welcome</h1>

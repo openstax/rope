@@ -1,25 +1,23 @@
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 import { ENV } from '../../lib/env'
 
-export { Page }
-
-function Page() {
+export function Page(): JSX.Element {
   const login = async (token: string): Promise<void> => {
     const resp = await fetch(
       '/api/login/google_auth',
       {
         method: 'POST',
         headers: {
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          token: token
+          token
         })
       }
     )
 
     if (resp.status !== 200) {
-      throw new Error("Error establishing session")
+      throw new Error('Error establishing session')
     }
   }
 
@@ -29,9 +27,11 @@ function Page() {
       <GoogleOAuthProvider clientId={ENV.GOOGLE_CLIENT_ID}>
         <GoogleLogin
           onSuccess={credentialResponse => {
-            login(credentialResponse.credential!).then(() => {
-              window.location.href='/'
-            })
+            if (credentialResponse.credential !== undefined) {
+              login(credentialResponse.credential).then(() => {
+                window.location.href = '/'
+              }).catch(error => { console.log(error) })
+            }
           }}
           onError={() => {
             console.error('Google login Failed')

@@ -4,11 +4,9 @@ import { PageContextProvider, usePageContext } from './usePageContext'
 import type { PageContext } from 'vike/types'
 import './PageShell.css'
 import { Link } from './Link'
-import { AuthContext, AuthStatus, useAuthContext, AuthState } from './useAuthContext'
+import { AuthContext, AuthStatus, useAuthContext, type AuthState } from './useAuthContext'
 
-export { PageShell }
-
-function PageShell({ children, pageContext }: { children: React.ReactNode; pageContext: PageContext }) {
+export function PageShell({ children, pageContext }: { children: React.ReactNode, pageContext: PageContext }): JSX.Element {
   const [authState, setAuthState] = useState<AuthState>({ status: AuthStatus.Unknown, email: undefined, isAdmin: false, isManager: false })
 
   useEffect(() => {
@@ -32,28 +30,28 @@ function PageShell({ children, pageContext }: { children: React.ReactNode; pageC
       })
     }
 
-    getCurrentUser()
+    getCurrentUser().catch(error => { console.error(error) })
   }, [])
 
-  const logout = async (): Promise<void> => {
-    const resp = await fetch('/api/session', { method: 'DELETE' })
-    if (resp.status === 200) {
-      setAuthState({
-        status: AuthStatus.NotSignedIn,
-        email: undefined,
-        isAdmin: false,
-        isManager: false
-      })
-    }
+  const logout = (): void => {
+    fetch('/api/session', { method: 'DELETE' }).then(resp => {
+      if (resp.status === 200) {
+        setAuthState({
+          status: AuthStatus.NotSignedIn,
+          email: undefined,
+          isAdmin: false,
+          isManager: false
+        })
+      }
+    }).catch(error => { console.error(error) })
   }
 
-
-  const admin_only = async (): Promise<void> => {
-    await fetch('/api/admin_only')
+  const adminOnly = (): void => {
+    fetch('/api/admin_only').catch(error => { console.error(error) })
   }
 
-  const manager_only = async (): Promise<void> => {
-    await fetch('/api/manager_only')
+  const managerOnly = (): void => {
+    fetch('/api/manager_only').catch(error => { console.error(error) })
   }
 
   return (
@@ -70,8 +68,8 @@ function PageShell({ children, pageContext }: { children: React.ReactNode; pageC
                 <Link className="navitem" href="/about">
                   About
                 </Link>
-                <a href="#" onClick={admin_only}>Test Admin request</a>
-                <a href="#" onClick={manager_only}>Test Manager request</a>
+                <a href="#" onClick={adminOnly}>Test Admin request</a>
+                <a href="#" onClick={managerOnly}>Test Manager request</a>
                 <a href="#" onClick={logout}>Logout</a>
               </Sidebar>
               <Content>{children}</Content>
@@ -83,7 +81,7 @@ function PageShell({ children, pageContext }: { children: React.ReactNode; pageC
   )
 }
 
-function Layout({ children }: { children: React.ReactNode }) {
+function Layout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <div
       style={{
@@ -97,7 +95,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   )
 }
 
-function Sidebar({ children }: { children: React.ReactNode }) {
+function Sidebar({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <div
       style={{
@@ -114,7 +112,7 @@ function Sidebar({ children }: { children: React.ReactNode }) {
   )
 }
 
-function Content({ children }: { children: React.ReactNode }) {
+function Content({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <div
       style={{
@@ -129,7 +127,7 @@ function Content({ children }: { children: React.ReactNode }) {
   )
 }
 
-function Logo() {
+function Logo(): JSX.Element {
   return (
     <div
       style={{
@@ -144,7 +142,7 @@ function Logo() {
   )
 }
 
-function AuthGuard({ children }: { children: React.ReactNode }) {
+function AuthGuard({ children }: { children: React.ReactNode }): JSX.Element | React.ReactNode {
   const authContext = useAuthContext()
   const pageContext = usePageContext()
 
@@ -156,7 +154,6 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     if ((authContext.status === AuthStatus.SignedIn) && (pageContext.urlPathname === '/login')) {
       window.location.href = '/'
     }
-
   }, [authContext, pageContext])
 
   if ((authContext.status === AuthStatus.SignedIn) || (pageContext.urlPathname === '/login')) {
