@@ -3,6 +3,22 @@ module.exports = {
     'react-refresh/only-export-components': 'warn',
     '@typescript-eslint/no-namespace': 'off'
   },
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      extends: 'standard-with-typescript',
+      rules: {
+        '@typescript-eslint/space-before-function-paren': [
+          'error',
+          {
+            anonymous: 'always',
+            named: 'never',
+            asyncArrow: 'always'
+          }
+        ],
+      }
+    }
+  ],
   reportUnusedDisableDirectives: true,
   ignorePatterns: ['dist/*'],
   env: { browser: true, es2020: true, node: true },
