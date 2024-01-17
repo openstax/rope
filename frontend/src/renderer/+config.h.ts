@@ -3,7 +3,7 @@ import type { Config } from 'vike/types'
 // https://vike.dev/config
 export default {
   // https://vike.dev/clientRouting
-  clientRouting: true,
+  clientRouting: false,
   // https://vike.dev/meta
   meta: {
     // Define new setting 'title'
@@ -15,5 +15,8 @@ export default {
       env: { server: true }
     }
   },
-  hydrationCanBeAborted: true
+  passToClient: [
+    'pageProps',
+    'urlPathname'
+  ]
 } satisfies Config
