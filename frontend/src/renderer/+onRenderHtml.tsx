@@ -23,7 +23,7 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRender
 
   // See https://vike.dev/head
   const title = getPageTitle(pageContext)
-  const desc = pageContext.data?.description || pageContext.config.description || 'Demo of using Vike'
+  const desc = pageContext.data?.description || pageContext.config.description || 'ROPE'
 
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="en">
