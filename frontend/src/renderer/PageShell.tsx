@@ -1,10 +1,8 @@
-export { PageShell }
-
 import React from 'react'
 import { PageContextProvider } from './usePageContext'
 import type { PageContext } from 'vike/types'
 
-function PageShell({ children, pageContext }: { children: React.ReactNode; pageContext: PageContext }) {
+export function PageShell({ children, pageContext }: { children: React.ReactNode, pageContext: PageContext }): JSX.Element {
   return (
     <React.StrictMode>
       <PageContextProvider pageContext={pageContext}>
@@ -16,7 +14,7 @@ function PageShell({ children, pageContext }: { children: React.ReactNode; pageC
   )
 }
 
-function Layout({ children }: { children: React.ReactNode }) {
+function Layout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <div
       style={{
@@ -30,7 +28,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   )
 }
 
-function Content({ children }: { children: React.ReactNode }) {
+function Content({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <div id="page-container">
       <div

@@ -1,12 +1,10 @@
-export { Page }
-
 import { usePageContext } from '../../renderer/usePageContext'
 
-function Page() {
+export function Page(): JSX.Element {
   const pageContext = usePageContext()
   let { abortReason } = pageContext
-  if (!abortReason) {
-    abortReason = pageContext.is404 ? 'Page not found.' : 'Something went wrong.'
+  if (abortReason === undefined) {
+    abortReason = (pageContext.is404 === true) ? 'Page not found.' : 'Something went wrong.'
   }
   return (
     <Center>
@@ -15,7 +13,7 @@ function Page() {
   )
 }
 
-function Center({ children }: { children: React.ReactNode }) {
+function Center({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <div
       style={{

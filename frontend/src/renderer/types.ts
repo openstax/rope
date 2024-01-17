@@ -1,5 +1,6 @@
 // https://vike.dev/pageContext#typescript
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Vike {
     interface PageContext {
       Page: () => React.ReactElement
