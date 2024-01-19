@@ -1,0 +1,48 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      target: ${ROPE_APP_TARGET:-dev}
+    environment:
+      - NGINX_HOST=localhost # Used when ROPE_APP_TARGET=deploy
+      - NGINX_PORT=3000      # Used when ROPE_APP_TARGET=deploy
+    volumes:
+      - ./frontend:/code
+      - /code/node_modules
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`localhost`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+    networks:
+      - rope
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    command: ["uvicorn", "rope.api.main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
+    volumes:
+      - ./backend:/code
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`localhost`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.middlewares=backend-stripprefix"
+      - "traefik.http.middlewares.backend-stripprefix.stripprefix.prefixes=/api"
+      - "traefik.http.services.backend.loadbalancer.server.port=80"
+    networks:
+      - rope
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--providers.docker=true"
+      - "--api.insecure=true"
+      - "--entrypoints.web.address=:3000"
+      - "--providers.docker.exposedbydefault=false"
+    ports:
+      - 3000:3000
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - rope
+networks:
+  rope:
