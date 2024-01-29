@@ -1,8 +1,12 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
+from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
-from api.auth import verify_google_token
-from api import settings
-from api.utils import find_user_by_email
+import uuid
+
+from rope.api.auth import verify_google_token
+from rope.api import settings
+from rope.api.database import SessionLocal, get_user_by_email
+from rope.api.sessions import create_session
 
 from pydantic import BaseModel
 
@@ -22,20 +26,37 @@ class GoogleLoginData(BaseModel):
     token: str
 
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 @app.post("/session")
-def google_login(login_data: GoogleLoginData, request: Request):
+def google_login(
+    login_data: GoogleLoginData, request: Request, db: Session = Depends(get_db)
+):
     token = verify_google_token(login_data.token)
     if not token:
         raise HTTPException(
             status_code=401,
             detail="Invalid token",
         )
-    # Need to actually look into the database for the email
-    user = find_user_by_email(token["email"])
+    user = get_user_by_email(db, token["email"])
     if not user:
         raise HTTPException(
             status_code=401,
             detail="Unauthorized user",
         )
+    # Need to confirm this will work / figure out how to get into dict.
+    user_data = {
+        'email': user['email'],
+        "is_manager": user["is_manager"],
+        "is_admin": user["is_admin"],
+    }
 
-    # Create the session
+    new_session_id = str(uuid.uuid4())
+    create_session(new_session_id, user_data)
+    request.session["session_id"] = new_session_id

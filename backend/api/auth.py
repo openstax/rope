@@ -12,7 +12,9 @@ def verify_google_token(token):
             settings.GOOGLE_CLIENT_ID,
         )
 
-        # Do we need to check for domain?
+        if idinfo["hd"] != "rice.edu":
+            return None
+
         return idinfo
 
     except ValueError:
