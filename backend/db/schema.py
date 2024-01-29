@@ -16,8 +16,8 @@ class Base(DeclarativeBase):
     )
 
 
-class User(Base):
-    __tablename__ = 'user'
+class UserAccount(Base):
+    __tablename__ = 'user_account'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     email: Mapped[str]

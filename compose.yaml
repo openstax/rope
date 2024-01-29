@@ -31,7 +31,7 @@ services:
     networks:
       - rope
   postgres:
-    image: postgres:15
+    image: postgres:16
     environment:
       - POSTGRES_DB=ropedb
       - POSTGRES_USER=pguser
