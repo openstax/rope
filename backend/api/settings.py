@@ -1,0 +1,4 @@
+import os
+
+SESSION_SECRET_KEY = os.getenv("SESSION_SECRET_KEY")
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
