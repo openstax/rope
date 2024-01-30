@@ -1,15 +1,15 @@
 from fastapi import FastAPI, Request, HTTPException, Depends
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
+
 import uuid
+from pydantic import BaseModel
+from typing import Annotated
 
 from rope.api.auth import verify_google_token, verify_user
 from rope.api import settings
 from rope.api.database import SessionLocal, get_user_by_email
-from rope.api.sessions import create_session
-
-from pydantic import BaseModel
-from typing import Annotated
+from rope.api.sessions import create_session, destroy_session
 
 
 app = FastAPI(title="ROPE API", root_path="/api")
@@ -65,3 +65,10 @@ def google_login(
 @app.get("/user/current")
 def get_current_user(current_user: Annotated[dict, Depends(verify_user)]):
     return current_user
+
+
+@app.delete("/session", dependencies=[Depends(verify_user)])
+def delete_session(request: Request):
+    session_id = request.session.get("session_id")
+    destroy_session(session_id)
+    del request.session["session_id"]
