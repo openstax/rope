@@ -1,7 +1,9 @@
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from fastapi import Request, HTTPException
 
-from api import settings
+from rope.api import settings
+from rope.api.sessions import get_session
 
 
 def verify_google_token(token):
@@ -19,3 +21,23 @@ def verify_google_token(token):
 
     except ValueError:
         return None
+
+
+def verify_user(request: Request):
+    session_id = request.session.get("session_id")
+
+    if not session_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthenticated user",
+        )
+
+    maybe_user = get_session(session_id)
+
+    if not maybe_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthenticated user",
+        )
+
+    return maybe_user
