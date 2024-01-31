@@ -1,9 +1,9 @@
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from fastapi import Request, HTTPException
+from fastapi import HTTPException, Depends
 
 from rope.api import settings
-from rope.api.sessions import get_session
+from rope.api.sessions import get_request_session, get_session
 
 
 def verify_google_token(token):
@@ -23,8 +23,8 @@ def verify_google_token(token):
         return None
 
 
-def verify_user(request: Request):
-    session_id = request.session.get("session_id")
+def verify_user(session=Depends(get_request_session)):
+    session_id = session.get("session_id")
 
     if not session_id:
         raise HTTPException(

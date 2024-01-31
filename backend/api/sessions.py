@@ -1,4 +1,10 @@
+from fastapi import Request
+
 sessions = {}
+
+
+def get_request_session(request: Request):
+    return request.session
 
 
 def create_session(session_id, user_data):

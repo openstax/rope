@@ -9,7 +9,7 @@ from typing import Annotated
 from rope.api.auth import verify_google_token, verify_user
 from rope.api import settings
 from rope.api.database import SessionLocal, get_user_by_email
-from rope.api.sessions import create_session, destroy_session
+from rope.api.sessions import create_session, destroy_session, get_request_session
 
 
 app = FastAPI(title="ROPE API", root_path="/api")
@@ -37,7 +37,9 @@ def get_db():
 
 @app.post("/session")
 def google_login(
-    login_data: GoogleLoginData, request: Request, db: Session = Depends(get_db)
+    login_data: GoogleLoginData,
+    session=Depends(get_request_session),
+    db: Session = Depends(get_db),
 ):
     token = verify_google_token(login_data.token)
     if not token:
@@ -59,7 +61,7 @@ def google_login(
 
     new_session_id = str(uuid.uuid4())
     create_session(new_session_id, user_data)
-    request.session["session_id"] = new_session_id
+    session["session_id"] = new_session_id
 
 
 @app.get("/user/current")
@@ -68,7 +70,7 @@ def get_current_user(current_user: Annotated[dict, Depends(verify_user)]):
 
 
 @app.delete("/session", dependencies=[Depends(verify_user)])
-def delete_session(request: Request):
-    session_id = request.session.get("session_id")
+def delete_session(session=Depends(get_request_session)):
+    session_id = session.get("session_id")
     destroy_session(session_id)
-    del request.session["session_id"]
+    del session["session_id"]
