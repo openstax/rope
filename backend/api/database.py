@@ -17,9 +17,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def get_user_by_email(db: Session, email: str):
-    user = db.query(UserAccount).filter(UserAccount.email == email).one()
+    user = db.query(UserAccount).filter(UserAccount.email == email).all()
     if not user:
         raise NoResultFound
     if len(user) > 1:
         raise MultipleResultsFound
-    return user
+    return user[0]

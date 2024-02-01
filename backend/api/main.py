@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -54,9 +54,9 @@ def google_login(
             detail="Unauthorized user",
         )
     user_data = {
-        "email": user["email"],
-        "is_manager": user["is_manager"],
-        "is_admin": user["is_admin"],
+        "email": user.email,
+        "is_manager": user.is_manager,
+        "is_admin": user.is_admin,
     }
 
     new_session_id = str(uuid.uuid4())
