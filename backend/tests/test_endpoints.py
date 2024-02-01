@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 import pytest
 from rope.api.main import app
-from rope.api.sessions import get_request_session, sessions
+from rope.api.sessions import get_request_session, session_store
 from rope.api.database import SessionLocal
 from rope.db.schema import UserAccount
 
@@ -41,7 +41,7 @@ def test_get_current_user(test_client, mocker):
         }
     }
     mocker.patch(
-        "rope.api.sessions.sessions",
+        "rope.api.sessions.session_store",
         user,
     )
     response = test_client.get("/user/current")
@@ -62,7 +62,7 @@ def test_unauthenticated_user(test_client, mocker):
         }
     }
     mocker.patch(
-        "rope.api.sessions.sessions",
+        "rope.api.sessions.session_store",
         user,
     )
     response = test_client.get("/user/current")
@@ -71,12 +71,14 @@ def test_unauthenticated_user(test_client, mocker):
 
 def test_delete_session(test_client, mocker):
     app.dependency_overrides[get_request_session] = override_get_request_session
+    session_store = {"12345": "ewfnweoif"}
     mocker.patch(
-        "rope.api.sessions.sessions",
-        {"12345": "ewfnweoif"},
+        "rope.api.sessions.session_store",
+        session_store,
     )
     response = test_client.delete("/session")
     assert response.status_code == 200
+    assert session_store.get("12345") is None
 
 
 def test_google_login(test_client, db, mocker):
@@ -93,8 +95,8 @@ def test_google_login(test_client, db, mocker):
     db.add(db_user)
     db.commit()
     response = test_client.post("/session", json={"token": "fp2m3fpwimef"})
-    session_id = list(sessions.keys())[0]
-    user_data = sessions[session_id]
+    session_id = list(session_store.keys())[0]
+    user_data = session_store[session_id]
     assert response.status_code == 200
     assert user_data["email"] == "test@rice.edu"
     assert user_data["is_manager"] is False

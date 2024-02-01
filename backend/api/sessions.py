@@ -1,6 +1,6 @@
 from fastapi import Request
 
-sessions = {}
+session_store = {}
 
 
 def get_request_session(request: Request):
@@ -8,12 +8,12 @@ def get_request_session(request: Request):
 
 
 def create_session(session_id, user_data):
-    sessions[session_id] = user_data
+    session_store[session_id] = user_data
 
 
 def get_session(session_id):
-    return sessions.get(session_id)
+    return session_store.get(session_id)
 
 
 def destroy_session(session_id):
-    del sessions[session_id]
+    del session_store[session_id]
