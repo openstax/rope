@@ -1,5 +1,4 @@
 from fastapi.testclient import TestClient
-from unittest.mock import patch
 import pytest
 from rope.api.main import app
 from rope.api.sessions import get_request_session, sessions
