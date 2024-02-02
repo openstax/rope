@@ -28,6 +28,15 @@ jobs:
         run: pip install .[test]
       - name: Lint
         run: flake8
+      - name: Test setup
+        run: |
+          docker compose up -d postgres
+          docker compose exec -T postgres timeout 10 bash -c "until pg_isready; do sleep 1; done;"
+          alembic upgrade head
+      - name: Test
+        run: pytest --cov-report=term --cov-report=xml --cov=rope
+      - name: Upload Code Coverage
+        uses: codecov/codecov-action@v3
 
   frontend:
     timeout-minutes: 10
