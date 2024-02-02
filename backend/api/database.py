@@ -17,3 +17,10 @@ def get_user_by_email(db: Session, email: str):
     if len(user) > 1:
         raise MultipleResultsFound
     return user[0]
+
+
+def get_all_users(db: Session):
+    users = db.query(UserAccount).all()
+    if not users:
+        raise NoResultFound
+    return users

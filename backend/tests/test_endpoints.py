@@ -31,6 +31,11 @@ def override_get_request_session():
     return session_id
 
 
+def override_admin_get_request_session():
+    session_id = {"session_id": "A1B2C3"}
+    return session_id
+
+
 def test_get_current_user(test_client, mocker):
     app.dependency_overrides[get_request_session] = override_get_request_session
     user = {
@@ -101,3 +106,27 @@ def test_google_login(test_client, db, mocker):
     assert user_data["email"] == "test@rice.edu"
     assert user_data["is_manager"] is False
     assert user_data["is_admin"] is False
+
+
+def test_get_all_users(test_client, db, mocker):
+    app.dependency_overrides[get_request_session] = override_admin_get_request_session
+    admin = {
+        "A1B2C3": {
+            "email": "admin@rice.edu",
+            "is_manager": False,
+            "is_admin": True,
+        }
+    }
+    mocker.patch(
+        "rope.api.sessions.session_store",
+        admin,
+    )
+    db_user = UserAccount(email="test@rice.edu", is_manager=False, is_admin=False)
+    db_user2 = UserAccount(email="admin@rice.edu", is_manager=False, is_admin=True)
+    db.add(db_user)
+    db.add(db_user2)
+    db.commit()
+    response = test_client.get("/user")
+    data = response.json()
+    assert response.status_code == 200
+    assert len(data) == 2

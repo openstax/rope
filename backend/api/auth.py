@@ -1,6 +1,7 @@
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from fastapi import HTTPException, Depends
+from typing import Annotated
 
 from rope.api import settings
 from rope.api.sessions import get_request_session, get_session
@@ -41,3 +42,13 @@ def verify_user(session=Depends(get_request_session)):
         )
 
     return maybe_user
+
+
+def verify_admin(current_user: Annotated[dict, Depends(verify_user)]):
+    if not current_user["is_admin"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Unauthorized to perform this request",
+        )
+
+    return current_user

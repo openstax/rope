@@ -6,9 +6,9 @@ import uuid
 from pydantic import BaseModel
 from typing import Annotated
 
-from rope.api.auth import verify_google_token, verify_user
+from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
-from rope.api.database import SessionLocal, get_user_by_email
+from rope.api.database import SessionLocal, get_user_by_email, get_all_users
 from rope.api.sessions import create_session, destroy_session, get_request_session
 
 
@@ -74,3 +74,9 @@ def delete_session(session=Depends(get_request_session)):
     session_id = session.get("session_id")
     destroy_session(session_id)
     del session["session_id"]
+
+
+@app.get("/user", dependencies=[Depends(verify_admin)])
+def get_users(db: Session = Depends(get_db)):
+    users = get_all_users(db)
+    return users
