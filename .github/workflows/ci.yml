@@ -28,6 +28,10 @@ jobs:
         run: pip install .[test]
       - name: Lint
         run: flake8
+      - name: Test
+        run: pytest --cov-report=term --cov-report=xml --cov=rope
+      - name: Upload Code Coverage
+        uses: codecov/codecov-action@v3
 
   frontend:
     timeout-minutes: 10

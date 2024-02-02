@@ -20,3 +20,9 @@ Devs can also test the deployment build of the frontend by running the following
 ```bash
 $ ROPE_APP_TARGET=deploy docker compose up --build -d
 ```
+
+Code coverage reports can be generated when running tests:
+
+```bash
+$ pytest --cov=rope --cov-report=term --cov-report=html
+```
