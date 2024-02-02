@@ -2,15 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 from rope.db.schema import UserAccount
+from rope.api.settings import PG_USER, PG_PASSWORD, PG_SERVER, PG_DB
 
-import os
-
-pg_server = os.getenv("POSTGRES_SERVER", "")
-pg_db = os.getenv("POSTGRES_DB", "")
-pg_user = os.getenv("POSTGRES_USER", "")
-pg_password = os.getenv("POSTGRES_PASSWORD", "")
-
-SQLALCHEMY_DATABASE_URL = f"postgresql://{pg_user}:{pg_password}@{pg_server}/{pg_db}"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_SERVER}/{PG_DB}"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
