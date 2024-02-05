@@ -14,6 +14,7 @@ from rope.api.database import (
     get_all_users,
     create_db_user,
     update_db_user,
+    delete_db_user,
 )
 from rope.api.sessions import create_session, destroy_session, get_request_session
 
@@ -33,11 +34,42 @@ class GoogleLoginData(BaseModel):
     token: str
 
 
-class User(BaseModel):
-    id: int | None = None
+class GetUsersResponse(BaseModel):
+    id: int
     email: str
     is_manager: bool
     is_admin: bool
+
+
+class PostUserRequest(BaseModel):
+    email: str
+    is_manager: bool
+    is_admin: bool
+
+
+class PostUserResponse(BaseModel):
+    id: int
+    email: str
+    is_manager: bool
+    is_admin: bool
+
+
+class PutUserRequest(BaseModel):
+    id: int
+    email: str
+    is_manager: bool
+    is_admin: bool
+
+
+class PutUserResponse(BaseModel):
+    id: int
+    email: str
+    is_manager: bool
+    is_admin: bool
+
+
+class DeletedUserResponse(BaseModel):
+    message: str
 
 
 def get_db():
@@ -90,18 +122,28 @@ def delete_session(session=Depends(get_request_session)):
 
 
 @app.get("/user", dependencies=[Depends(verify_admin)])
-def get_users(db: Session = Depends(get_db)):
+def get_users(db: Session = Depends(get_db)) -> list[GetUsersResponse]:
     users = get_all_users(db)
     return users
 
 
 @app.post("/user", dependencies=[Depends(verify_admin)])
-def create_user(user: User, db: Session = Depends(get_db)):
+def create_user(
+    user: PostUserRequest, db: Session = Depends(get_db)
+) -> PostUserResponse:
     new_user = create_db_user(db, user)
     return new_user
 
 
 @app.put("/user/{id}", dependencies=[Depends(verify_admin)])
-def update_user(id: int, user: User, db: Session = Depends(get_db)):
-    updated_user = update_db_user(db, user, id)
+def update_user(user: PutUserRequest, db: Session = Depends(get_db)) -> PutUserResponse:
+    updated_user = update_db_user(db, user)
     return updated_user
+
+
+@app.delete("/user/{id}", dependencies=[Depends(verify_admin)])
+def delete_user(id: int, db: Session = Depends(get_db)) -> DeletedUserResponse:
+    delete_db_user(db, id)
+    return {
+        "message": f"All user information for the user with id:{id} has been deleted"
+    }

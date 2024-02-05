@@ -36,8 +36,8 @@ def create_db_user(db: Session, user):
     return new_user
 
 
-def update_db_user(db: Session, user, id):
-    user_db = db.query(UserAccount).filter(user.id == id).first()
+def update_db_user(db: Session, user):
+    user_db = db.query(UserAccount).filter(UserAccount.id == user.id).first()
     if not user_db:
         raise NoResultFound
     user_db.email = user.email
@@ -46,3 +46,10 @@ def update_db_user(db: Session, user, id):
     db.commit()
     db.refresh(user_db)
     return user_db
+
+
+def delete_db_user(db: Session, id: int):
+    rows_deleted = db.query(UserAccount).filter(UserAccount.id == id).delete()
+    if rows_deleted == 0:
+        raise NoResultFound
+    db.commit()

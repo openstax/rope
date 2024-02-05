@@ -190,3 +190,29 @@ def test_update_user(test_client, db, mocker):
     data = response.json()
     assert response.status_code == 200
     assert data["email"] == "updateduser@rice.edu"
+
+
+def test_delete_user(test_client, db, mocker):
+    app.dependency_overrides[get_request_session] = override_admin_get_request_session
+    admin = {
+        "A1B2C3": {
+            "email": "admin@rice.edu",
+            "is_manager": False,
+            "is_admin": True,
+        }
+    }
+    mocker.patch(
+        "rope.api.sessions.session_store",
+        admin,
+    )
+    db_user = UserAccount(
+        email="currentuser@rice.edu", is_manager=False, is_admin=False
+    )
+    db.add(db_user)
+    db.commit()
+    user = db.query(UserAccount).first()
+    user_id = user.id
+    response = test_client.delete(f"user/{user_id}")
+    empty_db = db.query(UserAccount).all()
+    assert response.status_code == 200
+    assert len(empty_db) == 0
