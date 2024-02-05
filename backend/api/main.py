@@ -8,7 +8,12 @@ from typing import Annotated
 
 from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
-from rope.api.database import SessionLocal, get_user_by_email, get_all_users
+from rope.api.database import (
+    SessionLocal,
+    get_user_by_email,
+    get_all_users,
+    create_db_user,
+)
 from rope.api.sessions import create_session, destroy_session, get_request_session
 
 
@@ -25,6 +30,12 @@ app.add_middleware(
 
 class GoogleLoginData(BaseModel):
     token: str
+
+
+class User(BaseModel):
+    email: str
+    is_manager: bool
+    is_admin: bool
 
 
 def get_db():
@@ -80,3 +91,9 @@ def delete_session(session=Depends(get_request_session)):
 def get_users(db: Session = Depends(get_db)):
     users = get_all_users(db)
     return users
+
+
+@app.post("/user", dependencies=[Depends(verify_admin)])
+def create_user(user: User, db: Session = Depends(get_db)):
+    new_user = create_db_user(db, user)
+    return new_user

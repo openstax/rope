@@ -24,3 +24,13 @@ def get_all_users(db: Session):
     if not users:
         raise NoResultFound
     return users
+
+
+def create_db_user(db: Session, user):
+    new_user = UserAccount(
+        email=user.email, is_manager=user.is_manager, is_admin=user.is_admin
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
