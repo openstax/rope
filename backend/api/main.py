@@ -13,6 +13,7 @@ from rope.api.database import (
     get_user_by_email,
     get_all_users,
     create_db_user,
+    update_db_user,
 )
 from rope.api.sessions import create_session, destroy_session, get_request_session
 
@@ -33,6 +34,7 @@ class GoogleLoginData(BaseModel):
 
 
 class User(BaseModel):
+    id: int | None = None
     email: str
     is_manager: bool
     is_admin: bool
@@ -97,3 +99,9 @@ def get_users(db: Session = Depends(get_db)):
 def create_user(user: User, db: Session = Depends(get_db)):
     new_user = create_db_user(db, user)
     return new_user
+
+
+@app.put("/user/{id}", dependencies=[Depends(verify_admin)])
+def update_user(id: int, user: User, db: Session = Depends(get_db)):
+    updated_user = update_db_user(db, user, id)
+    return updated_user

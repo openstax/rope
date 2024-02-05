@@ -150,7 +150,7 @@ def test_create_user(test_client, db, mocker):
         "is_manager": False,
         "is_admin": False,
     }
-    response = test_client.post('/user', json=new_user_data)
+    response = test_client.post("/user", json=new_user_data)
     users = db.query(UserAccount).all()
     data = response.json()
     assert response.status_code == 200
@@ -158,3 +158,35 @@ def test_create_user(test_client, db, mocker):
     assert data["email"] == "createduser@rice.edu"
     assert data["is_manager"] is False
     assert data["is_admin"] is False
+
+
+def test_update_user(test_client, db, mocker):
+    app.dependency_overrides[get_request_session] = override_admin_get_request_session
+    admin = {
+        "A1B2C3": {
+            "email": "admin@rice.edu",
+            "is_manager": False,
+            "is_admin": True,
+        }
+    }
+    mocker.patch(
+        "rope.api.sessions.session_store",
+        admin,
+    )
+    db_user = UserAccount(
+        email="currentuser@rice.edu", is_manager=False, is_admin=False
+    )
+    db.add(db_user)
+    db.commit()
+    user = db.query(UserAccount).first()
+    user_id = user.id
+    updated_user_data = {
+        "id": user_id,
+        "email": "updateduser@rice.edu",
+        "is_manager": False,
+        "is_admin": False,
+    }
+    response = test_client.put(f"user/{user_id}", json=updated_user_data)
+    data = response.json()
+    assert response.status_code == 200
+    assert data["email"] == "updateduser@rice.edu"

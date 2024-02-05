@@ -34,3 +34,15 @@ def create_db_user(db: Session, user):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+
+def update_db_user(db: Session, user, id):
+    user_db = db.query(UserAccount).filter(user.id == id).first()
+    if not user_db:
+        raise NoResultFound
+    user_db.email = user.email
+    user_db.is_manager = user.is_manager
+    user_db.is_admin = user.is_admin
+    db.commit()
+    db.refresh(user_db)
+    return user_db
