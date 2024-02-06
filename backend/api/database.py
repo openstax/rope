@@ -53,3 +53,4 @@ def delete_db_user(db: Session, id: int):
     if rows_deleted == 0:
         raise NoResultFound
     db.commit()
+    return rows_deleted

@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
 import uuid
-from pydantic import BaseModel
 from typing import Annotated
 
+from rope.api import models
 from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
 from rope.api.database import (
@@ -16,7 +16,12 @@ from rope.api.database import (
     update_db_user,
     delete_db_user,
 )
-from rope.api.sessions import create_session, destroy_session, get_request_session
+from rope.api.sessions import (
+    create_session,
+    destroy_session,
+    get_request_session,
+    get_session,
+)
 
 
 app = FastAPI(title="ROPE API", root_path="/api")
@@ -30,48 +35,6 @@ app.add_middleware(
 )
 
 
-class GoogleLoginData(BaseModel):
-    token: str
-
-
-class GetUsersResponse(BaseModel):
-    id: int
-    email: str
-    is_manager: bool
-    is_admin: bool
-
-
-class PostUserRequest(BaseModel):
-    email: str
-    is_manager: bool
-    is_admin: bool
-
-
-class PostUserResponse(BaseModel):
-    id: int
-    email: str
-    is_manager: bool
-    is_admin: bool
-
-
-class PutUserRequest(BaseModel):
-    id: int
-    email: str
-    is_manager: bool
-    is_admin: bool
-
-
-class PutUserResponse(BaseModel):
-    id: int
-    email: str
-    is_manager: bool
-    is_admin: bool
-
-
-class DeletedUserResponse(BaseModel):
-    message: str
-
-
 def get_db():
     db = SessionLocal()
     try:
@@ -82,10 +45,10 @@ def get_db():
 
 @app.post("/session")
 def google_login(
-    login_data: GoogleLoginData,
+    login_data: models.GoogleLoginData,
     session=Depends(get_request_session),
     db: Session = Depends(get_db),
-):
+) -> models.PostSessionResponse:
     token = verify_google_token(login_data.token)
     if not token:
         raise HTTPException(
@@ -107,10 +70,14 @@ def google_login(
     new_session_id = str(uuid.uuid4())
     create_session(new_session_id, user_data)
     session["session_id"] = new_session_id
+    user_session_data = get_session(session["session_id"])
+    return user_session_data
 
 
 @app.get("/user/current")
-def get_current_user(current_user: Annotated[dict, Depends(verify_user)]):
+def get_current_user(
+    current_user: Annotated[dict, Depends(verify_user)]
+) -> models.GetCurrentUserResponse:
     return current_user
 
 
@@ -122,28 +89,32 @@ def delete_session(session=Depends(get_request_session)):
 
 
 @app.get("/user", dependencies=[Depends(verify_admin)])
-def get_users(db: Session = Depends(get_db)) -> list[GetUsersResponse]:
+def get_users(db: Session = Depends(get_db)) -> list[models.GetUsersResponse]:
     users = get_all_users(db)
     return users
 
 
 @app.post("/user", dependencies=[Depends(verify_admin)])
 def create_user(
-    user: PostUserRequest, db: Session = Depends(get_db)
-) -> PostUserResponse:
+    user: models.PostUserRequest, db: Session = Depends(get_db)
+) -> models.PostUserResponse:
     new_user = create_db_user(db, user)
     return new_user
 
 
 @app.put("/user/{id}", dependencies=[Depends(verify_admin)])
-def update_user(user: PutUserRequest, db: Session = Depends(get_db)) -> PutUserResponse:
+def update_user(
+    user: models.PutUserRequest, db: Session = Depends(get_db)
+) -> models.PutUserResponse:
     updated_user = update_db_user(db, user)
     return updated_user
 
 
 @app.delete("/user/{id}", dependencies=[Depends(verify_admin)])
-def delete_user(id: int, db: Session = Depends(get_db)) -> DeletedUserResponse:
-    delete_db_user(db, id)
-    return {
-        "message": f"All user information for the user with id:{id} has been deleted"
-    }
+def delete_user(id: int, db: Session = Depends(get_db)):
+    row_deleted = delete_db_user(db, id)
+    if row_deleted == 0:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User with the id: {id} does not exist"
+        )
