@@ -1,0 +1,32 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Chart.Name }}-tls-app
+spec:
+  entryPoints:
+    - websecure
+  tls:
+    secretName: {{ .Values.deploymentDomain }}-tls
+  routes:
+    - match: "Host(`{{ .Values.deploymentDomain }}`)"
+      kind: Rule
+      services:
+        - name: {{ .Chart.Name }}-app
+          port: 80
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Chart.Name }}-app
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: "Host(`{{ .Values.deploymentDomain }}`)"
+      kind: Rule
+      middlewares:
+        - name: {{ .Chart.Name }}-redirect
+      services:
+        - name: {{ .Chart.Name }}-app
+          port: 80

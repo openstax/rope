@@ -1,0 +1,14 @@
+deploymentDomain:
+pgServer:
+pgUsername:
+pgPassword:
+googleClientId:
+sessionSecretKey:
+moodleToken:
+moodleUrl:
+apiImage:
+  name: <account>.dkr.ecr.<region>.amazonaws.com/rope-api
+  tag: sha
+appImage:
+  name: <account>.dkr.ecr.<region>.amazonaws.com/rope-app
+  tag: sha
