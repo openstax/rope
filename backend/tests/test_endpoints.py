@@ -26,6 +26,22 @@ def clear_database_table(db):
     db.commit()
 
 
+@pytest.fixture
+def setup_admin_session(mocker):
+    app.dependency_overrides[get_request_session] = override_admin_get_request_session
+    admin = {
+        "A1B2C3": {
+            "email": "admin@rice.edu",
+            "is_manager": False,
+            "is_admin": True,
+        }
+    }
+    mocker.patch(
+        "rope.api.sessions.session_store",
+        admin,
+    )
+
+
 def override_get_request_session():
     session_id = {"session_id": "12345"}
     return session_id
@@ -108,19 +124,7 @@ def test_google_login(test_client, db, mocker):
     assert user_data["is_admin"] is False
 
 
-def test_get_all_users(test_client, db, mocker):
-    app.dependency_overrides[get_request_session] = override_admin_get_request_session
-    admin = {
-        "A1B2C3": {
-            "email": "admin@rice.edu",
-            "is_manager": False,
-            "is_admin": True,
-        }
-    }
-    mocker.patch(
-        "rope.api.sessions.session_store",
-        admin,
-    )
+def test_get_all_users(test_client, db, setup_admin_session):
     db_user = UserAccount(email="test@rice.edu", is_manager=False, is_admin=False)
     db_user2 = UserAccount(email="admin@rice.edu", is_manager=False, is_admin=True)
     db.add(db_user)
@@ -132,19 +136,7 @@ def test_get_all_users(test_client, db, mocker):
     assert len(data) == 2
 
 
-def test_create_user(test_client, db, mocker):
-    app.dependency_overrides[get_request_session] = override_admin_get_request_session
-    admin = {
-        "A1B2C3": {
-            "email": "admin@rice.edu",
-            "is_manager": False,
-            "is_admin": True,
-        }
-    }
-    mocker.patch(
-        "rope.api.sessions.session_store",
-        admin,
-    )
+def test_create_user(test_client, db, setup_admin_session):
     new_user_data = {
         "email": "createduser@rice.edu",
         "is_manager": False,
@@ -160,19 +152,7 @@ def test_create_user(test_client, db, mocker):
     assert data["is_admin"] is False
 
 
-def test_update_user(test_client, db, mocker):
-    app.dependency_overrides[get_request_session] = override_admin_get_request_session
-    admin = {
-        "A1B2C3": {
-            "email": "admin@rice.edu",
-            "is_manager": False,
-            "is_admin": True,
-        }
-    }
-    mocker.patch(
-        "rope.api.sessions.session_store",
-        admin,
-    )
+def test_update_user(test_client, db, setup_admin_session):
     db_user = UserAccount(
         email="currentuser@rice.edu", is_manager=False, is_admin=False
     )
@@ -192,19 +172,7 @@ def test_update_user(test_client, db, mocker):
     assert data["email"] == "updateduser@rice.edu"
 
 
-def test_delete_user(test_client, db, mocker):
-    app.dependency_overrides[get_request_session] = override_admin_get_request_session
-    admin = {
-        "A1B2C3": {
-            "email": "admin@rice.edu",
-            "is_manager": False,
-            "is_admin": True,
-        }
-    }
-    mocker.patch(
-        "rope.api.sessions.session_store",
-        admin,
-    )
+def test_delete_user(test_client, db, setup_admin_session):
     db_user = UserAccount(
         email="currentuser@rice.edu", is_manager=False, is_admin=False
     )
