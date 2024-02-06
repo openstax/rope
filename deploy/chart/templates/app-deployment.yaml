@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-app
+  labels:
+    app: {{ .Chart.Name }}-app
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}-app
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-app
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-app
+          image: {{ .Values.appImage.name }}:{{ .Values.appImage.tag }}
+          imagePullPolicy: Always
+          env:
+            - name: NGINX_HOST
+              value: {{ .Values.deploymentDomain }}
+            - name: NGINX_PORT
+              value: "80"
+          ports:
+            - containerPort: 80
