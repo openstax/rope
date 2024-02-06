@@ -5,7 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 import uuid
 from typing import Annotated
 
-from rope.api import models
+from rope.api.models import GoogleLoginData, BaseUser, FullUser
 from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
 from rope.api.database import (
@@ -45,10 +45,10 @@ def get_db():
 
 @app.post("/session")
 def google_login(
-    login_data: models.GoogleLoginData,
+    login_data: GoogleLoginData,
     session=Depends(get_request_session),
     db: Session = Depends(get_db),
-) -> models.PostSessionResponse:
+):
     token = verify_google_token(login_data.token)
     if not token:
         raise HTTPException(
@@ -75,9 +75,7 @@ def google_login(
 
 
 @app.get("/user/current")
-def get_current_user(
-    current_user: Annotated[dict, Depends(verify_user)]
-) -> models.GetCurrentUserResponse:
+def get_current_user(current_user: Annotated[dict, Depends(verify_user)]) -> BaseUser:
     return current_user
 
 
@@ -89,23 +87,19 @@ def delete_session(session=Depends(get_request_session)):
 
 
 @app.get("/user", dependencies=[Depends(verify_admin)])
-def get_users(db: Session = Depends(get_db)) -> list[models.GetUsersResponse]:
+def get_users(db: Session = Depends(get_db)) -> list[FullUser]:
     users = get_all_users(db)
     return users
 
 
 @app.post("/user", dependencies=[Depends(verify_admin)])
-def create_user(
-    user: models.PostUserRequest, db: Session = Depends(get_db)
-) -> models.PostUserResponse:
+def create_user(user: BaseUser, db: Session = Depends(get_db)) -> FullUser:
     new_user = create_db_user(db, user)
     return new_user
 
 
 @app.put("/user/{id}", dependencies=[Depends(verify_admin)])
-def update_user(
-    user: models.PutUserRequest, db: Session = Depends(get_db)
-) -> models.PutUserResponse:
+def update_user(user: FullUser, db: Session = Depends(get_db)) -> FullUser:
     updated_user = update_db_user(db, user)
     return updated_user
 
@@ -115,6 +109,5 @@ def delete_user(id: int, db: Session = Depends(get_db)):
     row_deleted = delete_db_user(db, id)
     if row_deleted == 0:
         raise HTTPException(
-            status_code=404,
-            detail=f"User with the id: {id} does not exist"
+            status_code=404, detail=f"User with the id: {id} does not exist"
         )
