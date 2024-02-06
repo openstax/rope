@@ -11,5 +11,5 @@ class BaseUser(BaseModel):
     is_admin: bool
 
 
-class FullUser(BaseModel):
+class FullUser(BaseUser):
     id: int
