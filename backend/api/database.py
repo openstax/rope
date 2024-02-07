@@ -13,7 +13,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def get_user_by_email(db: Session, email: str):
     user = db.query(UserAccount).filter(UserAccount.email == email).all()
     if not user:
-        raise NoResultFound
+        return None
     if len(user) > 1:
         raise MultipleResultsFound
     return user[0]
@@ -48,7 +48,5 @@ def update_db_user(db: Session, user):
 
 def delete_db_user(db: Session, id: int):
     rows_deleted = db.query(UserAccount).filter(UserAccount.id == id).delete()
-    if rows_deleted == 0:
-        raise NoResultFound
     db.commit()
     return rows_deleted
