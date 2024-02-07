@@ -134,6 +134,14 @@ def test_get_all_users(test_client, db, setup_admin_session):
     data = response.json()
     assert response.status_code == 200
     assert len(data) == 2
+    assert data[0].get("id") is not None
+    assert data[1].get("id") is not None
+    assert data[0].get("email") == "test@rice.edu"
+    assert data[0].get("is_manager") is False
+    assert data[0].get("is_admin") is False
+    assert data[1].get("email") == "admin@rice.edu"
+    assert data[1].get("is_manager") is False
+    assert data[1].get("is_admin") is True
 
 
 def test_create_user(test_client, db, setup_admin_session):
@@ -150,6 +158,7 @@ def test_create_user(test_client, db, setup_admin_session):
     assert data["email"] == "createduser@rice.edu"
     assert data["is_manager"] is False
     assert data["is_admin"] is False
+    assert data.get("id") is not None
 
 
 def test_update_user(test_client, db, setup_admin_session):
@@ -170,6 +179,9 @@ def test_update_user(test_client, db, setup_admin_session):
     data = response.json()
     assert response.status_code == 200
     assert data["email"] == "updateduser@rice.edu"
+    assert data["is_manager"] is False
+    assert data["is_admin"] is False
+    assert data.get("id") is not None
 
 
 def test_delete_user(test_client, db, setup_admin_session):
