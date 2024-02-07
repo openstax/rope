@@ -15,7 +15,7 @@ def get_user_by_email(db: Session, email: str):
     if not user:
         return None
     if len(user) > 1:
-        raise MultipleResultsFound
+        raise MultipleResultsFound  # pragma: no cover
     return user[0]
 
 
