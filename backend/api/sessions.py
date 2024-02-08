@@ -4,7 +4,7 @@ session_store = {}
 
 
 def get_request_session(request: Request):
-    return request.session
+    return request.session  # pragma: no cover
 
 
 def create_session(session_id, user_data):

@@ -3,13 +3,25 @@ from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
 import uuid
-from pydantic import BaseModel
 from typing import Annotated
 
-from rope.api.auth import verify_google_token, verify_user
+from rope.api.models import GoogleLoginData, BaseUser, FullUser
+from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
-from rope.api.database import SessionLocal, get_user_by_email
-from rope.api.sessions import create_session, destroy_session, get_request_session
+from rope.api.database import (
+    SessionLocal,
+    get_user_by_email,
+    get_all_users,
+    create_db_user,
+    update_db_user,
+    delete_db_user,
+)
+from rope.api.sessions import (
+    create_session,
+    destroy_session,
+    get_request_session,
+    get_session,
+)
 
 
 app = FastAPI(title="ROPE API", root_path="/api")
@@ -21,10 +33,6 @@ app.add_middleware(
     session_cookie="ROPE.session",
     max_age=60 * 60,  # 1 hour
 )
-
-
-class GoogleLoginData(BaseModel):
-    token: str
 
 
 def get_db():
@@ -62,10 +70,12 @@ def google_login(
     new_session_id = str(uuid.uuid4())
     create_session(new_session_id, user_data)
     session["session_id"] = new_session_id
+    user_session_data = get_session(session["session_id"])
+    return user_session_data
 
 
 @app.get("/user/current")
-def get_current_user(current_user: Annotated[dict, Depends(verify_user)]):
+def get_current_user(current_user: Annotated[dict, Depends(verify_user)]) -> BaseUser:
     return current_user
 
 
@@ -74,3 +84,30 @@ def delete_session(session=Depends(get_request_session)):
     session_id = session.get("session_id")
     destroy_session(session_id)
     del session["session_id"]
+
+
+@app.get("/user", dependencies=[Depends(verify_admin)])
+def get_users(db: Session = Depends(get_db)) -> list[FullUser]:
+    users = get_all_users(db)
+    return users
+
+
+@app.post("/user", dependencies=[Depends(verify_admin)])
+def create_user(user: BaseUser, db: Session = Depends(get_db)) -> FullUser:
+    new_user = create_db_user(db, user)
+    return new_user
+
+
+@app.put("/user/{id}", dependencies=[Depends(verify_admin)])
+def update_user(user: FullUser, db: Session = Depends(get_db)) -> FullUser:
+    updated_user = update_db_user(db, user)
+    return updated_user
+
+
+@app.delete("/user/{id}", dependencies=[Depends(verify_admin)])
+def delete_user(id: int, db: Session = Depends(get_db)):
+    row_deleted = delete_db_user(db, id)
+    if row_deleted == 0:
+        raise HTTPException(
+            status_code=404, detail=f"User with the id: {id} does not exist"
+        )
