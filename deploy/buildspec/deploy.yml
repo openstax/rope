@@ -1,0 +1,45 @@
+version: 0.2
+
+env:
+  shell: bash
+  secrets-manager:
+    SLACK_WEBHOOKURL: "slack:k12stream"
+    POSTGRES_USER: "rope:rdsusername"
+    POSTGRES_PASSWORD: "rope:rdspassword"
+    GOOGLE_CLIENT_ID: "rope:googleclientid"
+    SESSION_SECRET_KEY: "rope:sessionsecretkey"
+    MOODLE_TOKEN: "rope:moodletoken"
+
+phases:
+  install:
+    commands:
+      - curl -L https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz | tar -xvz
+      - mv linux-amd64/helm ./helm
+      - curl -L -o yq "https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64"
+      - chmod +x ./helm ./yq
+      - export PATH=$PWD:$PATH
+  pre_build:
+    commands:
+      - aws eks update-kubeconfig --name $K8S_CLUSTER_NAME
+      - export API_IMAGE_NAME=$(cat $CODEBUILD_SRC_DIR_api_build_output/api-image-name.txt)
+      - export API_IMAGE_TAG=$(cat $CODEBUILD_SRC_DIR_api_build_output/api-image-tag.txt)
+      - export APP_IMAGE_NAME=$(cat $CODEBUILD_SRC_DIR_app_build_output/app-image-name.txt)
+      - export APP_IMAGE_TAG=$(cat $CODEBUILD_SRC_DIR_app_build_output/app-image-tag.txt)
+      - touch ./values.yaml
+      - yq e -i '.deploymentDomain="rope.k12.openstax.org"' ./values.yaml
+      - yq e -i '.apiImage.name=strenv(API_IMAGE_NAME)' ./values.yaml
+      - yq e -i '.apiImage.tag=strenv(API_IMAGE_TAG)' ./values.yaml
+      - yq e -i '.appImage.name=strenv(APP_IMAGE_NAME)' ./values.yaml
+      - yq e -i '.appImage.tag=strenv(APP_IMAGE_TAG)' ./values.yaml
+      - yq e -i '.pgServer=strenv(POSTGRES_SERVER)' ./values.yaml
+      - yq e -i '.pgUsername=strenv(POSTGRES_USER)' ./values.yaml
+      - yq e -i '.pgPassword=strenv(POSTGRES_PASSWORD)' ./values.yaml
+      - yq e -i '.googleClientId=strenv(GOOGLE_CLIENT_ID)' ./values.yaml
+      - yq e -i '.sessionSecretKey=strenv(SESSION_SECRET_KEY)' ./values.yaml
+      - yq e -i '.moodleToken=strenv(MOODLE_TOKEN)' ./values.yaml
+      - yq e -i '.moodleUrl="https://qa.raiselearning.org"' ./values.yaml
+  build:
+    commands:
+      - helm upgrade -n raise --install -f ./values.yaml rope deploy/chart/
+      - export SLACK_MESSAGE="rope deployment completed successfully for commit $COMMIT_ID"
+      - "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"'\"$SLACK_MESSAGE\"'\"}' $SLACK_WEBHOOKURL"
