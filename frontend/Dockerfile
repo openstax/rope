@@ -11,6 +11,10 @@ COPY . .
 
 FROM base as dev
 
+ARG VITE_GOOGLE_CLIENT_ID
+
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+
 CMD ["npm", "run", "dev"]
 
 FROM base as builder
