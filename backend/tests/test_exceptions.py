@@ -158,7 +158,7 @@ def test_delete_db_user_no_results(test_client, setup_admin_session):
 def test_update_db_district_no_results(test_client, db, setup_admin_session):
     with pytest.raises(NoResultFound) as exc_info:
         db_district = SchoolDistrict(
-            name="currentschool independent school district", active=True
+            name="currentschool_isd", active=True
         )
         db.add(db_district)
         db.commit()
@@ -166,7 +166,7 @@ def test_update_db_district_no_results(test_client, db, setup_admin_session):
         district_id = district.id
         updated_district_data = {
             "id": 12345,
-            "name": "updatedschool independent school district",
+            "name": "updatedschool_isd",
             "active": False,
         }
         test_client.put(

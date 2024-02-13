@@ -212,8 +212,8 @@ def test_get_districts_admin(test_client, db, mocker):
         "rope.api.sessions.session_store",
         user,
     )
-    db_district = SchoolDistrict(name="active school district", active=True)
-    db_district2 = SchoolDistrict(name="not active school district", active=False)
+    db_district = SchoolDistrict(name="active_isd", active=True)
+    db_district2 = SchoolDistrict(name="not_active_isd", active=False)
     db.add(db_district)
     db.add(db_district2)
     db.commit()
@@ -223,9 +223,9 @@ def test_get_districts_admin(test_client, db, mocker):
     assert len(data) == 2
     assert data[0].get("id") is not None
     assert data[1].get("id") is not None
-    assert data[0].get("name") == "active school district"
+    assert data[0].get("name") == "active_isd"
     assert data[0].get("active") is True
-    assert data[1].get("name") == "not active school district"
+    assert data[1].get("name") == "not_active_isd"
     assert data[1].get("active") is False
 
 
@@ -242,8 +242,8 @@ def test_get_districts_authenticated_non_admin(test_client, db, mocker):
         "rope.api.sessions.session_store",
         user,
     )
-    db_district = SchoolDistrict(name="active school district", active=True)
-    db_district2 = SchoolDistrict(name="not active school district", active=False)
+    db_district = SchoolDistrict(name="active_isd", active=True)
+    db_district2 = SchoolDistrict(name="not_active_isd", active=False)
     db.add(db_district)
     db.add(db_district2)
     db.commit()
@@ -252,13 +252,13 @@ def test_get_districts_authenticated_non_admin(test_client, db, mocker):
     assert response.status_code == 200
     assert len(data) == 1
     assert data[0].get("id") is not None
-    assert data[0].get("name") == "active school district"
+    assert data[0].get("name") == "active_isd"
     assert data[0].get("active") is True
 
 
 def test_create_district(test_client, db, setup_admin_session):
     new_school_district_data = {
-        "name": "New Independent School District",
+        "name": "New_ISD",
         "active": True,
     }
     response = test_client.post(
@@ -268,13 +268,13 @@ def test_create_district(test_client, db, setup_admin_session):
     data = response.json()
     assert response.status_code == 200
     assert len(districts) == 1
-    assert data["name"] == "new independent school district"
+    assert data["name"] == "new_isd"
     assert data["active"] is True
 
 
 def test_update_district(test_client, db, setup_admin_session):
     db_district = SchoolDistrict(
-        name="currentschool independent school district", active=True
+        name="currentschool_isd", active=True
     )
     db.add(db_district)
     db.commit()
@@ -282,7 +282,7 @@ def test_update_district(test_client, db, setup_admin_session):
     district_id = district.id
     updated_district_data = {
         "id": district_id,
-        "name": "Updatedschool Independent School District",
+        "name": "Updatedschool_ISD",
         "active": False,
     }
     response = test_client.put(
@@ -290,6 +290,6 @@ def test_update_district(test_client, db, setup_admin_session):
     )
     data = response.json()
     assert response.status_code == 200
-    assert data["name"] == "updatedschool independent school district"
+    assert data["name"] == "updatedschool_isd"
     assert data["active"] is False
     assert data.get("id") is not None
