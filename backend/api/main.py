@@ -23,6 +23,7 @@ from rope.api.database import (
     delete_db_user,
     get_db_districts,
     create_db_district,
+    update_db_district,
 )
 from rope.api.sessions import (
     create_session,
@@ -135,3 +136,11 @@ def create_district(
 ) -> FullSchoolDistrict:
     new_district = create_db_district(db, district)
     return new_district
+
+
+@app.put("/admin/settings/district/{id}", dependencies=[Depends(verify_admin)])
+def update_district(
+    district: FullSchoolDistrict, db: Session = Depends(get_db)
+) -> FullSchoolDistrict:
+    updated_district = update_db_district(db, district)
+    return updated_district

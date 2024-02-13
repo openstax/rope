@@ -4,7 +4,7 @@ import pytest
 from rope.api.main import app
 from rope.api.sessions import get_request_session
 from rope.api.database import SessionLocal
-from rope.db.schema import UserAccount
+from rope.db.schema import UserAccount, SchoolDistrict
 
 
 @pytest.fixture
@@ -153,3 +153,24 @@ def test_update_db_user_no_results(test_client, db, setup_admin_session):
 def test_delete_db_user_no_results(test_client, setup_admin_session):
     response = test_client.delete(f"user/{12352353525324}")
     assert response.status_code == 404
+
+
+def test_update_db_district_no_results(test_client, db, setup_admin_session):
+    with pytest.raises(NoResultFound) as exc_info:
+        db_district = SchoolDistrict(
+            name="currentschool independent school district", active=True
+        )
+        db.add(db_district)
+        db.commit()
+        district = db.query(SchoolDistrict).first()
+        district_id = district.id
+        updated_district_data = {
+            "id": 12345,
+            "name": "updatedschool independent school district",
+            "active": False,
+        }
+        test_client.put(
+            f"admin/settings/district/{district_id}", json=updated_district_data
+        )
+
+    assert exc_info.type is NoResultFound

@@ -61,8 +61,23 @@ def get_db_districts(db: Session, user):
 
 
 def create_db_district(db: Session, district):
-    new_district = SchoolDistrict(name=district.name, active=district.active)
+    lower_case_district_name = district.name.lower()
+    new_district = SchoolDistrict(name=lower_case_district_name, active=district.active)
     db.add(new_district)
     db.commit()
     db.refresh(new_district)
     return new_district
+
+
+def update_db_district(db: Session, district):
+    district_db = (
+        db.query(SchoolDistrict).filter(SchoolDistrict.id == district.id).first()
+    )
+    if not district_db:
+        raise NoResultFound
+    lower_case_district_name = district.name.lower()
+    district_db.name = lower_case_district_name
+    district_db.active = district.active
+    db.commit()
+    db.refresh(district_db)
+    return district_db
