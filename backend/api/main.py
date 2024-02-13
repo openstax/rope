@@ -5,7 +5,13 @@ from starlette.middleware.sessions import SessionMiddleware
 import uuid
 from typing import Annotated
 
-from rope.api.models import GoogleLoginData, BaseUser, FullUser, SchoolDistrict
+from rope.api.models import (
+    GoogleLoginData,
+    BaseUser,
+    FullUser,
+    BaseSchoolDistrict,
+    FullSchoolDistrict,
+)
 from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
 from rope.api.database import (
@@ -16,6 +22,7 @@ from rope.api.database import (
     update_db_user,
     delete_db_user,
     get_db_districts,
+    create_db_district,
 )
 from rope.api.sessions import (
     create_session,
@@ -117,6 +124,14 @@ def delete_user(id: int, db: Session = Depends(get_db)):
 @app.get("/admin/settings/district")
 def get_districts(
     current_user: Annotated[dict, Depends(verify_user)], db: Session = Depends(get_db)
-) -> list[SchoolDistrict]:
+) -> list[FullSchoolDistrict]:
     school_districts = get_db_districts(db, current_user)
     return school_districts
+
+
+@app.post("/admin/settings/district", dependencies=[Depends(verify_admin)])
+def create_district(
+    district: BaseSchoolDistrict, db: Session = Depends(get_db)
+) -> FullSchoolDistrict:
+    new_district = create_db_district(db, district)
+    return new_district

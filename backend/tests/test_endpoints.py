@@ -254,3 +254,19 @@ def test_get_districts_authenticated_non_admin(test_client, db, mocker):
     assert data[0].get("id") is not None
     assert data[0].get("name") == "active school district"
     assert data[0].get("active") is True
+
+
+def test_create_district(test_client, db, setup_admin_session):
+    new_school_district_data = {
+        "name": "new independent school district",
+        "active": True,
+    }
+    response = test_client.post(
+        "/admin/settings/district", json=new_school_district_data
+    )
+    districts = db.query(SchoolDistrict).all()
+    data = response.json()
+    assert response.status_code == 200
+    assert len(districts) == 1
+    assert data["name"] == "new independent school district"
+    assert data["active"] is True

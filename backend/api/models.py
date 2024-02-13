@@ -15,7 +15,10 @@ class FullUser(BaseUser):
     id: int
 
 
-class SchoolDistrict(BaseModel):
-    id: int
+class BaseSchoolDistrict(BaseModel):
     name: str
     active: bool
+
+
+class FullSchoolDistrict(BaseSchoolDistrict):
+    id: int

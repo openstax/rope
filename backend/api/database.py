@@ -58,3 +58,11 @@ def get_db_districts(db: Session, user):
     else:
         school_districts = db.query(SchoolDistrict).filter(SchoolDistrict.active).all()
     return school_districts
+
+
+def create_db_district(db: Session, district):
+    new_district = SchoolDistrict(name=district.name, active=district.active)
+    db.add(new_district)
+    db.commit()
+    db.refresh(new_district)
+    return new_district
