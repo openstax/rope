@@ -5,7 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 import uuid
 from typing import Annotated
 
-from rope.api.models import GoogleLoginData, BaseUser, FullUser
+from rope.api.models import GoogleLoginData, BaseUser, FullUser, SchoolDistrict
 from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
 from rope.api.database import (
@@ -15,6 +15,7 @@ from rope.api.database import (
     create_db_user,
     update_db_user,
     delete_db_user,
+    get_db_districts,
 )
 from rope.api.sessions import (
     create_session,
@@ -111,3 +112,11 @@ def delete_user(id: int, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=404, detail=f"User with the id: {id} does not exist"
         )
+
+
+@app.get("/admin/settings/district")
+def get_districts(
+    current_user: Annotated[dict, Depends(verify_user)], db: Session = Depends(get_db)
+) -> list[SchoolDistrict]:
+    school_districts = get_db_districts(db, current_user)
+    return school_districts

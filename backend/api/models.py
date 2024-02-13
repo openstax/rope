@@ -13,3 +13,9 @@ class BaseUser(BaseModel):
 
 class FullUser(BaseUser):
     id: int
+
+
+class SchoolDistrict(BaseModel):
+    id: int
+    name: str
+    active: bool

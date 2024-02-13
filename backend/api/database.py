@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
-from rope.db.schema import UserAccount
+from rope.db.schema import UserAccount, SchoolDistrict
 from rope.api.settings import PG_USER, PG_PASSWORD, PG_SERVER, PG_DB
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_SERVER}/{PG_DB}"
@@ -50,3 +50,11 @@ def delete_db_user(db: Session, id: int):
     rows_deleted = db.query(UserAccount).filter(UserAccount.id == id).delete()
     db.commit()
     return rows_deleted
+
+
+def get_db_districts(db: Session, user):
+    if user["is_admin"]:
+        school_districts = db.query(SchoolDistrict).all()
+    else:
+        school_districts = db.query(SchoolDistrict).filter(SchoolDistrict.active).all()
+    return school_districts
