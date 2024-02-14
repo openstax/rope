@@ -97,3 +97,17 @@ def create_db_moodle_settings(db: Session, moodle_setting):
     db.commit()
     db.refresh(new_moodle_setting)
     return new_moodle_setting
+
+
+def update_db_moodle_settings(db: Session, moodle_setting):
+    moodle_settings_db = (
+        db.query(MoodleSetting).filter(MoodleSetting.id == moodle_setting.id).first()
+    )
+    if not moodle_settings_db:
+        raise NoResultFound
+    lower_case_moodle_setting_name = moodle_setting.name.lower()
+    moodle_settings_db.name = lower_case_moodle_setting_name
+    moodle_settings_db.value = moodle_setting.value
+    db.commit()
+    db.refresh(moodle_settings_db)
+    return moodle_settings_db

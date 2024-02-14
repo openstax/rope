@@ -89,6 +89,11 @@ def test_non_admin_access_admin_endpoint(test_client, mocker):
         "name": "Academic_Year",
         "value": "AY 2030",
     }
+    updated_moodle_setting_data = {
+        "id": 829384923,
+        "name": "Updated_Academic_Year",
+        "value": "AY 2200",
+    }
     get_all_users_response = test_client.get("/user")
     create_user_response = test_client.post("/user", json=non_admin_user)
     update_user_response = test_client.put("/user/12", json=non_admin_user)
@@ -102,6 +107,9 @@ def test_non_admin_access_admin_endpoint(test_client, mocker):
     create_moodle_setting_response = test_client.post(
         "/admin/settings/moodle", json=new_moodle_setting_data
     )
+    update_moodle_setting_response = test_client.put(
+        "/admin/settings/moodle/77", json=updated_moodle_setting_data
+    )
     assert get_all_users_response.status_code == 403
     assert create_user_response.status_code == 403
     assert update_user_response.status_code == 403
@@ -109,6 +117,7 @@ def test_non_admin_access_admin_endpoint(test_client, mocker):
     assert create_district_response.status_code == 403
     assert update_district_response.status_code == 403
     assert create_moodle_setting_response.status_code == 403
+    assert update_moodle_setting_response.status_code == 403
 
 
 def test_missing_session_id(test_client):

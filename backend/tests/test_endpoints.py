@@ -286,7 +286,7 @@ def test_update_district(test_client, db, setup_admin_session):
         "active": False,
     }
     response = test_client.put(
-        f"admin/settings/district/{district_id}", json=updated_district_data
+        f"/admin/settings/district/{district_id}", json=updated_district_data
     )
     data = response.json()
     assert response.status_code == 200
@@ -339,4 +339,25 @@ def test_create_moodle_settings(test_client, db, setup_admin_session):
     assert len(moodle_settings) == 1
     assert data["name"] == "academic_year"
     assert data["value"] == "AY 2030"
+    assert data.get("id") is not None
+
+
+def test_update_moodle_settings(test_client, db, setup_admin_session):
+    db_moodle_setting = MoodleSetting(name="academic_year", value="AY 2030")
+    db.add(db_moodle_setting)
+    db.commit()
+    moodle_setting = db.query(MoodleSetting).first()
+    moodle_setting_id = moodle_setting.id
+    updated_moodle_setting_data = {
+        "id": moodle_setting_id,
+        "name": "Updated_Academic_Year",
+        "value": "AY 2100",
+    }
+    response = test_client.put(
+        f"/admin/settings/moodle/{moodle_setting_id}", json=updated_moodle_setting_data
+    )
+    data = response.json()
+    assert response.status_code == 200
+    assert data["name"] == "updated_academic_year"
+    assert data["value"] == "AY 2100"
     assert data.get("id") is not None
