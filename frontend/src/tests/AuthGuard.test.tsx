@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { AuthContext, AuthStatus } from '../components/useAuthContext'
 import { AuthGuard } from '../components/AuthGuard'
-import { expect, vi } from 'vitest'
+import { expect } from 'vitest'
 import { PageContextProvider } from '../components/usePageContext'
 import { type PageContext } from 'vike/types'
 
