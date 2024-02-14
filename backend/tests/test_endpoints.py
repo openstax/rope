@@ -3,7 +3,7 @@ import pytest
 from rope.api.main import app
 from rope.api.sessions import get_request_session, session_store
 from rope.api.database import SessionLocal
-from rope.db.schema import UserAccount, SchoolDistrict
+from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting
 
 
 @pytest.fixture
@@ -24,6 +24,7 @@ def db():
 def clear_database_table(db):
     db.query(UserAccount).delete()
     db.query(SchoolDistrict).delete()
+    db.query(MoodleSetting).delete()
     db.commit()
 
 
@@ -293,3 +294,33 @@ def test_update_district(test_client, db, setup_admin_session):
     assert data["name"] == "updatedschool_isd"
     assert data["active"] is False
     assert data.get("id") is not None
+
+
+def test_get_moodle_settings(test_client, db, mocker):
+    app.dependency_overrides[get_request_session] = override_get_request_session
+    user = {
+        "12345": {
+            "email": "moodlesettings@rice.edu",
+            "is_manager": False,
+            "is_admin": False,
+        }
+    }
+    mocker.patch(
+        "rope.api.sessions.session_store",
+        user,
+    )
+    moodle_setting = MoodleSetting(name="academic_year", value="AY 2024")
+    moodle_setting2 = MoodleSetting(name="academic_year_short", value="AY24")
+    db.add(moodle_setting)
+    db.add(moodle_setting2)
+    db.commit()
+    response = test_client.get("/admin/settings/moodle")
+    data = response.json()
+    assert response.status_code == 200
+    assert len(data) == 2
+    assert data[0].get("id") is not None
+    assert data[1].get("id") is not None
+    assert data[0].get("name") == "academic_year"
+    assert data[0].get("value") == "AY 2024"
+    assert data[1].get("name") == "academic_year_short"
+    assert data[1].get("value") == "AY24"

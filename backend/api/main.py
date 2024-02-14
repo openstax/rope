@@ -11,6 +11,8 @@ from rope.api.models import (
     FullUser,
     BaseSchoolDistrict,
     FullSchoolDistrict,
+    BaseMoodleSettings,
+    FullMoodleSettings,
 )
 from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
@@ -24,6 +26,7 @@ from rope.api.database import (
     get_db_districts,
     create_db_district,
     update_db_district,
+    get_db_moodle_settings,
 )
 from rope.api.sessions import (
     create_session,
@@ -145,3 +148,9 @@ def update_district(
 ) -> FullSchoolDistrict:
     updated_district = update_db_district(db, district)
     return updated_district
+
+
+@app.get("/admin/settings/moodle", dependencies=[Depends(verify_user)])
+def get_moodle_settings(db: Session = Depends(get_db)) -> list[FullMoodleSettings]:
+    moodle_settings = get_db_moodle_settings(db)
+    return moodle_settings

@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
-from rope.db.schema import UserAccount, SchoolDistrict
+from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting
 from rope.api.settings import PG_USER, PG_PASSWORD, PG_SERVER, PG_DB
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_SERVER}/{PG_DB}"
@@ -81,3 +81,8 @@ def update_db_district(db: Session, district):
     db.commit()
     db.refresh(district_db)
     return district_db
+
+
+def get_db_moodle_settings(db: Session):
+    moodle_settings = db.query(MoodleSetting).all()
+    return moodle_settings
