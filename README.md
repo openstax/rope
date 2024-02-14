@@ -23,7 +23,7 @@ Once running, the application components can be accessed at the following URLs:
 
 A user can be added to the database by running the following command: 
 ```bash
-$ docker compose exec postgres psql -U pguser -d ropedb -c "INSERT INTO user_account (email, is_manager, is_admin, created_at, updated_at) VALUES (user@email.com', false, true, now(), now());"
+$ docker compose exec postgres psql -U pguser -d ropedb -c "INSERT INTO user_account (email, is_manager, is_admin, created_at, updated_at) VALUES ('user@email.com', false, true, now(), now());"
 ```
 
 Devs can also test the deployment build of the frontend by running the following:
