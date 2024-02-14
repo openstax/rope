@@ -22,3 +22,12 @@ class BaseSchoolDistrict(BaseModel):
 
 class FullSchoolDistrict(BaseSchoolDistrict):
     id: int
+
+
+class BaseMoodleSettings(BaseModel):
+    name: str
+    value: str
+
+
+class FullMoodleSettings(BaseMoodleSettings):
+    id: int
