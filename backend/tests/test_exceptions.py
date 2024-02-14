@@ -76,14 +76,31 @@ def test_non_admin_access_admin_endpoint(test_client, mocker):
         "is_manager": False,
         "is_admin": False,
     }
+    new_school_district_data = {
+        "name": "New_ISD",
+        "active": True,
+    }
+    updated_district_data = {
+        "id": 12345678,
+        "name": "Updatedschool_ISD",
+        "active": False,
+    }
     get_all_users_response = test_client.get("/user")
     create_user_response = test_client.post("/user", json=non_admin_user)
     update_user_response = test_client.put("/user/12", json=non_admin_user)
     delete_user_response = test_client.delete("/user/12")
+    create_district_response = test_client.post(
+        "/admin/settings/district", json=new_school_district_data
+    )
+    update_district_response = test_client.put(
+        "/admin/settings/district/77", json=updated_district_data
+    )
     assert get_all_users_response.status_code == 403
     assert create_user_response.status_code == 403
     assert update_user_response.status_code == 403
     assert delete_user_response.status_code == 403
+    assert create_district_response.status_code == 403
+    assert update_district_response.status_code == 403
 
 
 def test_missing_session_id(test_client):
@@ -157,9 +174,7 @@ def test_delete_db_user_no_results(test_client, setup_admin_session):
 
 def test_update_db_district_no_results(test_client, db, setup_admin_session):
     with pytest.raises(NoResultFound) as exc_info:
-        db_district = SchoolDistrict(
-            name="currentschool_isd", active=True
-        )
+        db_district = SchoolDistrict(name="currentschool_isd", active=True)
         db.add(db_district)
         db.commit()
         district = db.query(SchoolDistrict).first()

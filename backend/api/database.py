@@ -52,8 +52,8 @@ def delete_db_user(db: Session, id: int):
     return rows_deleted
 
 
-def get_db_districts(db: Session, user):
-    if user["is_admin"]:
+def get_db_districts(db: Session, active_only=True):
+    if active_only:
         school_districts = db.query(SchoolDistrict).all()
     else:
         school_districts = db.query(SchoolDistrict).filter(SchoolDistrict.active).all()
