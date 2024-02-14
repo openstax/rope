@@ -4,7 +4,7 @@ import pytest
 from rope.api.main import app
 from rope.api.sessions import get_request_session
 from rope.api.database import SessionLocal
-from rope.db.schema import UserAccount, SchoolDistrict
+from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting
 
 
 @pytest.fixture
@@ -24,6 +24,8 @@ def db():
 @pytest.fixture(autouse=True)
 def clear_database_table(db):
     db.query(UserAccount).delete()
+    db.query(SchoolDistrict).delete()
+    db.query(MoodleSetting).delete()
     db.commit()
 
 
@@ -202,7 +204,27 @@ def test_update_db_district_no_results(test_client, db, setup_admin_session):
             "active": False,
         }
         test_client.put(
-            f"admin/settings/district/{district_id}", json=updated_district_data
+            f"/admin/settings/district/{district_id}", json=updated_district_data
+        )
+
+    assert exc_info.type is NoResultFound
+
+
+def test_update_db_moodle_setting_no_results(test_client, db, setup_admin_session):
+    with pytest.raises(NoResultFound) as exc_info:
+        db_moodle_setting = MoodleSetting(name="academic_year", value="AY 2040")
+        db.add(db_moodle_setting)
+        db.commit()
+        moodle_setting = db.query(MoodleSetting).first()
+        moodle_setting_id = moodle_setting.id
+        updated_moodle_setting_data = {
+            "id": 8765234624624324,
+            "name": "updated_academic_year",
+            "value": "AY 2500",
+        }
+        test_client.put(
+            f"/admin/settings/moodle/{moodle_setting_id}",
+            json=updated_moodle_setting_data,
         )
 
     assert exc_info.type is NoResultFound
