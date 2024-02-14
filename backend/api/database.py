@@ -53,7 +53,7 @@ def delete_db_user(db: Session, id: int):
 
 
 def get_db_districts(db: Session, active_only=True):
-    if active_only:
+    if not active_only:
         school_districts = db.query(SchoolDistrict).all()
     else:
         school_districts = db.query(SchoolDistrict).filter(SchoolDistrict.active).all()

@@ -126,7 +126,7 @@ def delete_user(id: int, db: Session = Depends(get_db)):
 def get_districts(
     current_user: Annotated[dict, Depends(verify_user)], db: Session = Depends(get_db)
 ) -> list[FullSchoolDistrict]:
-    active_only = current_user["is_admin"]
+    active_only = not current_user["is_admin"]
     school_districts = get_db_districts(db, active_only)
     return school_districts
 
