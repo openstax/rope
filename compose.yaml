@@ -3,9 +3,12 @@ services:
     build:
       context: ./frontend
       target: ${ROPE_APP_TARGET:-dev}
+      args:
+        - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
     environment:
       - NGINX_HOST=localhost # Used when ROPE_APP_TARGET=deploy
       - NGINX_PORT=3000      # Used when ROPE_APP_TARGET=deploy
+
     volumes:
       - ./frontend:/code
       - /code/node_modules
@@ -19,6 +22,13 @@ services:
     build:
       context: ./backend
       target: dev
+    environment:
+      - GOOGLE_CLIENT_ID
+      - SESSION_SECRET_KEY=secret
+      - POSTGRES_DB=ropedb
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pgpassword
+      - POSTGRES_SERVER=postgres
     command: ["uvicorn", "rope.api.main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
     volumes:
       - ./backend:/code

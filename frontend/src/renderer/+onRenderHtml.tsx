@@ -5,6 +5,7 @@ import { PageShell } from './PageShell'
 import { escapeInject, dangerouslySkipEscape } from 'vike/server'
 import type { OnRenderHtmlAsync } from 'vike/types'
 import { getPageTitle } from './getPageTitle'
+import { ServerStyleSheet } from 'styled-components'
 
 export const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRenderHtmlAsync> => {
   const { Page } = pageContext
@@ -15,10 +16,14 @@ export const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<O
   if (!Page) throw new Error('My onRenderHtml() hook expects pageContext.Page to be defined')
 
   // Alternativly, we can use an HTML stream, see https://vike.dev/stream
+  const sheet = new ServerStyleSheet()
+
   const pageHtml = ReactDOMServer.renderToString(
+    sheet.collectStyles(
     <PageShell pageContext={pageContext}>
       <Page />
     </PageShell>
+    )
   )
 
   // See https://vike.dev/head
@@ -32,6 +37,7 @@ export const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<O
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="${desc}" />
         <title>${title}</title>
+        <style>${dangerouslySkipEscape(sheet.getStyleTags())}</style>
       </head>
       <body>
         <div id="react-root">${dangerouslySkipEscape(pageHtml)}</div>
