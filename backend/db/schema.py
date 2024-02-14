@@ -39,3 +39,14 @@ class SchoolDistrict(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str]
     active: Mapped[bool]
+
+
+class MoodleSetting(Base):
+    __tablename__ = 'moodle_setting'
+    __table_args__ = (
+        UniqueConstraint('name'),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str]
+    value: Mapped[str]
