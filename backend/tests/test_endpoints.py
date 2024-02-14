@@ -3,7 +3,7 @@ import pytest
 from rope.api.main import app
 from rope.api.sessions import get_request_session, session_store
 from rope.api.database import SessionLocal
-from rope.db.schema import UserAccount
+from rope.db.schema import UserAccount, SchoolDistrict
 
 
 @pytest.fixture
@@ -23,6 +23,7 @@ def db():
 @pytest.fixture(autouse=True)
 def clear_database_table(db):
     db.query(UserAccount).delete()
+    db.query(SchoolDistrict).delete()
     db.commit()
 
 
@@ -196,3 +197,99 @@ def test_delete_user(test_client, db, setup_admin_session):
     empty_db = db.query(UserAccount).all()
     assert response.status_code == 200
     assert len(empty_db) == 0
+
+
+def test_get_districts_admin(test_client, db, mocker):
+    app.dependency_overrides[get_request_session] = override_get_request_session
+    user = {
+        "12345": {
+            "email": "districts@rice.edu",
+            "is_manager": False,
+            "is_admin": True,
+        }
+    }
+    mocker.patch(
+        "rope.api.sessions.session_store",
+        user,
+    )
+    db_district = SchoolDistrict(name="active_isd", active=True)
+    db_district2 = SchoolDistrict(name="not_active_isd", active=False)
+    db.add(db_district)
+    db.add(db_district2)
+    db.commit()
+    response = test_client.get("/admin/settings/district")
+    data = response.json()
+    assert response.status_code == 200
+    assert len(data) == 2
+    assert data[0].get("id") is not None
+    assert data[1].get("id") is not None
+    assert data[0].get("name") == "active_isd"
+    assert data[0].get("active") is True
+    assert data[1].get("name") == "not_active_isd"
+    assert data[1].get("active") is False
+
+
+def test_get_districts_authenticated_non_admin(test_client, db, mocker):
+    app.dependency_overrides[get_request_session] = override_get_request_session
+    user = {
+        "12345": {
+            "email": "districts@rice.edu",
+            "is_manager": False,
+            "is_admin": False,
+        }
+    }
+    mocker.patch(
+        "rope.api.sessions.session_store",
+        user,
+    )
+    db_district = SchoolDistrict(name="active_isd", active=True)
+    db_district2 = SchoolDistrict(name="not_active_isd", active=False)
+    db.add(db_district)
+    db.add(db_district2)
+    db.commit()
+    response = test_client.get("/admin/settings/district")
+    data = response.json()
+    assert response.status_code == 200
+    assert len(data) == 1
+    assert data[0].get("id") is not None
+    assert data[0].get("name") == "active_isd"
+    assert data[0].get("active") is True
+
+
+def test_create_district(test_client, db, setup_admin_session):
+    new_school_district_data = {
+        "name": "New_ISD",
+        "active": True,
+    }
+    response = test_client.post(
+        "/admin/settings/district", json=new_school_district_data
+    )
+    districts = db.query(SchoolDistrict).all()
+    data = response.json()
+    assert response.status_code == 200
+    assert len(districts) == 1
+    assert data["name"] == "new_isd"
+    assert data["active"] is True
+
+
+def test_update_district(test_client, db, setup_admin_session):
+    db_district = SchoolDistrict(
+        name="currentschool_isd", active=True
+    )
+    db.add(db_district)
+    db.commit()
+    district = db.query(SchoolDistrict).first()
+    district_id = district.id
+    updated_district_data = {
+        "id": district_id,
+        "name": "Updatedschool_ISD",
+        "active": False,
+    }
+    response = test_client.put(
+        f"admin/settings/district/{district_id}", json=updated_district_data
+    )
+    data = response.json()
+    assert response.status_code == 200
+    assert data["name"] == "updatedschool_isd"
+    assert data["active"] is False
+    assert data.get("id") is not None
