@@ -1,7 +1,7 @@
 import styled from 'styled-components'
-import { Link } from '../renderer/Link'
+import { Link } from './Link'
 import { Logo } from './Logo'
-import { AuthStatus, useAuthContext } from '../renderer/useAuthContext'
+import { AuthStatus, useAuthContext } from './useAuthContext'
 
 const HeaderContent = styled.div`
   display: flex;
@@ -10,10 +10,6 @@ const HeaderContent = styled.div`
   padding: 8px;
   color: #fff;
   background-color: #005047;
-
-  & > *:last-child {
-    margin-left: auto;
-  }
 
   & > * {
     margin-right: 8px;
@@ -26,13 +22,20 @@ const HeaderContent = styled.div`
     text-decoration: none;
     transition: background-color 0.3s ease;
   }
+
   .navitem.is-active {
-    background-color:rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.2);
   }
+
   & > *:hover {
     background-color: rgba(255, 255, 255, 0.2); 
   }
+
+  .right-element {
+    margin-left: auto;
+  }
 `
+
 interface HeaderProps {
   children?: React.ReactNode
   logout: () => void
@@ -48,12 +51,12 @@ export function Header({ children, logout }: HeaderProps): JSX.Element {
         <Link className="navitem" href="/">
           Home
         </Link>
-        <Link className="navitem" href="/about">
-          About
+        <Link className="navitem" href="/courses">
+          Courses
         </Link>
         {authContext.status === AuthStatus.SignedIn
-          ? <a href="#" onClick={logout}>Logout</a>
-          : <a href="/login" >Login</a> }
+          ? <a className="right-element" href="#" onClick={logout}>Logout</a>
+          : <></>}
         {children}
       </HeaderContent>
     </>

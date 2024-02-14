@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { usePageContext } from '../../renderer/usePageContext'
+import { usePageContext } from '../../components/usePageContext'
 
 const Center = styled.div`
   height: calc(100vh - 100px);

@@ -19,6 +19,8 @@ CMD ["npm", "run", "dev"]
 
 FROM base as builder
 
+ARG VITE_GOOGLE_CLIENT_ID
+
 RUN npm run build
 
 FROM nginx:1.25 as deploy

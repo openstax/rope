@@ -25,12 +25,12 @@ function Page(): JSX.Element {
     )
 
     if (resp.status !== 200) {
-      throw new Error('Error establishing session')
+      throw new Error('Error: Login failed')
     }
   }
   const handleLogin = (credentialResponse: CredentialResponse): void => {
     const token = credentialResponse.credential
-    if (typeof token === 'string') {
+    if (token !== undefined) {
       login(token)
         .then(() => {
           window.location.href = '/'

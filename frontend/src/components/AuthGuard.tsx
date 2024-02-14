@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
-import { AuthStatus, useAuthContext } from '../renderer/useAuthContext'
-import { usePageContext } from '../renderer/usePageContext'
-
+import { AuthStatus, useAuthContext } from './useAuthContext'
+import { usePageContext } from './usePageContext'
 export function AuthGuard({ children }: { children: React.ReactNode }): JSX.Element {
   const authContext = useAuthContext()
   const pageContext = usePageContext()

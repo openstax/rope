@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { PageContextProvider } from './usePageContext'
+import { PageContextProvider } from '../components/usePageContext'
 import type { PageContext } from 'vike/types'
 import './PageShell.css'
 import { Header } from '../components/Header'
-import { Layout } from '../components/Layout'
 import { AuthGuard } from '../components/AuthGuard'
 import { Content } from '../components/Content'
-import { AuthContext, AuthStatus, type AuthState } from './useAuthContext'
+import { AuthContext, AuthStatus, type AuthState } from '../components/useAuthContext'
 
 export function PageShell({ children, pageContext }: { children: React.ReactNode, pageContext: PageContext }): JSX.Element {
   const [authState, setAuthState] = useState<AuthState>({ status: AuthStatus.Unknown, email: undefined, isAdmin: false, isManager: false })
@@ -59,11 +58,9 @@ export function PageShell({ children, pageContext }: { children: React.ReactNode
       <PageContextProvider pageContext={pageContext}>
         <AuthContext.Provider value={authState}>
           <AuthGuard>
-            <Layout>
               <Header logout={logout}>
               </Header>
               <Content>{children}</Content>
-            </Layout>
           </AuthGuard>
         </AuthContext.Provider>
       </PageContextProvider>

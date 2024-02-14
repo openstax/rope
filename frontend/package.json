@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "npm run server:dev",
     "test": "vitest",
-    "test:ci": "vitest run",
+    "test:ci": "vitest run --coverage",
     "prod": "npm run lint && npm run build && npm run server:prod",
     "build": "tsc && vite build",
     "server": "vite --host",
@@ -38,10 +38,10 @@
     "vike": "^0.4.156",
     "vite": "^5.0.10"
   },
-  "type": "module",
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.2.1",
+    "@vitest/coverage-v8": "^1.2.2",
     "jsdom": "^24.0.0",
     "vitest": "^1.2.2"
   }

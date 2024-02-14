@@ -1,7 +1,7 @@
 function Page(): JSX.Element {
   return (
     <>
-      <h1>About</h1>
+      <h1>Courses</h1>
     </>
   )
 }
