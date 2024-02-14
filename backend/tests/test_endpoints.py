@@ -271,12 +271,11 @@ def test_create_district(test_client, db, setup_admin_session):
     assert len(districts) == 1
     assert data["name"] == "new_isd"
     assert data["active"] is True
+    assert data.get("id") is not None
 
 
 def test_update_district(test_client, db, setup_admin_session):
-    db_district = SchoolDistrict(
-        name="currentschool_isd", active=True
-    )
+    db_district = SchoolDistrict(name="currentschool_isd", active=True)
     db.add(db_district)
     db.commit()
     district = db.query(SchoolDistrict).first()
@@ -324,3 +323,20 @@ def test_get_moodle_settings(test_client, db, mocker):
     assert data[0].get("value") == "AY 2024"
     assert data[1].get("name") == "academic_year_short"
     assert data[1].get("value") == "AY24"
+
+
+def test_create_moodle_settings(test_client, db, setup_admin_session):
+    new_moodle_setting_data = {
+        "name": "academic_year",
+        "value": "AY 2030",
+    }
+    response = test_client.post(
+        "/admin/settings/moodle", json=new_moodle_setting_data
+    )
+    moodle_settings = db.query(MoodleSetting).all()
+    data = response.json()
+    assert response.status_code == 200
+    assert len(moodle_settings) == 1
+    assert data["name"] == "academic_year"
+    assert data["value"] == "AY 2030"
+    assert data.get("id") is not None

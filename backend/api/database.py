@@ -86,3 +86,14 @@ def update_db_district(db: Session, district):
 def get_db_moodle_settings(db: Session):
     moodle_settings = db.query(MoodleSetting).all()
     return moodle_settings
+
+
+def create_db_moodle_settings(db: Session, moodle_setting):
+    lower_case_moodle_setting_name = moodle_setting.name.lower()
+    new_moodle_setting = MoodleSetting(
+        name=lower_case_moodle_setting_name, value=moodle_setting.value
+    )
+    db.add(new_moodle_setting)
+    db.commit()
+    db.refresh(new_moodle_setting)
+    return new_moodle_setting

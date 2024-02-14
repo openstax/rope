@@ -27,6 +27,7 @@ from rope.api.database import (
     create_db_district,
     update_db_district,
     get_db_moodle_settings,
+    create_db_moodle_settings,
 )
 from rope.api.sessions import (
     create_session,
@@ -154,3 +155,11 @@ def update_district(
 def get_moodle_settings(db: Session = Depends(get_db)) -> list[FullMoodleSettings]:
     moodle_settings = get_db_moodle_settings(db)
     return moodle_settings
+
+
+@app.post("/admin/settings/moodle", dependencies=[Depends(verify_admin)])
+def create_moodle_settings(
+    moodle_setting: BaseMoodleSettings, db: Session = Depends(get_db)
+) -> FullMoodleSettings:
+    new_moodle_setting = create_db_moodle_settings(db, moodle_setting)
+    return new_moodle_setting
