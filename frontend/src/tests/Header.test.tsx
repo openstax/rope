@@ -25,6 +25,9 @@ describe('Header component', () => {
     expect(courses).toBeInTheDocument()
     const logout = screen.getByText('Logout')
     expect(logout).toBeInTheDocument()
+    const home = screen.getByText('Home')
+    expect(home).toBeInTheDocument()
+
     fireEvent.click(logout)
     expect(logoutMock).toHaveBeenCalledTimes(1)
   })
@@ -38,6 +41,8 @@ describe('Header component', () => {
     )
     const courses = screen.getByText('Courses')
     expect(courses).toBeInTheDocument()
+    const home = screen.getByText('Home')
+    expect(home).toBeInTheDocument()
     const logout = screen.queryByText('Logout')
     expect(logout).toBeNull()
   })

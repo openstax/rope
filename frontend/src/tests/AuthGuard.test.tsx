@@ -22,8 +22,8 @@ describe('AuthGuard', () => {
       </PageContextProvider>
     )
 
-    const pageTitle = screen.queryByText('Protected content')
-    expect(pageTitle).toBeNull()
+    const protectedContent = screen.queryByText('Protected content')
+    expect(protectedContent).toBeNull()
   })
 
   it('Authguard shows user protected content if user is logged in', () => {
@@ -43,7 +43,7 @@ describe('AuthGuard', () => {
 
     )
 
-    const pageTitle = screen.getByText('Protected content')
-    expect(pageTitle).toBeInTheDocument()
+    const protectedContent = screen.getByText('Protected content')
+    expect(protectedContent).toBeInTheDocument()
   })
 })
