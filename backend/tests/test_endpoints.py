@@ -44,17 +44,8 @@ def setup_admin_session(mocker):
     )
 
 
-def override_get_request_session():
-    session_id = {"session_id": "12345"}
-    return session_id
-
-
-def override_admin_get_request_session():
-    session_id = {"session_id": "A1B2C3"}
-    return session_id
-
-
-def test_get_current_user(test_client, mocker):
+@pytest.fixture
+def setup_nonadmin_authenticated_user_session(mocker):
     app.dependency_overrides[get_request_session] = override_get_request_session
     user = {
         "12345": {
@@ -67,6 +58,19 @@ def test_get_current_user(test_client, mocker):
         "rope.api.sessions.session_store",
         user,
     )
+
+
+def override_get_request_session():
+    session_id = {"session_id": "12345"}
+    return session_id
+
+
+def override_admin_get_request_session():
+    session_id = {"session_id": "A1B2C3"}
+    return session_id
+
+
+def test_get_current_user(test_client, setup_nonadmin_authenticated_user_session):
     response = test_client.get("/user/current")
     data = response.json()
     assert response.status_code == 200
@@ -230,19 +234,9 @@ def test_get_districts_admin(test_client, db, mocker):
     assert data[1].get("active") is False
 
 
-def test_get_districts_authenticated_non_admin(test_client, db, mocker):
-    app.dependency_overrides[get_request_session] = override_get_request_session
-    user = {
-        "12345": {
-            "email": "districts@rice.edu",
-            "is_manager": False,
-            "is_admin": False,
-        }
-    }
-    mocker.patch(
-        "rope.api.sessions.session_store",
-        user,
-    )
+def test_get_districts_authenticated_non_admin(
+    test_client, db, setup_nonadmin_authenticated_user_session
+):
     db_district = SchoolDistrict(name="active_isd", active=True)
     db_district2 = SchoolDistrict(name="not_active_isd", active=False)
     db.add(db_district)
@@ -295,19 +289,9 @@ def test_update_district(test_client, db, setup_admin_session):
     assert data.get("id") is not None
 
 
-def test_get_moodle_settings(test_client, db, mocker):
-    app.dependency_overrides[get_request_session] = override_get_request_session
-    user = {
-        "12345": {
-            "email": "moodlesettings@rice.edu",
-            "is_manager": False,
-            "is_admin": False,
-        }
-    }
-    mocker.patch(
-        "rope.api.sessions.session_store",
-        user,
-    )
+def test_get_moodle_settings(
+    test_client, db, setup_nonadmin_authenticated_user_session
+):
     moodle_setting = MoodleSetting(name="academic_year", value="AY 2024")
     moodle_setting2 = MoodleSetting(name="academic_year_short", value="AY24")
     db.add(moodle_setting)
