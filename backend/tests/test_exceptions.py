@@ -4,7 +4,7 @@ import pytest
 from rope.api.main import app
 from rope.api.sessions import get_request_session
 from rope.api.database import SessionLocal
-from rope.db.schema import UserAccount, SchoolDistrict
+from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting
 
 
 @pytest.fixture
@@ -24,6 +24,8 @@ def db():
 @pytest.fixture(autouse=True)
 def clear_database_table(db):
     db.query(UserAccount).delete()
+    db.query(SchoolDistrict).delete()
+    db.query(MoodleSetting).delete()
     db.commit()
 
 
@@ -85,6 +87,15 @@ def test_non_admin_access_admin_endpoint(test_client, mocker):
         "name": "Updatedschool_ISD",
         "active": False,
     }
+    new_moodle_setting_data = {
+        "name": "Academic_Year",
+        "value": "AY 2030",
+    }
+    updated_moodle_setting_data = {
+        "id": 829384923,
+        "name": "Updated_Academic_Year",
+        "value": "AY 2200",
+    }
     get_all_users_response = test_client.get("/user")
     create_user_response = test_client.post("/user", json=non_admin_user)
     update_user_response = test_client.put("/user/12", json=non_admin_user)
@@ -95,12 +106,20 @@ def test_non_admin_access_admin_endpoint(test_client, mocker):
     update_district_response = test_client.put(
         "/admin/settings/district/77", json=updated_district_data
     )
+    create_moodle_setting_response = test_client.post(
+        "/admin/settings/moodle", json=new_moodle_setting_data
+    )
+    update_moodle_setting_response = test_client.put(
+        "/admin/settings/moodle/77", json=updated_moodle_setting_data
+    )
     assert get_all_users_response.status_code == 403
     assert create_user_response.status_code == 403
     assert update_user_response.status_code == 403
     assert delete_user_response.status_code == 403
     assert create_district_response.status_code == 403
     assert update_district_response.status_code == 403
+    assert create_moodle_setting_response.status_code == 403
+    assert update_moodle_setting_response.status_code == 403
 
 
 def test_missing_session_id(test_client):
@@ -185,7 +204,27 @@ def test_update_db_district_no_results(test_client, db, setup_admin_session):
             "active": False,
         }
         test_client.put(
-            f"admin/settings/district/{district_id}", json=updated_district_data
+            f"/admin/settings/district/{district_id}", json=updated_district_data
+        )
+
+    assert exc_info.type is NoResultFound
+
+
+def test_update_db_moodle_setting_no_results(test_client, db, setup_admin_session):
+    with pytest.raises(NoResultFound) as exc_info:
+        db_moodle_setting = MoodleSetting(name="academic_year", value="AY 2040")
+        db.add(db_moodle_setting)
+        db.commit()
+        moodle_setting = db.query(MoodleSetting).first()
+        moodle_setting_id = moodle_setting.id
+        updated_moodle_setting_data = {
+            "id": 8765234624624324,
+            "name": "updated_academic_year",
+            "value": "AY 2500",
+        }
+        test_client.put(
+            f"/admin/settings/moodle/{moodle_setting_id}",
+            json=updated_moodle_setting_data,
         )
 
     assert exc_info.type is NoResultFound
