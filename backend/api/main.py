@@ -16,20 +16,7 @@ from rope.api.models import (
 )
 from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
-from rope.api.database import (
-    SessionLocal,
-    get_user_by_email,
-    get_all_users,
-    create_db_user,
-    update_db_user,
-    delete_db_user,
-    get_db_districts,
-    create_db_district,
-    update_db_district,
-    get_db_moodle_settings,
-    create_db_moodle_settings,
-    update_db_moodle_settings,
-)
+from rope.api import database
 from rope.api.sessions import (
     create_session,
     destroy_session,
@@ -50,7 +37,7 @@ app.add_middleware(
 
 
 def get_db():
-    db = SessionLocal()
+    db = database.SessionLocal()
     try:
         yield db
     finally:
@@ -69,7 +56,7 @@ def google_login(
             status_code=401,
             detail="Invalid token",
         )
-    user = get_user_by_email(db, token["email"])
+    user = database.get_user_by_email(db, token["email"])
     if not user:
         raise HTTPException(
             status_code=401,
@@ -102,25 +89,25 @@ def delete_session(session=Depends(get_request_session)):
 
 @app.get("/user", dependencies=[Depends(verify_admin)])
 def get_users(db: Session = Depends(get_db)) -> list[FullUser]:
-    users = get_all_users(db)
+    users = database.get_all_users(db)
     return users
 
 
 @app.post("/user", dependencies=[Depends(verify_admin)])
 def create_user(user: BaseUser, db: Session = Depends(get_db)) -> FullUser:
-    new_user = create_db_user(db, user)
+    new_user = database.create_user(db, user)
     return new_user
 
 
 @app.put("/user/{id}", dependencies=[Depends(verify_admin)])
 def update_user(user: FullUser, db: Session = Depends(get_db)) -> FullUser:
-    updated_user = update_db_user(db, user)
+    updated_user = database.update_user(db, user)
     return updated_user
 
 
 @app.delete("/user/{id}", dependencies=[Depends(verify_admin)])
 def delete_user(id: int, db: Session = Depends(get_db)):
-    row_deleted = delete_db_user(db, id)
+    row_deleted = database.delete_user(db, id)
     if row_deleted == 0:
         raise HTTPException(
             status_code=404, detail=f"User with the id: {id} does not exist"
@@ -132,7 +119,7 @@ def get_districts(
     current_user: Annotated[dict, Depends(verify_user)], db: Session = Depends(get_db)
 ) -> list[FullSchoolDistrict]:
     active_only = not current_user["is_admin"]
-    school_districts = get_db_districts(db, active_only)
+    school_districts = database.get_districts(db, active_only)
     return school_districts
 
 
@@ -140,7 +127,7 @@ def get_districts(
 def create_district(
     district: BaseSchoolDistrict, db: Session = Depends(get_db)
 ) -> FullSchoolDistrict:
-    new_district = create_db_district(db, district)
+    new_district = database.create_district(db, district)
     return new_district
 
 
@@ -148,13 +135,13 @@ def create_district(
 def update_district(
     district: FullSchoolDistrict, db: Session = Depends(get_db)
 ) -> FullSchoolDistrict:
-    updated_district = update_db_district(db, district)
+    updated_district = database.update_district(db, district)
     return updated_district
 
 
 @app.get("/admin/settings/moodle", dependencies=[Depends(verify_user)])
 def get_moodle_settings(db: Session = Depends(get_db)) -> list[FullMoodleSettings]:
-    moodle_settings = get_db_moodle_settings(db)
+    moodle_settings = database.get_moodle_settings(db)
     return moodle_settings
 
 
@@ -162,7 +149,7 @@ def get_moodle_settings(db: Session = Depends(get_db)) -> list[FullMoodleSetting
 def create_moodle_settings(
     moodle_setting: BaseMoodleSettings, db: Session = Depends(get_db)
 ) -> FullMoodleSettings:
-    new_moodle_setting = create_db_moodle_settings(db, moodle_setting)
+    new_moodle_setting = database.create_moodle_settings(db, moodle_setting)
     return new_moodle_setting
 
 
@@ -170,5 +157,5 @@ def create_moodle_settings(
 def update_moodle_settings(
     moodle_setting: FullMoodleSettings, db: Session = Depends(get_db)
 ) -> FullMoodleSettings:
-    updated_moodle_settings = update_db_moodle_settings(db, moodle_setting)
+    updated_moodle_settings = database.update_moodle_settings(db, moodle_setting)
     return updated_moodle_settings

@@ -24,7 +24,7 @@ def get_all_users(db: Session):
     return users
 
 
-def create_db_user(db: Session, user):
+def create_user(db: Session, user):
     new_user = UserAccount(
         email=user.email, is_manager=user.is_manager, is_admin=user.is_admin
     )
@@ -34,7 +34,7 @@ def create_db_user(db: Session, user):
     return new_user
 
 
-def update_db_user(db: Session, user):
+def update_user(db: Session, user):
     user_db = db.query(UserAccount).filter(UserAccount.id == user.id).first()
     if not user_db:
         raise NoResultFound
@@ -46,13 +46,13 @@ def update_db_user(db: Session, user):
     return user_db
 
 
-def delete_db_user(db: Session, id: int):
+def delete_user(db: Session, id: int):
     rows_deleted = db.query(UserAccount).filter(UserAccount.id == id).delete()
     db.commit()
     return rows_deleted
 
 
-def get_db_districts(db: Session, active_only=True):
+def get_districts(db: Session, active_only=True):
     if not active_only:
         school_districts = db.query(SchoolDistrict).all()
     else:
@@ -60,7 +60,7 @@ def get_db_districts(db: Session, active_only=True):
     return school_districts
 
 
-def create_db_district(db: Session, district):
+def create_district(db: Session, district):
     lower_case_district_name = district.name.lower()
     new_district = SchoolDistrict(name=lower_case_district_name, active=district.active)
     db.add(new_district)
@@ -69,7 +69,7 @@ def create_db_district(db: Session, district):
     return new_district
 
 
-def update_db_district(db: Session, district):
+def update_district(db: Session, district):
     district_db = (
         db.query(SchoolDistrict).filter(SchoolDistrict.id == district.id).first()
     )
@@ -83,12 +83,12 @@ def update_db_district(db: Session, district):
     return district_db
 
 
-def get_db_moodle_settings(db: Session):
+def get_moodle_settings(db: Session):
     moodle_settings = db.query(MoodleSetting).all()
     return moodle_settings
 
 
-def create_db_moodle_settings(db: Session, moodle_setting):
+def create_moodle_settings(db: Session, moodle_setting):
     lower_case_moodle_setting_name = moodle_setting.name.lower()
     new_moodle_setting = MoodleSetting(
         name=lower_case_moodle_setting_name, value=moodle_setting.value
@@ -99,7 +99,7 @@ def create_db_moodle_settings(db: Session, moodle_setting):
     return new_moodle_setting
 
 
-def update_db_moodle_settings(db: Session, moodle_setting):
+def update_moodle_settings(db: Session, moodle_setting):
     moodle_settings_db = (
         db.query(MoodleSetting).filter(MoodleSetting.id == moodle_setting.id).first()
     )
