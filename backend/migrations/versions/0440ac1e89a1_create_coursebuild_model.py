@@ -1,8 +1,8 @@
 """Create CourseBuild model
 
-Revision ID: 2af7bbeaa160
+Revision ID: 0440ac1e89a1
 Revises: aa205c6ae88f
-Create Date: 2024-02-19 12:36:58.821375
+Create Date: 2024-02-19 13:19:15.917234
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2af7bbeaa160'
+revision = '0440ac1e89a1'
 down_revision = 'aa205c6ae88f'
 branch_labels = None
 depends_on = None
@@ -40,7 +40,8 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['creator'], ['user_account.id'], ),
     sa.ForeignKeyConstraint(['school_district'], ['school_district.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('course_shortname', 'instructor_email', 'academic_year')
+    sa.UniqueConstraint('course_shortname'),
+    sa.UniqueConstraint('instructor_email', 'academic_year')
     )
     # ### end Alembic commands ###
 

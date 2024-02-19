@@ -65,7 +65,8 @@ class Status(enum.Enum):
 class CourseBuild(Base):
     __tablename__ = "course_build"
     __table_args__ = (
-        UniqueConstraint("course_shortname", "instructor_email", "academic_year"),
+        UniqueConstraint("course_shortname"),
+        UniqueConstraint("instructor_email", "academic_year"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
