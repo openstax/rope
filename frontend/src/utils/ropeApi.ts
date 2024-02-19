@@ -5,6 +5,15 @@ export interface User {
   id: number
 }
 
+function convertApiUserToUser(apiUser: { email: string, is_admin: boolean, is_manager: boolean, id: number }): User {
+  return {
+    email: apiUser.email,
+    isAdmin: apiUser.is_admin,
+    isManager: apiUser.is_manager,
+    id: apiUser.id
+  }
+}
+
 export const ropeApi = {
   fetchUsers: async (): Promise<User[]> => {
     const response = await fetch('/api/user')
@@ -12,11 +21,9 @@ export const ropeApi = {
       throw new Error('Failed to get users')
     }
     const usersFromApi = await response.json()
-    const users: User[] = usersFromApi.map((user: { is_admin: boolean, is_manager: boolean }) => ({
-      ...user,
-      isAdmin: user.is_admin,
-      isManager: user.is_manager
-    }))
+    const users: User[] = usersFromApi.map((user: { email: string, is_admin: boolean, is_manager: boolean, id: number }) =>
+      convertApiUserToUser(user)
+    )
     return users
   },
 
@@ -34,7 +41,8 @@ export const ropeApi = {
       throw new Error('Failed to add user')
     }
 
-    return await response.json()
+    const newUserFromApi: { email: string, is_admin: boolean, is_manager: boolean, id: number } = await response.json()
+    return convertApiUserToUser(newUserFromApi)
   },
 
   deleteUser: async (id: number): Promise<void> => {
@@ -60,6 +68,7 @@ export const ropeApi = {
       throw new Error('Failed to update user permissions')
     }
 
-    return await response.json()
+    const updatedUserFromApi: { id: number, email: string, is_admin: boolean, is_manager: boolean } = await response.json()
+    return convertApiUserToUser(updatedUserFromApi)
   }
 }
