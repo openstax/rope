@@ -1,7 +1,7 @@
 export interface User {
   email: string
-  is_admin: boolean
-  is_manager: boolean
+  isAdmin: boolean
+  isManager: boolean
   id: number
 }
 
@@ -11,7 +11,13 @@ export const ropeApi = {
     if (!response.ok) {
       throw new Error('Failed to get users')
     }
-    return await response.json()
+    const usersFromApi = await response.json()
+    const users: User[] = usersFromApi.map((user: { is_admin: boolean, is_manager: boolean }) => ({
+      ...user,
+      isAdmin: user.is_admin,
+      isManager: user.is_manager
+    }))
+    return users
   },
 
   addUser: async (email: string, isAdmin: boolean, isManager: boolean): Promise<User> => {

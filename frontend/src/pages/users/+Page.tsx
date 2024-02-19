@@ -107,7 +107,7 @@ function Page(): JSX.Element {
       await ropeApi.updateUserPermissions(id, isAdmin, isManager, email)
       setUsers(users.map(user => {
         if (user.id === id) {
-          return { ...user, is_admin: isAdmin, is_manager: isManager, email }
+          return { ...user, isAdmin, isManager, email }
         }
         return user
       }))
@@ -131,10 +131,10 @@ function Page(): JSX.Element {
             <input
               type="checkbox"
               name="isAdmin"
-              checked={user.is_admin}
+              checked={user.isAdmin}
               onChange={(e) => {
                 const isChecked = e.target.checked
-                void updateUserPermissions(user.id, isChecked, user.is_manager, user.email)
+                void updateUserPermissions(user.id, isChecked, user.isManager, user.email)
               }}
             />
           </Td>
@@ -142,10 +142,10 @@ function Page(): JSX.Element {
             <input
               type="checkbox"
               name="isManager"
-              checked={user.is_manager}
+              checked={user.isManager}
               onChange={(e) => {
                 const isChecked = e.target.checked
-                void updateUserPermissions(user.id, user.is_admin, isChecked, user.email)
+                void updateUserPermissions(user.id, user.isAdmin, isChecked, user.email)
               }}
             />
           </Td>
