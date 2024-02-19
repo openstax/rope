@@ -1,13 +1,7 @@
 import { useAuthContext } from '../../components/useAuthContext'
 import { useState, useEffect } from 'react'
 import styled from 'styled-components'
-
-interface User {
-  email: string
-  is_admin: boolean
-  is_manager: boolean
-  id: number
-}
+import { ropeApi, type User } from '../../utils/ropeApi'
 
 const Container = styled.div`
   display: flex;
@@ -40,19 +34,21 @@ const Input = styled.input`
 
 const Button = styled.button`
   padding: 8px 16px;
-  margin-top: 10px;
 `
 
 const ErrorTag = styled.p`
-  color: red
+  color: red;
 `
-
+const SuccessMessage = styled.p`
+  color: green;
+`
 function Page(): JSX.Element {
   const authContext = useAuthContext()
 
   const [users, setUsers] = useState<User[]>([])
   const [newUser, setNewUser] = useState<{ email: string, isAdmin: boolean, isManager: boolean }>({ email: '', isAdmin: false, isManager: false })
   const [error, setError] = useState<string>('')
+  const [successMessage, setSuccessMessage] = useState<string>('')
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target
@@ -68,13 +64,13 @@ function Page(): JSX.Element {
   }, [authContext.isAdmin])
 
   const fetchUsers = async (): Promise<void> => {
-    const response = await fetch('/api/user')
-    if (!response.ok) {
-      throw new Error('Failed to get users')
+    try {
+      const data = await ropeApi.fetchUsers()
+      setUsers(data)
+    } catch (error) {
+      console.error('Fetch error', error)
+      setError('Failed to fetch users')
     }
-    const data: User[] = await response.json()
-    console.log(data)
-    setUsers(data)
   }
 
   const addUser = async (): Promise<void> => {
@@ -84,68 +80,44 @@ function Page(): JSX.Element {
       setError('Please enter a valid Rice University email')
       return
     }
+
     try {
-      const response = await fetch('/api/user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, is_admin: isAdmin, is_manager: isManager })
-      })
-
-      if (!response.ok) {
-        setError('Failed to add user')
-        throw new Error('Failed to add user')
-      }
-
-      const data: User = await response.json()
+      const data = await ropeApi.addUser(email, isAdmin, isManager)
       setUsers([...users, data])
       setNewUser({ email: '', isAdmin: false, isManager: false })
       setError('')
     } catch (error) {
+      setError('Failed to add user. Please try again.')
       console.error('Add user error', error)
     }
   }
 
   const deleteUser = async (id: number): Promise<void> => {
     try {
-      const response = await fetch(`/api/user/${id}`, {
-        method: 'DELETE'
-      })
-
-      if (!response.ok) {
-        setError('Failed to delete user')
-        throw new Error('Failed to delete user')
-      }
-
+      await ropeApi.deleteUser(id)
       setUsers(users.filter(user => user.id !== id))
     } catch (error) {
+      setError('Failed to delete user. Please try again.')
       console.error('Delete user error', error)
     }
   }
 
   const updateUserPermissions = async (id: number, isAdmin: boolean, isManager: boolean, email: string): Promise<void> => {
     try {
-      const response = await fetch(`/api/user/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id, is_admin: isAdmin, is_manager: isManager, email })
-      })
-
-      if (!response.ok) {
-        setError('Failed to update user permissions')
-        throw new Error('Failed to update user permissions')
-      }
-
+      await ropeApi.updateUserPermissions(id, isAdmin, isManager, email)
       setUsers(users.map(user => {
         if (user.id === id) {
           return { ...user, is_admin: isAdmin, is_manager: isManager, email }
         }
         return user
       }))
+      setError('')
+      setSuccessMessage('User permissions updated successfully')
+      setTimeout(() => {
+        setSuccessMessage('')
+      }, 3000)
     } catch (error) {
+      setError('Failed to update user permissions')
       console.error('Update user permissions error', error)
     }
   }
@@ -193,6 +165,7 @@ function Page(): JSX.Element {
         ? <>
           <h2>User Management</h2>
           {(error !== '') && <ErrorTag>{error}</ErrorTag>}
+          {(successMessage !== '') && <SuccessMessage>{successMessage}</SuccessMessage>}
           <Table>
             <thead>
               <tr>

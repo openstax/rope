@@ -54,7 +54,7 @@ describe('Users page', async () => {
   })
 
   it('adds a user when addUser is called', async () => {
-    global.fetch = vi.fn().mockResolvedValueOnce({
+    global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => await Promise.resolve([{ id: 3, email: 'user3@rice.edu', is_admin: false, is_manager: false }])
     })
