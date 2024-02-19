@@ -55,7 +55,7 @@ class MoodleSetting(Base):
     value: Mapped[str]
 
 
-class CourseStatus(enum.Enum):
+class CourseBuildStatus(enum.Enum):
     CREATED = "created"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -83,5 +83,5 @@ class CourseBuild(Base):
     academic_year: Mapped[str]
     academic_year_short: Mapped[str]
     base_course_id: Mapped[int]
-    status: Mapped[CourseStatus]
+    status: Mapped[CourseBuildStatus]
     creator: Mapped[int] = mapped_column(ForeignKey("user_account.id"))

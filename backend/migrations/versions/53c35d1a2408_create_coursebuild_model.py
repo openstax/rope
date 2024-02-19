@@ -1,8 +1,8 @@
 """Create CourseBuild model
 
-Revision ID: 890a6b56f838
+Revision ID: 53c35d1a2408
 Revises: aa205c6ae88f
-Create Date: 2024-02-19 15:18:13.193672
+Create Date: 2024-02-19 15:25:40.630245
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '890a6b56f838'
+revision = '53c35d1a2408'
 down_revision = 'aa205c6ae88f'
 branch_labels = None
 depends_on = None
@@ -33,7 +33,7 @@ def upgrade() -> None:
     sa.Column('academic_year', sa.String(), nullable=False),
     sa.Column('academic_year_short', sa.String(), nullable=False),
     sa.Column('base_course_id', sa.Integer(), nullable=False),
-    sa.Column('status', sa.Enum('CREATED', 'PROCESSING', 'COMPLETED', 'FAILED', name='coursestatus'), nullable=False),
+    sa.Column('status', sa.Enum('CREATED', 'PROCESSING', 'COMPLETED', 'FAILED', name='coursebuildstatus'), nullable=False),
     sa.Column('creator', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
