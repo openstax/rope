@@ -26,7 +26,7 @@ from rope.api.sessions import (
 from moodlecli.moodle import MoodleClient
 
 client = MoodleClient(requests.Session(), settings.MOODLE_URL,
-                                          settings.MOODLE_TOKEN)
+                      settings.MOODLE_TOKEN)
 
 app = FastAPI(title="ROPE API", root_path="/api")
 
@@ -132,6 +132,7 @@ def create_district(
 ) -> FullSchoolDistrict:
     new_district = database.create_district(db, district)
     return new_district
+
 
 @app.put("/admin/settings/district/{id}", dependencies=[Depends(verify_admin)])
 def update_district(
