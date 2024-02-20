@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 import uuid
 import requests
-from typing import Annotated
+from typing import Annotated, Optional
 from rope.api.models import (
     GoogleLoginData,
     BaseUser,
@@ -164,9 +164,11 @@ def update_moodle_settings(
     return updated_moodle_settings
 
 
-@app.get("/moodle/user/")
-def get_moodle_user(email: str = '', db: Session = Depends(get_db)) -> MoodelUser:
+@app.get("/moodle/user/", dependencies=[Depends(verify_admin)])
+def get_moodle_user(email: str = '') -> Optional[MoodelUser]:
     user_data = client.get_user_by_email(email)
+    if not user_data:
+        return None
     first_name = user_data.get("firstname")
     last_name = user_data.get("lastname")
     user_email = user_data.get("email")
