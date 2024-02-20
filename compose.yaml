@@ -23,6 +23,7 @@ services:
       context: ./backend
       target: dev
     environment:
+      - GOOGLE_CLIENT_ID
       - MOODLE_URL
       - MOODLE_TOKEN
       - SESSION_SECRET_KEY=secret
@@ -41,7 +42,6 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=80"
     networks:
       - rope
-
   postgres:
     image: postgres:16
     environment:
