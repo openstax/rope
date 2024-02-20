@@ -345,3 +345,21 @@ def test_update_moodle_settings(test_client, db, setup_admin_session):
     assert data["name"] == "updated_academic_year"
     assert data["value"] == "AY 2100"
     assert data.get("id") is not None
+
+
+def test_get_moodle_user(test_client, db, setup_admin_session, mocker):
+    mocker.patch("rope.api.main.client.get_user_by_email", return_value={
+        "firstname": "first",
+        "lastname": "last",
+        "email": "first.last@email.com"
+    })
+
+    response = test_client.get("/moodle/user/?email=first.last@email.com")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["first_name"] == "first"
+    assert data["last_name"] == "last"
+    assert data["email"] == "first.last@email.com"

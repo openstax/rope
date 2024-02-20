@@ -23,7 +23,8 @@ services:
       context: ./backend
       target: dev
     environment:
-      - GOOGLE_CLIENT_ID
+      - MOODLE_URL
+      - MOODLE_TOKEN
       - SESSION_SECRET_KEY=secret
       - POSTGRES_DB=ropedb
       - POSTGRES_USER=pguser
@@ -40,6 +41,9 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=80"
     networks:
       - rope
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   postgres:
     image: postgres:16
     environment:

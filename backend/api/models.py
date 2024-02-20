@@ -31,3 +31,9 @@ class BaseMoodleSettings(BaseModel):
 
 class FullMoodleSettings(BaseMoodleSettings):
     id: int
+
+
+class MoodelUser(BaseModel):
+    first_name: str
+    last_name: str
+    email: str

@@ -1,10 +1,9 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
-
 import uuid
+import requests
 from typing import Annotated
-
 from rope.api.models import (
     GoogleLoginData,
     BaseUser,
@@ -13,6 +12,7 @@ from rope.api.models import (
     FullSchoolDistrict,
     BaseMoodleSettings,
     FullMoodleSettings,
+    MoodelUser
 )
 from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
@@ -23,7 +23,10 @@ from rope.api.sessions import (
     get_request_session,
     get_session,
 )
+from moodlecli.moodle import MoodleClient
 
+client = MoodleClient(requests.Session(), settings.MOODLE_URL,
+                                          settings.MOODLE_TOKEN)
 
 app = FastAPI(title="ROPE API", root_path="/api")
 
@@ -130,7 +133,6 @@ def create_district(
     new_district = database.create_district(db, district)
     return new_district
 
-
 @app.put("/admin/settings/district/{id}", dependencies=[Depends(verify_admin)])
 def update_district(
     district: FullSchoolDistrict, db: Session = Depends(get_db)
@@ -159,3 +161,13 @@ def update_moodle_settings(
 ) -> FullMoodleSettings:
     updated_moodle_settings = database.update_moodle_settings(db, moodle_setting)
     return updated_moodle_settings
+
+
+@app.get("/moodle/user/")
+def get_moodle_user(email: str = '', db: Session = Depends(get_db)) -> MoodelUser:
+    user_data = client.get_user_by_email(email)
+    first_name = user_data.get("firstname")
+    last_name = user_data.get("lastname")
+    user_email = user_data.get("email")
+
+    return {"first_name": first_name, "last_name": last_name, "email": user_email}
