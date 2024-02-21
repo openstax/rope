@@ -35,7 +35,7 @@ def create_course_shortname(course_build_settings, moodle_settings, update_short
     nonce = 0
     if update_shortname:
         nonce += 1
-        course_shortname = f"Alg1 {instructor_firstname[0]}{instructor_lastname[0]}{nonce} {academic_year_short}"
+        course_shortname = f"Alg1 {instructor_firstname[0]}{instructor_lastname[0]}{nonce} {academic_year_short}"  # noqa: E501
     return course_shortname
 
 
