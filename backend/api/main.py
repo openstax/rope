@@ -25,7 +25,11 @@ from rope.api.sessions import (
 )
 from moodlecli.moodle import MoodleClient
 
-client = MoodleClient(requests.Session(), settings.MOODLE_URL, settings.MOODLE_TOKEN)
+moodle_client = MoodleClient(
+    requests.Session(),
+    settings.MOODLE_URL,
+    settings.MOODLE_TOKEN,
+)
 
 app = FastAPI(title="ROPE API", root_path="/api")
 
@@ -165,7 +169,7 @@ def update_moodle_settings(
 
 @app.get("/moodle/user/", dependencies=[Depends(verify_user)])
 def get_moodle_user(email: str = "") -> Optional[MoodelUser]:
-    user_data = client.get_user_by_email(email)
+    user_data = moodle_client.get_user_by_email(email)
     if not user_data:
         return None
     first_name = user_data.get("firstname")
