@@ -12,7 +12,7 @@ from rope.api.models import (
     FullSchoolDistrict,
     BaseMoodleSettings,
     FullMoodleSettings,
-    MoodelUser
+    MoodelUser,
 )
 from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
@@ -25,8 +25,7 @@ from rope.api.sessions import (
 )
 from moodlecli.moodle import MoodleClient
 
-client = MoodleClient(requests.Session(), settings.MOODLE_URL,
-                      settings.MOODLE_TOKEN)
+client = MoodleClient(requests.Session(), settings.MOODLE_URL, settings.MOODLE_TOKEN)
 
 app = FastAPI(title="ROPE API", root_path="/api")
 
@@ -165,7 +164,7 @@ def update_moodle_settings(
 
 
 @app.get("/moodle/user/", dependencies=[Depends(verify_admin)])
-def get_moodle_user(email: str = '') -> Optional[MoodelUser]:
+def get_moodle_user(email: str = "") -> Optional[MoodelUser]:
     user_data = client.get_user_by_email(email)
     if not user_data:
         return None
