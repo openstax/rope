@@ -3,7 +3,7 @@ import pytest
 from rope.api.main import app
 from rope.api.sessions import get_request_session, session_store
 from rope.api.database import SessionLocal
-from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting
+from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting, CourseBuild
 
 
 @pytest.fixture
@@ -22,6 +22,7 @@ def db():
 
 @pytest.fixture(autouse=True)
 def clear_database_table(db):
+    db.query(CourseBuild).delete()
     db.query(UserAccount).delete()
     db.query(SchoolDistrict).delete()
     db.query(MoodleSetting).delete()
@@ -60,6 +61,71 @@ def setup_nonadmin_authenticated_user_session(mocker):
     )
 
 
+@pytest.fixture
+def setup_manager_session(mocker):
+    app.dependency_overrides[get_request_session] = override_manager_get_request_session
+    manager = {
+        "Z9C8V7": {
+            "email": "manager@rice.edu",
+            "is_manager": True,
+            "is_admin": False,
+        }
+    }
+    mocker.patch(
+        "rope.api.sessions.session_store",
+        manager,
+    )
+
+
+@pytest.fixture
+def create_course_build_setup_district(test_client, setup_admin_session):
+    new_school_district_data = {
+        "name": "snowfall_isd",
+        "active": True,
+    }
+    response = test_client.post(
+        "/admin/settings/district", json=new_school_district_data
+    )
+    return response.json()
+
+
+@pytest.fixture
+def create_course_build_setup_moodle_settings(test_client, db, setup_admin_session):
+    academic_year = {
+        "name": "academic_year",
+        "value": "AY 2024",
+    }
+    academic_year_short = {
+        "name": "academic_year_short",
+        "value": "AY24",
+    }
+    course_category = {
+        "name": "course_category",
+        "value": "21",
+    }
+    base_course_id = {
+        "name": "base_course_id",
+        "value": "100",
+    }
+    test_client.post("/admin/settings/moodle", json=academic_year)
+    test_client.post("/admin/settings/moodle", json=academic_year_short)
+    test_client.post("/admin/settings/moodle", json=course_category)
+    test_client.post("/admin/settings/moodle", json=base_course_id)
+    moodle_settings = db.query(MoodleSetting).all()
+    return moodle_settings
+
+
+@pytest.fixture
+def create_course_build_setup_user(test_client, db, setup_admin_session):
+    new_user_data = {
+        "email": "manager@rice.edu",
+        "is_manager": True,
+        "is_admin": False,
+    }
+    response = test_client.post("/user", json=new_user_data)
+    return response.json()
+
+
 def override_get_request_session():
     session_id = {"session_id": "12345"}
     return session_id
@@ -67,6 +133,11 @@ def override_get_request_session():
 
 def override_admin_get_request_session():
     session_id = {"session_id": "A1B2C3"}
+    return session_id
+
+
+def override_manager_get_request_session():
+    session_id = {"session_id": "Z9C8V7"}
     return session_id
 
 
@@ -314,9 +385,7 @@ def test_create_moodle_settings(test_client, db, setup_admin_session):
         "name": "academic_year",
         "value": "AY 2030",
     }
-    response = test_client.post(
-        "/admin/settings/moodle", json=new_moodle_setting_data
-    )
+    response = test_client.post("/admin/settings/moodle", json=new_moodle_setting_data)
     moodle_settings = db.query(MoodleSetting).all()
     data = response.json()
     assert response.status_code == 200
@@ -344,4 +413,89 @@ def test_update_moodle_settings(test_client, db, setup_admin_session):
     assert response.status_code == 200
     assert data["name"] == "updated_academic_year"
     assert data["value"] == "AY 2100"
+    assert data.get("id") is not None
+
+
+def test_create_course_build(
+    test_client,
+    db,
+    create_course_build_setup_district,
+    create_course_build_setup_moodle_settings,
+    create_course_build_setup_user,
+    setup_manager_session,
+):
+    school_district_id = create_course_build_setup_district["id"]
+    course_build_settings = {
+        "instructor_firstname": "Franklin",
+        "instructor_lastname": "Saint",
+        "instructor_email": "fsaint@rice.edu",
+        "school_district": school_district_id,
+    }
+    response = test_client.post("/moodle/course/build", json=course_build_settings)
+    course_build = db.query(CourseBuild).all()
+    data = response.json()
+    assert response.status_code == 200
+    assert len(course_build) == 1
+    assert data["instructor_firstname"] == "Franklin"
+    assert data["instructor_lastname"] == "Saint"
+    assert data["instructor_email"] == "fsaint@rice.edu"
+    assert data["course_name"] == "Algebra 1 - Franklin Saint AY 2024"
+    assert data["course_shortname"] == "Alg1 FS AY24"
+    assert data["course_category"] == 21
+    assert data["course_id"] is None
+    assert data["course_enrollment_url"] is None
+    assert data["course_enrollment_key"] is None
+    assert data["school_district"] is not None
+    assert data["academic_year"] == "AY 2024"
+    assert data["academic_year_short"] == "AY24"
+    assert data["base_course_id"] == 100
+    assert data["status"] == "created"
+    assert data["creator"] is not None
+    assert data.get("id") is not None
+
+
+def test_create_course_build_duplicate_shortname(
+    test_client,
+    db,
+    create_course_build_setup_district,
+    create_course_build_setup_moodle_settings,
+    create_course_build_setup_user,
+    setup_manager_session,
+):
+    school_district_id = create_course_build_setup_district["id"]
+    course_build_settings1 = {
+        "instructor_firstname": "Franklin",
+        "instructor_lastname": "Saint",
+        "instructor_email": "fsaint@rice.edu",
+        "school_district": school_district_id,
+    }
+    course_build_settings2 = {
+        "instructor_firstname": "Freya",
+        "instructor_lastname": "Santiago",
+        "instructor_email": "fsantiago@rice.edu",
+        "school_district": school_district_id,
+    }
+    test_client.post("/moodle/course/build", json=course_build_settings1)
+    second_response = test_client.post(
+        "/moodle/course/build", json=course_build_settings2
+    )
+    course_build = db.query(CourseBuild).all()
+    data = second_response.json()
+    assert second_response.status_code == 200
+    assert len(course_build) == 2
+    assert data["instructor_firstname"] == "Freya"
+    assert data["instructor_lastname"] == "Santiago"
+    assert data["instructor_email"] == "fsantiago@rice.edu"
+    assert data["course_name"] == "Algebra 1 - Freya Santiago AY 2024"
+    assert data["course_shortname"] == "Alg1 FS1 AY24"
+    assert data["course_category"] == 21
+    assert data["course_id"] is None
+    assert data["course_enrollment_url"] is None
+    assert data["course_enrollment_key"] is None
+    assert data["school_district"] is not None
+    assert data["academic_year"] == "AY 2024"
+    assert data["academic_year_short"] == "AY24"
+    assert data["base_course_id"] == 100
+    assert data["status"] == "created"
+    assert data["creator"] is not None
     assert data.get("id") is not None

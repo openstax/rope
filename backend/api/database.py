@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
-from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting
+from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting, CourseBuild
 from rope.api.settings import PG_USER, PG_PASSWORD, PG_SERVER, PG_DB
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_SERVER}/{PG_DB}"
@@ -111,3 +111,32 @@ def update_moodle_settings(db: Session, moodle_setting):
     db.commit()
     db.refresh(moodle_settings_db)
     return moodle_settings_db
+
+
+def create_course_build(
+    db: Session,
+    course_build_settings,
+    moodle_settings,
+    course_name,
+    course_shortname,
+    status,
+    creator
+):
+    new_course_build = CourseBuild(
+        instructor_firstname=course_build_settings.instructor_firstname,
+        instructor_lastname=course_build_settings.instructor_lastname,
+        instructor_email=course_build_settings.instructor_email,
+        course_name=course_name,
+        course_shortname=course_shortname,
+        course_category=moodle_settings["course_category"],
+        school_district=course_build_settings.school_district,
+        academic_year=moodle_settings["academic_year"],
+        academic_year_short=moodle_settings["academic_year_short"],
+        base_course_id=moodle_settings["base_course_id"],
+        status=status,
+        creator=creator,
+    )
+    db.add(new_course_build)
+    db.commit()
+    db.refresh(new_course_build)
+    return new_course_build

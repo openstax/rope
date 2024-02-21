@@ -4,7 +4,7 @@ import pytest
 from rope.api.main import app
 from rope.api.sessions import get_request_session
 from rope.api.database import SessionLocal
-from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting
+from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting, CourseBuild
 
 
 @pytest.fixture
@@ -23,6 +23,7 @@ def db():
 
 @pytest.fixture(autouse=True)
 def clear_database_table(db):
+    db.query(CourseBuild).delete()
     db.query(UserAccount).delete()
     db.query(SchoolDistrict).delete()
     db.query(MoodleSetting).delete()
