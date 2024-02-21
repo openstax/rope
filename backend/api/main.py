@@ -171,7 +171,7 @@ def create_course_build(
     db: Session = Depends(get_db),
 ) -> FullCourseBuildSettings:
     moodle_settings_db = db.query(MoodleSetting).all()
-    if moodle_settings_db is None:
+    if len(moodle_settings_db) == 0:
         raise NoResultFound
     moodle_settings = {}
     for setting in moodle_settings_db:
