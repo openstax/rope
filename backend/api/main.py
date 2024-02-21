@@ -163,7 +163,7 @@ def update_moodle_settings(
     return updated_moodle_settings
 
 
-@app.get("/moodle/user/", dependencies=[Depends(verify_admin)])
+@app.get("/moodle/user/", dependencies=[Depends(verify_user)])
 def get_moodle_user(email: str = "") -> Optional[MoodelUser]:
     user_data = client.get_user_by_email(email)
     if not user_data:

@@ -60,6 +60,12 @@ def override_admin_get_request_session():
     return session_id
 
 
+def test_unauthenticated_access_endpoint(test_client):
+    get_moodle_users_response = test_client.get("/moodle/user")
+
+    assert get_moodle_users_response.status_code == 401
+
+
 def test_non_admin_access_admin_endpoint(test_client, mocker):
     app.dependency_overrides[get_request_session] = override_get_request_session
     user = {
@@ -112,7 +118,6 @@ def test_non_admin_access_admin_endpoint(test_client, mocker):
     update_moodle_setting_response = test_client.put(
         "/admin/settings/moodle/77", json=updated_moodle_setting_data
     )
-    get_moodle_users_response = test_client.get("/moodle/user")
 
     assert get_all_users_response.status_code == 403
     assert create_user_response.status_code == 403
@@ -122,7 +127,6 @@ def test_non_admin_access_admin_endpoint(test_client, mocker):
     assert update_district_response.status_code == 403
     assert create_moodle_setting_response.status_code == 403
     assert update_moodle_setting_response.status_code == 403
-    assert get_moodle_users_response.status_code == 403
 
 
 def test_missing_session_id(test_client):
