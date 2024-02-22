@@ -345,7 +345,9 @@ def test_update_moodle_settings(test_client, db, setup_admin_session):
     assert data.get("id") is not None
 
 
-def test_get_moodle_user(test_client, setup_admin_session, mocker):
+def test_get_moodle_user(
+    test_client, setup_nonadmin_authenticated_user_session, mocker
+):
     mocker.patch(
         "rope.api.main.moodle_client.get_user_by_email",
         return_value={
