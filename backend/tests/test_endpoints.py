@@ -314,9 +314,7 @@ def test_create_moodle_settings(test_client, db, setup_admin_session):
         "name": "academic_year",
         "value": "AY 2030",
     }
-    response = test_client.post(
-        "/admin/settings/moodle", json=new_moodle_setting_data
-    )
+    response = test_client.post("/admin/settings/moodle", json=new_moodle_setting_data)
     moodle_settings = db.query(MoodleSetting).all()
     data = response.json()
     assert response.status_code == 200
@@ -345,3 +343,36 @@ def test_update_moodle_settings(test_client, db, setup_admin_session):
     assert data["name"] == "updated_academic_year"
     assert data["value"] == "AY 2100"
     assert data.get("id") is not None
+
+
+def test_get_moodle_user(
+    test_client, setup_nonadmin_authenticated_user_session, mocker
+):
+    mocker.patch(
+        "rope.api.main.moodle_client.get_user_by_email",
+        return_value={
+            "firstname": "first",
+            "lastname": "last",
+            "email": "first.last@email.com",
+        },
+    )
+
+    response = test_client.get("/moodle/user/?email=first.last@email.com")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["first_name"] == "first"
+    assert data["last_name"] == "last"
+    assert data["email"] == "first.last@email.com"
+
+    mocker.patch("rope.api.main.moodle_client.get_user_by_email", return_value=None)
+
+    response = test_client.get("/moodle/user/?email=first.last@email.com")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert not data

@@ -1,10 +1,9 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
-
 import uuid
-from typing import Annotated
-
+import requests
+from typing import Annotated, Optional
 from rope.api.models import (
     GoogleLoginData,
     BaseUser,
@@ -13,6 +12,7 @@ from rope.api.models import (
     FullSchoolDistrict,
     BaseMoodleSettings,
     FullMoodleSettings,
+    MoodleUser,
 )
 from rope.api.auth import verify_google_token, verify_user, verify_admin
 from rope.api import settings
@@ -23,7 +23,13 @@ from rope.api.sessions import (
     get_request_session,
     get_session,
 )
+from moodlecli.moodle import MoodleClient
 
+moodle_client = MoodleClient(
+    requests.Session(),
+    settings.MOODLE_URL,
+    settings.MOODLE_TOKEN,
+)
 
 app = FastAPI(title="ROPE API", root_path="/api")
 
@@ -159,3 +165,15 @@ def update_moodle_settings(
 ) -> FullMoodleSettings:
     updated_moodle_settings = database.update_moodle_settings(db, moodle_setting)
     return updated_moodle_settings
+
+
+@app.get("/moodle/user/", dependencies=[Depends(verify_user)])
+def get_moodle_user(email: str = "") -> Optional[MoodleUser]:
+    user_data = moodle_client.get_user_by_email(email)
+    if not user_data:
+        return None
+    first_name = user_data.get("firstname")
+    last_name = user_data.get("lastname")
+    user_email = user_data.get("email")
+
+    return {"first_name": first_name, "last_name": last_name, "email": user_email}
