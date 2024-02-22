@@ -120,7 +120,7 @@ def create_course_build(
     course_name,
     course_shortname,
     status,
-    creator
+    creator,
 ):
     new_course_build = CourseBuild(
         instructor_firstname=course_build_settings.instructor_firstname,
@@ -140,3 +140,12 @@ def create_course_build(
     db.commit()
     db.refresh(new_course_build)
     return new_course_build
+
+
+def get_course_by_shortname(db: Session, course_shortname):
+    course = (
+        db.query(CourseBuild)
+        .filter(CourseBuild.course_shortname == course_shortname)
+        .first()
+    )
+    return course

@@ -25,7 +25,7 @@ from rope.api.sessions import (
     get_request_session,
     get_session,
 )
-from rope.db.schema import MoodleSetting, CourseBuild, UserAccount
+from rope.db.schema import MoodleSetting, UserAccount
 from moodlecli.moodle import MoodleClient
 
 moodle_client = MoodleClient(
@@ -176,11 +176,11 @@ def create_course_build(
     course_build_settings: BaseCourseBuildSettings,
     db: Session = Depends(get_db),
 ) -> FullCourseBuildSettings:
-    moodle_settings_db = db.query(MoodleSetting).all()
-    if len(moodle_settings_db) == 0:
+    moodle_settings_db_query_results = db.query(MoodleSetting).all()
+    if len(moodle_settings_db_query_results) == 0:
         raise NoResultFound
     moodle_settings = {}
-    for setting in moodle_settings_db:
+    for setting in moodle_settings_db_query_results:
         name = setting.name
         value = setting.value
         moodle_settings[name] = value
@@ -194,11 +194,19 @@ def create_course_build(
     course_shortname = utils.create_course_shortname(
         course_build_settings, moodle_settings, False
     )
-    course_shortname_exists = (
-        db.query(CourseBuild)
-        .filter(CourseBuild.course_shortname == course_shortname)
-        .first()
+    get_moodle_course_by_shortname = moodle_client.get_course_by_shortname(
+        course_shortname
     )
+    course_shortname_exists = get_moodle_course_by_shortname["courses"]
+    if len(course_shortname_exists) > 0:
+        course_shortname = utils.update_course_shortname(
+            db,
+            course_shortname,
+            course_shortname_exists,
+            course_build_settings,
+            moodle_settings,
+        )
+    course_shortname_exists = database.get_course_by_shortname(db, course_shortname)
     if course_shortname_exists is not None:
         course_shortname = utils.update_course_shortname(
             db,

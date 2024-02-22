@@ -1,5 +1,13 @@
 from sqlalchemy.orm import Session
-from rope.db.schema import CourseBuild
+from rope.api import settings, database
+from moodlecli.moodle import MoodleClient
+import requests
+
+moodle_client = MoodleClient(
+    requests.Session(),
+    settings.MOODLE_URL,
+    settings.MOODLE_TOKEN,
+)
 
 
 def moodle_settings_key_check(moodle_setting_keys):
@@ -46,15 +54,25 @@ def update_course_shortname(
     course_build_settings,
     moodle_settings,
 ):
-    # Need to also query moodle to confirm the shortname doesn't exist there as well.
     course_shortname = current_course_shortname
-    while course_shortname_exists is not None:
-        course_shortname = create_course_shortname(
-            course_build_settings, moodle_settings, True
-        )
-        course_shortname_exists = (
-            db.query(CourseBuild)
-            .filter(CourseBuild.course_shortname == course_shortname)
-            .first()
-        )
+    if isinstance(course_shortname_exists, list):
+        while len(course_shortname_exists) > 0:
+            course_shortname = create_course_shortname(
+                course_build_settings,
+                moodle_settings,
+                True,
+            )
+            get_moodle_course_by_shortname = moodle_client.get_course_by_shortname(
+                course_shortname
+            )
+            course_shortname_exists = get_moodle_course_by_shortname["courses"]
+    else:
+        while course_shortname_exists is not None:
+            course_shortname = create_course_shortname(
+                course_build_settings, moodle_settings, True
+            )
+            course_shortname_exists = database.get_course_by_shortname(
+                db,
+                course_shortname,
+            )
     return course_shortname

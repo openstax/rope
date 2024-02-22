@@ -475,19 +475,87 @@ def test_create_course_build_duplicate_shortname(
         "instructor_email": "fsantiago@rice.edu",
         "school_district": school_district_id,
     }
-    test_client.post("/moodle/course/build", json=course_build_settings1)
-    second_response = test_client.post(
+    first_course_response = test_client.post(
+        "/moodle/course/build", json=course_build_settings1
+    )
+    second_course_response = test_client.post(
         "/moodle/course/build", json=course_build_settings2
     )
     course_build = db.query(CourseBuild).all()
-    data = second_response.json()
-    assert second_response.status_code == 200
+    first_course_data = first_course_response.json()
+    secound_course_data = second_course_response.json()
+    assert second_course_response.status_code == 200
     assert len(course_build) == 2
-    assert data["instructor_firstname"] == "Freya"
-    assert data["instructor_lastname"] == "Santiago"
-    assert data["instructor_email"] == "fsantiago@rice.edu"
-    assert data["course_name"] == "Algebra 1 - Freya Santiago AY 2024"
-    assert data["course_shortname"] == "Alg1 FS1 AY24"
+    assert first_course_data["instructor_firstname"] == "Franklin"
+    assert first_course_data["instructor_lastname"] == "Saint"
+    assert first_course_data["instructor_email"] == "fsaint@rice.edu"
+    assert first_course_data["course_name"] == "Algebra 1 - Franklin Saint AY 2024"
+    assert first_course_data["course_shortname"] == "Alg1 FS AY24"
+    assert first_course_data["course_category"] == 21
+    assert first_course_data["course_id"] is None
+    assert first_course_data["course_enrollment_url"] is None
+    assert first_course_data["course_enrollment_key"] is None
+    assert first_course_data["school_district"] is not None
+    assert first_course_data["academic_year"] == "AY 2024"
+    assert first_course_data["academic_year_short"] == "AY24"
+    assert first_course_data["base_course_id"] == 100
+    assert first_course_data["status"] == "created"
+    assert first_course_data["creator"] is not None
+    assert first_course_data.get("id") is not None
+    assert secound_course_data["instructor_firstname"] == "Freya"
+    assert secound_course_data["instructor_lastname"] == "Santiago"
+    assert secound_course_data["instructor_email"] == "fsantiago@rice.edu"
+    assert secound_course_data["course_name"] == "Algebra 1 - Freya Santiago AY 2024"
+    assert secound_course_data["course_shortname"] == "Alg1 FS1 AY24"
+    assert secound_course_data["course_category"] == 21
+    assert secound_course_data["course_id"] is None
+    assert secound_course_data["course_enrollment_url"] is None
+    assert secound_course_data["course_enrollment_key"] is None
+    assert secound_course_data["school_district"] is not None
+    assert secound_course_data["academic_year"] == "AY 2024"
+    assert secound_course_data["academic_year_short"] == "AY24"
+    assert secound_course_data["base_course_id"] == 100
+    assert secound_course_data["status"] == "created"
+    assert secound_course_data["creator"] is not None
+    assert secound_course_data.get("id") is not None
+
+
+def test_create_course_build_duplicate_shortname_moodle(
+    test_client,
+    db,
+    create_course_build_setup_district,
+    create_course_build_setup_moodle_settings,
+    create_course_build_setup_user,
+    setup_manager_session,
+    mocker,
+):
+    school_district_id = create_course_build_setup_district["id"]
+    course_build_settings = {
+        "instructor_firstname": "Reed",
+        "instructor_lastname": "Thompson",
+        "instructor_email": "rthompson@rice.edu",
+        "school_district": school_district_id,
+    }
+    mocker.patch(
+        "rope.api.main.moodle_client.get_course_by_shortname",
+        return_value={
+            "courses": [
+                {
+                    "shortname": "Alg1 RT AY24",
+                }
+            ]
+        },
+    )
+    response = test_client.post("/moodle/course/build", json=course_build_settings)
+    course_build = db.query(CourseBuild).all()
+    data = response.json()
+    assert response.status_code == 200
+    assert len(course_build) == 1
+    assert data["instructor_firstname"] == "Reed"
+    assert data["instructor_lastname"] == "Thompson"
+    assert data["instructor_email"] == "rthompson@rice.edu"
+    assert data["course_name"] == "Algebra 1 - Reed Thompson AY 2024"
+    assert data["course_shortname"] == "Alg1 RT1 AY24"
     assert data["course_category"] == 21
     assert data["course_id"] is None
     assert data["course_enrollment_url"] is None
