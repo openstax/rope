@@ -144,6 +144,7 @@ def override_manager_get_request_session():
 def test_get_current_user(test_client, setup_nonadmin_authenticated_user_session):
     response = test_client.get("/user/current")
     data = response.json()
+
     assert response.status_code == 200
     assert data["email"] == "test@rice.edu"
     assert data["is_manager"] is False
@@ -164,6 +165,7 @@ def test_unauthenticated_user(test_client, mocker):
         user,
     )
     response = test_client.get("/user/current")
+
     assert response.status_code == 401
 
 
@@ -175,6 +177,7 @@ def test_delete_session(test_client, mocker):
         session_store,
     )
     response = test_client.delete("/session")
+
     assert response.status_code == 200
     assert session_store.get("12345") is None
 
@@ -195,6 +198,7 @@ def test_google_login(test_client, db, mocker):
     response = test_client.post("/session", json={"token": "fp2m3fpwimef"})
     session_id = list(session_store.keys())[0]
     user_data = session_store[session_id]
+
     assert response.status_code == 200
     assert user_data["email"] == "test@rice.edu"
     assert user_data["is_manager"] is False
@@ -209,6 +213,7 @@ def test_get_all_users(test_client, db, setup_admin_session):
     db.commit()
     response = test_client.get("/user")
     data = response.json()
+
     assert response.status_code == 200
     assert len(data) == 2
     assert data[0].get("id") is not None
@@ -230,6 +235,7 @@ def test_create_user(test_client, db, setup_admin_session):
     response = test_client.post("/user", json=new_user_data)
     users = db.query(UserAccount).all()
     data = response.json()
+
     assert response.status_code == 200
     assert len(users) == 1
     assert data["email"] == "createduser@rice.edu"
@@ -254,6 +260,7 @@ def test_update_user(test_client, db, setup_admin_session):
     }
     response = test_client.put(f"user/{user_id}", json=updated_user_data)
     data = response.json()
+
     assert response.status_code == 200
     assert data["email"] == "updateduser@rice.edu"
     assert data["is_manager"] is False
@@ -271,6 +278,7 @@ def test_delete_user(test_client, db, setup_admin_session):
     user_id = user.id
     response = test_client.delete(f"user/{user_id}")
     empty_db = db.query(UserAccount).all()
+
     assert response.status_code == 200
     assert len(empty_db) == 0
 
@@ -295,6 +303,7 @@ def test_get_districts_admin(test_client, db, mocker):
     db.commit()
     response = test_client.get("/admin/settings/district")
     data = response.json()
+
     assert response.status_code == 200
     assert len(data) == 2
     assert data[0].get("id") is not None
@@ -315,6 +324,7 @@ def test_get_districts_authenticated_non_admin(
     db.commit()
     response = test_client.get("/admin/settings/district")
     data = response.json()
+
     assert response.status_code == 200
     assert len(data) == 1
     assert data[0].get("id") is not None
@@ -332,6 +342,7 @@ def test_create_district(test_client, db, setup_admin_session):
     )
     districts = db.query(SchoolDistrict).all()
     data = response.json()
+
     assert response.status_code == 200
     assert len(districts) == 1
     assert data["name"] == "new_isd"
@@ -354,6 +365,7 @@ def test_update_district(test_client, db, setup_admin_session):
         f"/admin/settings/district/{district_id}", json=updated_district_data
     )
     data = response.json()
+
     assert response.status_code == 200
     assert data["name"] == "updatedschool_isd"
     assert data["active"] is False
@@ -370,6 +382,7 @@ def test_get_moodle_settings(
     db.commit()
     response = test_client.get("/admin/settings/moodle")
     data = response.json()
+
     assert response.status_code == 200
     assert len(data) == 2
     assert data[0].get("id") is not None
@@ -388,6 +401,7 @@ def test_create_moodle_settings(test_client, db, setup_admin_session):
     response = test_client.post("/admin/settings/moodle", json=new_moodle_setting_data)
     moodle_settings = db.query(MoodleSetting).all()
     data = response.json()
+
     assert response.status_code == 200
     assert len(moodle_settings) == 1
     assert data["name"] == "academic_year"
@@ -410,6 +424,7 @@ def test_update_moodle_settings(test_client, db, setup_admin_session):
         f"/admin/settings/moodle/{moodle_setting_id}", json=updated_moodle_setting_data
     )
     data = response.json()
+
     assert response.status_code == 200
     assert data["name"] == "updated_academic_year"
     assert data["value"] == "AY 2100"
@@ -434,8 +449,10 @@ def test_create_course_build(
     response = test_client.post("/moodle/course/build", json=course_build_settings)
     course_build = db.query(CourseBuild).all()
     data = response.json()
-    assert response.status_code == 200
+
     assert len(course_build) == 1
+
+    assert response.status_code == 200
     assert data["instructor_firstname"] == "Franklin"
     assert data["instructor_lastname"] == "Saint"
     assert data["instructor_email"] == "fsaint@rice.edu"
@@ -484,8 +501,10 @@ def test_create_course_build_duplicate_shortname(
     course_build = db.query(CourseBuild).all()
     first_course_data = first_course_response.json()
     secound_course_data = second_course_response.json()
-    assert second_course_response.status_code == 200
+
     assert len(course_build) == 2
+
+    assert first_course_response.status_code == 200
     assert first_course_data["instructor_firstname"] == "Franklin"
     assert first_course_data["instructor_lastname"] == "Saint"
     assert first_course_data["instructor_email"] == "fsaint@rice.edu"
@@ -502,6 +521,8 @@ def test_create_course_build_duplicate_shortname(
     assert first_course_data["status"] == "created"
     assert first_course_data["creator"] is not None
     assert first_course_data.get("id") is not None
+
+    assert second_course_response.status_code == 200
     assert secound_course_data["instructor_firstname"] == "Freya"
     assert secound_course_data["instructor_lastname"] == "Santiago"
     assert secound_course_data["instructor_email"] == "fsantiago@rice.edu"
@@ -549,8 +570,10 @@ def test_create_course_build_duplicate_shortname_moodle(
     response = test_client.post("/moodle/course/build", json=course_build_settings)
     course_build = db.query(CourseBuild).all()
     data = response.json()
-    assert response.status_code == 200
+
     assert len(course_build) == 1
+
+    assert response.status_code == 200
     assert data["instructor_firstname"] == "Reed"
     assert data["instructor_lastname"] == "Thompson"
     assert data["instructor_email"] == "rthompson@rice.edu"
