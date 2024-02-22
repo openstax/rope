@@ -174,6 +174,15 @@ def test_missing_session_id(test_client):
     response = test_client.get("/user/current")
     assert response.status_code == 401
 
+    response = test_client.get("/moodle/user")
+    assert response.status_code == 401
+
+    response = test_client.get("/admin/settings/district")
+    assert response.status_code == 401
+
+    response = test_client.delete("/session")
+    assert response.status_code == 401
+
 
 def test_incorrect_user_domain(test_client, mocker):
     google_oauth_mock = mocker.Mock()

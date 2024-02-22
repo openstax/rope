@@ -24,6 +24,8 @@ services:
       target: dev
     environment:
       - GOOGLE_CLIENT_ID
+      - MOODLE_URL
+      - MOODLE_TOKEN
       - SESSION_SECRET_KEY=secret
       - POSTGRES_DB=ropedb
       - POSTGRES_USER=pguser

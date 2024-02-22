@@ -56,3 +56,9 @@ class FullCourseBuildSettings(BaseCourseBuildSettings):
     creator: int
     status: enum.Enum
     id: int
+
+
+class MoodleUser(BaseModel):
+    first_name: str
+    last_name: str
+    email: str

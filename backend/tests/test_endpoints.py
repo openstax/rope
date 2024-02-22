@@ -499,3 +499,36 @@ def test_create_course_build_duplicate_shortname(
     assert data["status"] == "created"
     assert data["creator"] is not None
     assert data.get("id") is not None
+
+
+def test_get_moodle_user(
+    test_client, setup_nonadmin_authenticated_user_session, mocker
+):
+    mocker.patch(
+        "rope.api.main.moodle_client.get_user_by_email",
+        return_value={
+            "firstname": "first",
+            "lastname": "last",
+            "email": "first.last@email.com",
+        },
+    )
+
+    response = test_client.get("/moodle/user/?email=first.last@email.com")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["first_name"] == "first"
+    assert data["last_name"] == "last"
+    assert data["email"] == "first.last@email.com"
+
+    mocker.patch("rope.api.main.moodle_client.get_user_by_email", return_value=None)
+
+    response = test_client.get("/moodle/user/?email=first.last@email.com")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert not data
