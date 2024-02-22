@@ -34,7 +34,7 @@ Devs can also test the deployment build of the frontend by running the following
 $ ROPE_APP_TARGET=deploy docker compose up --build -d
 ```
 
-When developing backend code, developers may want to install the package in an editable virtual environment. That can be done as follows (to avoid unresolved imports per [this issue](https://github.com/microsoft/pylance-release/issues/3473)):
+When developing backend code, developers may want to install the package in an editable virtual environment. That can be done as follows (to avoid unresolved imports per [this issue](https://github.com/microsoft/pylance-release/issues/3473)). If the imports remain unresolved, the language server may need to be restarted:
 
 ```bash
 $ pip install -e .[test] --config-settings editable_mode=strict
