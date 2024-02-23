@@ -205,6 +205,7 @@ def create_course_build(
             course_shortname_exists,
             course_build_settings,
             moodle_settings,
+            moodle_client,
         )
     course_shortname_exists = database.get_course_by_shortname(db, course_shortname)
     if course_shortname_exists is not None:

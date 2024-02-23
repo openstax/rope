@@ -438,7 +438,15 @@ def test_create_course_build(
     create_course_build_setup_moodle_settings,
     create_course_build_setup_user,
     setup_manager_session,
+    mocker,
 ):
+    mocker.patch(
+        "rope.api.main.moodle_client.get_course_by_shortname",
+        return_value={
+            "courses": [],
+            "warnings": [],
+        },
+    )
     school_district_id = create_course_build_setup_district["id"]
     course_build_settings = {
         "instructor_firstname": "Franklin",
@@ -478,7 +486,15 @@ def test_create_course_build_duplicate_shortname(
     create_course_build_setup_moodle_settings,
     create_course_build_setup_user,
     setup_manager_session,
+    mocker,
 ):
+    mocker.patch(
+        "rope.api.main.moodle_client.get_course_by_shortname",
+        return_value={
+            "courses": [],
+            "warnings": [],
+        },
+    )
     school_district_id = create_course_build_setup_district["id"]
     course_build_settings1 = {
         "instructor_firstname": "Franklin",
@@ -559,17 +575,15 @@ def test_create_course_build_duplicate_shortname_moodle(
     }
     mocker.patch(
         "rope.api.main.moodle_client.get_course_by_shortname",
-        return_value={
-            "courses": [
-                {
-                    "shortname": "Alg1 RT AY24",
-                }
-            ]
-        },
+        side_effect=[
+            {"courses": [{}]},
+            {"courses": []},
+        ]
     )
     response = test_client.post("/moodle/course/build", json=course_build_settings)
     course_build = db.query(CourseBuild).all()
     data = response.json()
+    print(data)
 
     assert len(course_build) == 1
 

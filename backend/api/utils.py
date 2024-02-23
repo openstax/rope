@@ -1,13 +1,5 @@
 from sqlalchemy.orm import Session
-from rope.api import settings, database
-from moodlecli.moodle import MoodleClient
-import requests
-
-moodle_client = MoodleClient(
-    requests.Session(),
-    settings.MOODLE_URL,
-    settings.MOODLE_TOKEN,
-)
+from rope.api import database
 
 
 def moodle_settings_key_check(moodle_setting_keys):
@@ -53,6 +45,7 @@ def update_course_shortname(
     course_shortname_exists,
     course_build_settings,
     moodle_settings,
+    moodle_client=None,
 ):
     course_shortname = current_course_shortname
     if isinstance(course_shortname_exists, list):
