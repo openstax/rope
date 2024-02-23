@@ -583,7 +583,6 @@ def test_create_course_build_duplicate_shortname_moodle(
     response = test_client.post("/moodle/course/build", json=course_build_settings)
     course_build = db.query(CourseBuild).all()
     data = response.json()
-    print(data)
 
     assert len(course_build) == 1
 
