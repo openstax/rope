@@ -464,7 +464,7 @@ def test_create_course_build(
     assert data["instructor_firstname"] == "Franklin"
     assert data["instructor_lastname"] == "Saint"
     assert data["instructor_email"] == "fsaint@rice.edu"
-    assert data["course_name"] == "Algebra 1 - Franklin Saint AY 2024"
+    assert data["course_name"] == "Algebra 1 - Franklin Saint (AY 2024)"
     assert data["course_shortname"] == "Alg1 FS AY24"
     assert data["course_id"] is None
     assert data["course_enrollment_url"] is None
@@ -521,7 +521,7 @@ def test_create_course_build_duplicate_shortname(
     assert first_course_data["instructor_firstname"] == "Franklin"
     assert first_course_data["instructor_lastname"] == "Saint"
     assert first_course_data["instructor_email"] == "fsaint@rice.edu"
-    assert first_course_data["course_name"] == "Algebra 1 - Franklin Saint AY 2024"
+    assert first_course_data["course_name"] == "Algebra 1 - Franklin Saint (AY 2024)"
     assert first_course_data["course_shortname"] == "Alg1 FS AY24"
     assert first_course_data["course_id"] is None
     assert first_course_data["course_enrollment_url"] is None
@@ -536,7 +536,7 @@ def test_create_course_build_duplicate_shortname(
     assert secound_course_data["instructor_firstname"] == "Freya"
     assert secound_course_data["instructor_lastname"] == "Santiago"
     assert secound_course_data["instructor_email"] == "fsantiago@rice.edu"
-    assert secound_course_data["course_name"] == "Algebra 1 - Freya Santiago AY 2024"
+    assert secound_course_data["course_name"] == "Algebra 1 - Freya Santiago (AY 2024)"
     assert secound_course_data["course_shortname"] == "Alg1 FS1 AY24"
     assert secound_course_data["course_id"] is None
     assert secound_course_data["course_enrollment_url"] is None
@@ -581,7 +581,7 @@ def test_create_course_build_duplicate_shortname_moodle(
     assert data["instructor_firstname"] == "Reed"
     assert data["instructor_lastname"] == "Thompson"
     assert data["instructor_email"] == "rthompson@rice.edu"
-    assert data["course_name"] == "Algebra 1 - Reed Thompson AY 2024"
+    assert data["course_name"] == "Algebra 1 - Reed Thompson (AY 2024)"
     assert data["course_shortname"] == "Alg1 RT1 AY24"
     assert data["course_id"] is None
     assert data["course_enrollment_url"] is None
