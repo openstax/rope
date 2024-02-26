@@ -60,6 +60,15 @@ def get_districts(db: Session, active_only=True):
     return school_districts
 
 
+def get_district_by_name(db: Session, school_district_name):
+    school_district = (
+        db.query(SchoolDistrict)
+        .filter(SchoolDistrict.name == school_district_name)
+        .first()
+    )
+    return school_district
+
+
 def create_district(db: Session, district):
     lower_case_district_name = district.name.lower()
     new_district = SchoolDistrict(name=lower_case_district_name, active=district.active)
@@ -85,7 +94,19 @@ def update_district(db: Session, district):
 
 def get_moodle_settings(db: Session):
     moodle_settings = db.query(MoodleSetting).all()
+    if len(moodle_settings) == 0:
+        raise NoResultFound
     return moodle_settings
+
+
+def get_moodle_setting_by_name(db: Session, setting_name):
+    moodle_setting = (
+        db.query(MoodleSetting).filter(MoodleSetting.name == setting_name).first()
+    )
+    if not moodle_setting:
+        return None
+
+    return moodle_setting.value
 
 
 def create_moodle_settings(db: Session, moodle_setting):
@@ -115,24 +136,30 @@ def update_moodle_settings(db: Session, moodle_setting):
 
 def create_course_build(
     db: Session,
-    course_build_settings,
-    moodle_settings,
+    instructor_firstname,
+    instructor_lastname,
+    instructor_email,
+    school_district_id,
+    academic_year,
+    academic_year_short,
+    course_category,
+    base_course_id,
     course_name,
     course_shortname,
     status,
     creator,
 ):
     new_course_build = CourseBuild(
-        instructor_firstname=course_build_settings.instructor_firstname,
-        instructor_lastname=course_build_settings.instructor_lastname,
-        instructor_email=course_build_settings.instructor_email,
+        instructor_firstname=instructor_firstname,
+        instructor_lastname=instructor_lastname,
+        instructor_email=instructor_email,
         course_name=course_name,
         course_shortname=course_shortname,
-        course_category=moodle_settings["course_category"],
-        school_district=course_build_settings.school_district,
-        academic_year=moodle_settings["academic_year"],
-        academic_year_short=moodle_settings["academic_year_short"],
-        base_course_id=moodle_settings["base_course_id"],
+        course_category=course_category,
+        school_district=school_district_id,
+        academic_year=academic_year,
+        academic_year_short=academic_year_short,
+        base_course_id=base_course_id,
         status=status,
         creator=creator,
     )
