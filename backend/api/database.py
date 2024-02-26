@@ -10,6 +10,14 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 def get_user_by_email(db: Session, email: str):
     user = db.query(UserAccount).filter(UserAccount.email == email).all()
     if not user:
