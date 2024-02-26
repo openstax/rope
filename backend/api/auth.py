@@ -55,8 +55,9 @@ def verify_admin(current_user: Annotated[dict, Depends(verify_user)]):
 
 
 def verify_manager(current_user: Annotated[dict, Depends(verify_user)]):
-    if not current_user["is_manager"]:
+    if not current_user["is_admin"] and not current_user["is_manager"]:
         raise HTTPException(
             status_code=403,
             detail="Unauthorized to perform this request",
         )
+    return current_user
