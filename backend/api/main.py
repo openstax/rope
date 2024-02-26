@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import NoResultFound
 from starlette.middleware.sessions import SessionMiddleware
 import uuid
 import requests
@@ -25,7 +24,7 @@ from rope.api.sessions import (
     get_request_session,
     get_session,
 )
-from rope.db.schema import MoodleSetting, UserAccount
+from rope.db.schema import CourseBuildStatus
 from moodlecli.moodle import MoodleClient
 
 moodle_client = MoodleClient(
@@ -170,67 +169,78 @@ def update_moodle_settings(
     return updated_moodle_settings
 
 
-@app.post("/moodle/course/build", dependencies=[Depends(verify_manager)])
+@app.post("/moodle/course/build")
 def create_course_build(
-    current_user: Annotated[dict, Depends(verify_user)],
+    current_user: Annotated[dict, Depends(verify_manager)],
     course_build_settings: BaseCourseBuildSettings,
     db: Session = Depends(get_db),
 ) -> FullCourseBuildSettings:
-    moodle_settings_db_query_results = db.query(MoodleSetting).all()
-    if len(moodle_settings_db_query_results) == 0:
-        raise NoResultFound
-    moodle_settings = {}
-    for setting in moodle_settings_db_query_results:
-        name = setting.name
-        value = setting.value
-        moodle_settings[name] = value
-    moodle_setting_keys = moodle_settings.keys()
-    required_moodle_setting_keys_exist = utils.moodle_settings_key_check(
-        moodle_setting_keys
+    academic_year = database.get_moodle_setting_by_name(db, "academic_year")
+    academic_year_short = database.get_moodle_setting_by_name(db, "academic_year_short")
+    course_category = database.get_moodle_setting_by_name(db, "course_category")
+    base_course_id = database.get_moodle_setting_by_name(db, "base_course_id")
+    if any(
+        setting is None
+        for setting in [
+            academic_year,
+            academic_year_short,
+            course_category,
+            base_course_id,
+        ]
+    ):
+        raise Exception("One or more expected Moodle settings is not set.")
+    instructor_firstname = course_build_settings.instructor_firstname
+    instructor_lastname = course_build_settings.instructor_lastname
+    instructor_email = course_build_settings.instructor_email
+    course_name = utils.create_course_name(
+        instructor_firstname,
+        instructor_lastname,
+        academic_year,
     )
-    if not required_moodle_setting_keys_exist:
-        raise NoResultFound
-    course_name = utils.create_course_name(course_build_settings, moodle_settings)
-    course_shortname = utils.create_course_shortname(
-        course_build_settings, moodle_settings, False
+    maybe_course_shortname = utils.create_course_shortname(
+        instructor_firstname, instructor_lastname, academic_year_short
     )
-    get_moodle_course_by_shortname = moodle_client.get_course_by_shortname(
-        course_shortname
-    )
-    course_shortname_exists = get_moodle_course_by_shortname["courses"]
-    if len(course_shortname_exists) > 0:
-        course_shortname = utils.update_course_shortname(
-            db,
-            course_shortname,
-            course_shortname_exists,
-            course_build_settings,
-            moodle_settings,
-            moodle_client,
+    nonce = 1
+    while not utils.check_course_shortname_uniqueness(
+        db, moodle_client, maybe_course_shortname
+    ):
+        maybe_course_shortname = utils.create_course_shortname(
+            instructor_firstname, instructor_lastname, academic_year_short, nonce
         )
-    course_shortname_exists = database.get_course_by_shortname(db, course_shortname)
-    if course_shortname_exists is not None:
-        course_shortname = utils.update_course_shortname(
-            db,
-            course_shortname,
-            course_shortname_exists,
-            course_build_settings,
-            moodle_settings,
-        )
-    user_db = (
-        db.query(UserAccount).filter(UserAccount.email == current_user["email"]).first()
-    )
+        nonce += 1
+    user_db = database.get_user_by_email(db, current_user["email"])
+    school_district_name = course_build_settings.school_district
+    school_district = database.get_district_by_name(db, school_district_name)
+    school_district_id = school_district.id
     creator = user_db.id
-    status = "CREATED"
-    course_build = database.create_course_build(
+    status = CourseBuildStatus.CREATED.value
+    database.create_course_build(
         db,
-        course_build_settings,
-        moodle_settings,
+        instructor_firstname,
+        instructor_lastname,
+        instructor_email,
+        school_district_id,
+        academic_year,
+        academic_year_short,
+        course_category,
+        base_course_id,
         course_name,
-        course_shortname,
+        maybe_course_shortname,
         status,
         creator,
     )
-    return course_build
+    return {
+        "instructor_firstname": instructor_firstname,
+        "instructor_lastname": instructor_lastname,
+        "instructor_email": instructor_email,
+        "school_district": school_district_name,
+        "academic_year": academic_year,
+        "academic_year_short": academic_year_short,
+        "course_name": course_name,
+        "course_shortname": maybe_course_shortname,
+        "creator": current_user["email"],
+        "status": status,
+    }
 
 
 @app.get("/moodle/user/", dependencies=[Depends(verify_user)])
