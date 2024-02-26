@@ -441,7 +441,7 @@ def test_create_course_build(
     mocker,
 ):
     mocker.patch(
-        "rope.api.main.moodle_client.get_course_by_shortname",
+        "rope.api.routers.moodle.moodle_client.get_course_by_shortname",
         return_value={
             "courses": [],
             "warnings": [],
@@ -486,7 +486,7 @@ def test_create_course_build_duplicate_shortname(
     mocker,
 ):
     mocker.patch(
-        "rope.api.main.moodle_client.get_course_by_shortname",
+        "rope.api.routers.moodle.moodle_client.get_course_by_shortname",
         return_value={
             "courses": [],
             "warnings": [],
@@ -565,11 +565,11 @@ def test_create_course_build_duplicate_shortname_moodle(
         "school_district": school_district_name,
     }
     mocker.patch(
-        "rope.api.main.moodle_client.get_course_by_shortname",
+        "rope.api.routers.moodle.moodle_client.get_course_by_shortname",
         side_effect=[
             {"courses": [{}]},
             {"courses": []},
-        ]
+        ],
     )
     response = test_client.post("/moodle/course/build", json=course_build_settings)
     course_build = db.query(CourseBuild).all()
@@ -597,7 +597,7 @@ def test_get_moodle_user(
     test_client, setup_nonadmin_authenticated_user_session, mocker
 ):
     mocker.patch(
-        "rope.api.main.moodle_client.get_user_by_email",
+        "rope.api.routers.moodle.moodle_client.get_user_by_email",
         return_value={
             "firstname": "first",
             "lastname": "last",
@@ -615,7 +615,10 @@ def test_get_moodle_user(
     assert data["last_name"] == "last"
     assert data["email"] == "first.last@email.com"
 
-    mocker.patch("rope.api.main.moodle_client.get_user_by_email", return_value=None)
+    mocker.patch(
+        "rope.api.routers.moodle.moodle_client.get_user_by_email",
+        return_value=None,
+    )
 
     response = test_client.get("/moodle/user/?email=first.last@email.com")
 
