@@ -3,7 +3,7 @@ from rope.api import database
 
 def create_course_name(instructor_firstname, instructor_lastname, academic_year):
     course_name = (
-        f"Algebra 1 - {instructor_firstname} {instructor_lastname} {academic_year}"
+        f"Algebra 1 - {instructor_firstname} {instructor_lastname} ({academic_year})"
     )
     return course_name
 
