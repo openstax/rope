@@ -16,7 +16,7 @@ from rope.api.models import (
 
 router = APIRouter(
     prefix="/moodle",
-    tags=["admin"],
+    tags=["moodle"],
 )
 
 moodle_client = MoodleClient(
