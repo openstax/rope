@@ -447,12 +447,12 @@ def test_create_course_build(
             "warnings": [],
         },
     )
-    school_district_id = create_course_build_setup_district["id"]
+    school_district_name = create_course_build_setup_district["name"]
     course_build_settings = {
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
         "instructor_email": "fsaint@rice.edu",
-        "school_district": school_district_id,
+        "school_district": school_district_name,
     }
     response = test_client.post("/moodle/course/build", json=course_build_settings)
     course_build = db.query(CourseBuild).all()
@@ -466,17 +466,14 @@ def test_create_course_build(
     assert data["instructor_email"] == "fsaint@rice.edu"
     assert data["course_name"] == "Algebra 1 - Franklin Saint AY 2024"
     assert data["course_shortname"] == "Alg1 FS AY24"
-    assert data["course_category"] == 21
     assert data["course_id"] is None
     assert data["course_enrollment_url"] is None
     assert data["course_enrollment_key"] is None
-    assert data["school_district"] is not None
+    assert data["school_district"] == "snowfall_isd"
     assert data["academic_year"] == "AY 2024"
     assert data["academic_year_short"] == "AY24"
-    assert data["base_course_id"] == 100
     assert data["status"] == "created"
-    assert data["creator"] is not None
-    assert data.get("id") is not None
+    assert data["creator"] == "manager@rice.edu"
 
 
 def test_create_course_build_duplicate_shortname(
@@ -495,18 +492,18 @@ def test_create_course_build_duplicate_shortname(
             "warnings": [],
         },
     )
-    school_district_id = create_course_build_setup_district["id"]
+    school_district_name = create_course_build_setup_district["name"]
     course_build_settings1 = {
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
         "instructor_email": "fsaint@rice.edu",
-        "school_district": school_district_id,
+        "school_district": school_district_name,
     }
     course_build_settings2 = {
         "instructor_firstname": "Freya",
         "instructor_lastname": "Santiago",
         "instructor_email": "fsantiago@rice.edu",
-        "school_district": school_district_id,
+        "school_district": school_district_name,
     }
     first_course_response = test_client.post(
         "/moodle/course/build", json=course_build_settings1
@@ -526,17 +523,14 @@ def test_create_course_build_duplicate_shortname(
     assert first_course_data["instructor_email"] == "fsaint@rice.edu"
     assert first_course_data["course_name"] == "Algebra 1 - Franklin Saint AY 2024"
     assert first_course_data["course_shortname"] == "Alg1 FS AY24"
-    assert first_course_data["course_category"] == 21
     assert first_course_data["course_id"] is None
     assert first_course_data["course_enrollment_url"] is None
     assert first_course_data["course_enrollment_key"] is None
-    assert first_course_data["school_district"] is not None
+    assert first_course_data["school_district"] == "snowfall_isd"
     assert first_course_data["academic_year"] == "AY 2024"
     assert first_course_data["academic_year_short"] == "AY24"
-    assert first_course_data["base_course_id"] == 100
     assert first_course_data["status"] == "created"
-    assert first_course_data["creator"] is not None
-    assert first_course_data.get("id") is not None
+    assert first_course_data["creator"] == "manager@rice.edu"
 
     assert second_course_response.status_code == 200
     assert secound_course_data["instructor_firstname"] == "Freya"
@@ -544,17 +538,14 @@ def test_create_course_build_duplicate_shortname(
     assert secound_course_data["instructor_email"] == "fsantiago@rice.edu"
     assert secound_course_data["course_name"] == "Algebra 1 - Freya Santiago AY 2024"
     assert secound_course_data["course_shortname"] == "Alg1 FS1 AY24"
-    assert secound_course_data["course_category"] == 21
     assert secound_course_data["course_id"] is None
     assert secound_course_data["course_enrollment_url"] is None
     assert secound_course_data["course_enrollment_key"] is None
-    assert secound_course_data["school_district"] is not None
+    assert secound_course_data["school_district"] == "snowfall_isd"
     assert secound_course_data["academic_year"] == "AY 2024"
     assert secound_course_data["academic_year_short"] == "AY24"
-    assert secound_course_data["base_course_id"] == 100
     assert secound_course_data["status"] == "created"
-    assert secound_course_data["creator"] is not None
-    assert secound_course_data.get("id") is not None
+    assert secound_course_data["creator"] == "manager@rice.edu"
 
 
 def test_create_course_build_duplicate_shortname_moodle(
@@ -566,12 +557,12 @@ def test_create_course_build_duplicate_shortname_moodle(
     setup_manager_session,
     mocker,
 ):
-    school_district_id = create_course_build_setup_district["id"]
+    school_district_name = create_course_build_setup_district["name"]
     course_build_settings = {
         "instructor_firstname": "Reed",
         "instructor_lastname": "Thompson",
         "instructor_email": "rthompson@rice.edu",
-        "school_district": school_district_id,
+        "school_district": school_district_name,
     }
     mocker.patch(
         "rope.api.main.moodle_client.get_course_by_shortname",
@@ -592,17 +583,14 @@ def test_create_course_build_duplicate_shortname_moodle(
     assert data["instructor_email"] == "rthompson@rice.edu"
     assert data["course_name"] == "Algebra 1 - Reed Thompson AY 2024"
     assert data["course_shortname"] == "Alg1 RT1 AY24"
-    assert data["course_category"] == 21
     assert data["course_id"] is None
     assert data["course_enrollment_url"] is None
     assert data["course_enrollment_key"] is None
-    assert data["school_district"] is not None
+    assert data["school_district"] == "snowfall_isd"
     assert data["academic_year"] == "AY 2024"
     assert data["academic_year_short"] == "AY24"
-    assert data["base_course_id"] == 100
     assert data["status"] == "created"
-    assert data["creator"] is not None
-    assert data.get("id") is not None
+    assert data["creator"] == "manager@rice.edu"
 
 
 def test_get_moodle_user(
