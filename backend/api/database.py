@@ -102,8 +102,6 @@ def update_district(db: Session, district):
 
 def get_moodle_settings(db: Session):
     moodle_settings = db.query(MoodleSetting).all()
-    if len(moodle_settings) == 0:
-        raise NoResultFound
     return moodle_settings
 
 
