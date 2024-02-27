@@ -14,12 +14,11 @@ from rope.api.models import (
 
 
 router = APIRouter(
-    prefix="/admin/settings",
     tags=["admin"],
 )
 
 
-@router.get("/district/")
+@router.get("/admin/settings/district")
 def get_districts(
     current_user: Annotated[dict, Depends(verify_user)],
     db: Session = Depends(database.get_db),
@@ -29,7 +28,7 @@ def get_districts(
     return school_districts
 
 
-@router.post("/district/", dependencies=[Depends(verify_admin)])
+@router.post("/admin/settings/district", dependencies=[Depends(verify_admin)])
 def create_district(
     district: BaseSchoolDistrict, db: Session = Depends(database.get_db)
 ) -> FullSchoolDistrict:
@@ -37,7 +36,7 @@ def create_district(
     return new_district
 
 
-@router.put("/district/{id}/", dependencies=[Depends(verify_admin)])
+@router.put("/admin/settings/district/{id}", dependencies=[Depends(verify_admin)])
 def update_district(
     district: FullSchoolDistrict, db: Session = Depends(database.get_db)
 ) -> FullSchoolDistrict:
@@ -45,7 +44,7 @@ def update_district(
     return updated_district
 
 
-@router.get("/moodle/", dependencies=[Depends(verify_user)])
+@router.get("/admin/settings/moodle", dependencies=[Depends(verify_user)])
 def get_moodle_settings(
     db: Session = Depends(database.get_db),
 ) -> list[FullMoodleSettings]:
@@ -53,7 +52,7 @@ def get_moodle_settings(
     return moodle_settings
 
 
-@router.post("/moodle/", dependencies=[Depends(verify_admin)])
+@router.post("/admin/settings/moodle", dependencies=[Depends(verify_admin)])
 def create_moodle_settings(
     moodle_setting: BaseMoodleSettings, db: Session = Depends(database.get_db)
 ) -> FullMoodleSettings:
@@ -61,7 +60,7 @@ def create_moodle_settings(
     return new_moodle_setting
 
 
-@router.put("/moodle/{id}/", dependencies=[Depends(verify_admin)])
+@router.put("/admin/settings/moodle/{id}", dependencies=[Depends(verify_admin)])
 def update_moodle_settings(
     moodle_setting: FullMoodleSettings, db: Session = Depends(database.get_db)
 ) -> FullMoodleSettings:

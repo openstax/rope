@@ -14,12 +14,11 @@ from rope.api.sessions import (
 from rope.api.models import GoogleLoginData
 
 router = APIRouter(
-    prefix="/session",
     tags=["session"],
 )
 
 
-@router.post("/")
+@router.post("/session")
 def google_login(
     login_data: GoogleLoginData,
     session=Depends(get_request_session),
@@ -50,7 +49,7 @@ def google_login(
     return user_session_data
 
 
-@router.delete("/", dependencies=[Depends(verify_user)])
+@router.delete("/session", dependencies=[Depends(verify_user)])
 def delete_session(session=Depends(get_request_session)):
     session_id = session.get("session_id")
     destroy_session(session_id)

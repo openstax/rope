@@ -15,7 +15,6 @@ from rope.api.models import (
 )
 
 router = APIRouter(
-    prefix="/moodle",
     tags=["moodle"],
 )
 
@@ -26,7 +25,7 @@ moodle_client = MoodleClient(
 )
 
 
-@router.post("/course/build/")
+@router.post("/moodle/course/build")
 def create_course_build(
     current_user: Annotated[dict, Depends(verify_manager)],
     course_build_settings: BaseCourseBuildSettings,
@@ -100,7 +99,7 @@ def create_course_build(
     }
 
 
-@router.get("/user/", dependencies=[Depends(verify_user)])
+@router.get("/moodle/user", dependencies=[Depends(verify_user)])
 def get_moodle_user(email: str = "") -> Optional[MoodleUser]:
     user_data = moodle_client.get_user_by_email(email)
     if not user_data:
