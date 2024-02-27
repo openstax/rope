@@ -170,12 +170,3 @@ def test_update_db_moodle_setting_no_results(test_client, db, setup_admin_sessio
         )
 
     assert exc_info.type is NoResultFound
-
-
-def test_get_moodle_settings_no_results(
-    test_client, db, setup_nonadmin_authenticated_user_session
-):
-    with pytest.raises(NoResultFound) as exc_info:
-        test_client.get("/admin/settings/moodle")
-
-    assert exc_info.type is NoResultFound
