@@ -55,7 +55,7 @@ class MoodleSetting(Base):
     value: Mapped[str]
 
 
-class CourseBuildStatus(enum.Enum):
+class CourseBuildStatus(str, enum.Enum):
     CREATED = "created"
     PROCESSING = "processing"
     COMPLETED = "completed"

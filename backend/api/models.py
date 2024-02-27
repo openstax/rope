@@ -1,3 +1,5 @@
+from typing import Optional, Literal
+
 from pydantic import BaseModel
 
 
@@ -31,6 +33,25 @@ class BaseMoodleSettings(BaseModel):
 
 class FullMoodleSettings(BaseMoodleSettings):
     id: int
+
+
+class BaseCourseBuildSettings(BaseModel):
+    instructor_firstname: str
+    instructor_lastname: str
+    instructor_email: str
+    school_district: str
+
+
+class FullCourseBuildSettings(BaseCourseBuildSettings):
+    course_name: str
+    course_shortname: str
+    course_id: Optional[int] = None
+    course_enrollment_url: Optional[str] = None
+    course_enrollment_key: Optional[str] = None
+    academic_year: str
+    academic_year_short: str
+    creator: str
+    status: Literal["created", "processing", "completed", "failed"]
 
 
 class MoodleUser(BaseModel):
