@@ -1,23 +1,7 @@
-from fastapi.testclient import TestClient
 import pytest
-from rope.api.main import app
-from rope.api.sessions import get_request_session, session_store
-from rope.api.database import SessionLocal
+
+from rope.api.sessions import session_store
 from rope.db.schema import UserAccount
-
-
-@pytest.fixture
-def test_client():
-    return TestClient(app)
-
-
-@pytest.fixture
-def db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @pytest.fixture(autouse=True)
@@ -26,13 +10,11 @@ def clear_database_table(db):
     db.commit()
 
 
-def override_get_request_session():
-    session_id = {"session_id": "12345"}
-    return session_id
-
-
-def test_delete_session(test_client, mocker):
-    app.dependency_overrides[get_request_session] = override_get_request_session
+def test_delete_session(
+    test_client,
+    setup_override_get_request_session,
+    mocker,
+):
     session_store = {"12345": "ewfnweoif"}
     mocker.patch(
         "rope.api.sessions.session_store",
