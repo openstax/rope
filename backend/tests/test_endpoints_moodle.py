@@ -13,18 +13,6 @@ def clear_database_table(db):
 
 
 @pytest.fixture
-def create_course_build_setup_district(test_client, setup_admin_session):
-    new_school_district_data = {
-        "name": "snowfall_isd",
-        "active": True,
-    }
-    response = test_client.post(
-        "/admin/settings/district", json=new_school_district_data
-    )
-    return response.json()
-
-
-@pytest.fixture
 def setup_school_district(db):
     school_district = SchoolDistrict(name="snowfall_isd", active=True)
     db.add(school_district)
@@ -45,48 +33,27 @@ def setup_new_user_manager(db):
 
 
 @pytest.fixture
-def create_course_build_setup_moodle_settings(test_client, db, setup_admin_session):
-    academic_year = {
-        "name": "academic_year",
-        "value": "AY 2024",
-    }
-    academic_year_short = {
-        "name": "academic_year_short",
-        "value": "AY24",
-    }
-    course_category = {
-        "name": "course_category",
-        "value": "21",
-    }
-    base_course_id = {
-        "name": "base_course_id",
-        "value": "100",
-    }
-    test_client.post("/admin/settings/moodle", json=academic_year)
-    test_client.post("/admin/settings/moodle", json=academic_year_short)
-    test_client.post("/admin/settings/moodle", json=course_category)
-    test_client.post("/admin/settings/moodle", json=base_course_id)
+def setup_moodle_settings(db):
+    academic_year = MoodleSetting(name="academic_year", value="AY 2024")
+    academic_year_short = MoodleSetting(name="academic_year_short", value="AY24")
+    course_category = MoodleSetting(name="course_category", value="21")
+    base_course_id = MoodleSetting(name="base_course_id", value="100")
+    db.add(academic_year)
+    db.add(academic_year_short)
+    db.add(course_category)
+    db.add(base_course_id)
+    db.commit()
+
     moodle_settings = db.query(MoodleSetting).all()
     return moodle_settings
-
-
-@pytest.fixture
-def create_course_build_setup_user(test_client, db, setup_admin_session):
-    new_user_data = {
-        "email": "manager@rice.edu",
-        "is_manager": True,
-        "is_admin": False,
-    }
-    response = test_client.post("/user", json=new_user_data)
-    return response.json()
 
 
 def test_create_course_build(
     test_client,
     db,
-    create_course_build_setup_district,
-    create_course_build_setup_moodle_settings,
-    create_course_build_setup_user,
+    setup_school_district,
+    setup_moodle_settings,
+    setup_new_user_manager,
     setup_manager_session,
     mocker,
 ):
@@ -97,7 +64,7 @@ def test_create_course_build(
             "warnings": [],
         },
     )
-    school_district_name = create_course_build_setup_district["name"]
+    school_district_name = setup_school_district.name
     course_build_settings = {
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
@@ -129,9 +96,9 @@ def test_create_course_build(
 def test_create_course_build_duplicate_shortname(
     test_client,
     db,
-    create_course_build_setup_district,
-    create_course_build_setup_moodle_settings,
-    create_course_build_setup_user,
+    setup_school_district,
+    setup_moodle_settings,
+    setup_new_user_manager,
     setup_manager_session,
     mocker,
 ):
@@ -142,7 +109,7 @@ def test_create_course_build_duplicate_shortname(
             "warnings": [],
         },
     )
-    school_district_name = create_course_build_setup_district["name"]
+    school_district_name = setup_school_district.name
     course_build_settings1 = {
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
@@ -201,13 +168,13 @@ def test_create_course_build_duplicate_shortname(
 def test_create_course_build_duplicate_shortname_moodle(
     test_client,
     db,
-    create_course_build_setup_district,
-    create_course_build_setup_moodle_settings,
-    create_course_build_setup_user,
+    setup_school_district,
+    setup_moodle_settings,
+    setup_new_user_manager,
     setup_manager_session,
     mocker,
 ):
-    school_district_name = create_course_build_setup_district["name"]
+    school_district_name = setup_school_district.name
     course_build_settings = {
         "instructor_firstname": "Reed",
         "instructor_lastname": "Thompson",
