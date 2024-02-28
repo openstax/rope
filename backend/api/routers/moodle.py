@@ -65,7 +65,7 @@ def create_course_build(
         )
         nonce += 1
     user_db = database.get_user_by_email(db, current_user["email"])
-    school_district_name = course_build_settings.school_district
+    school_district_name = course_build_settings.school_district_name
     school_district = database.get_district_by_name(db, school_district_name)
     school_district_id = school_district.id
     creator = user_db.id
@@ -89,12 +89,12 @@ def create_course_build(
         "instructor_firstname": instructor_firstname,
         "instructor_lastname": instructor_lastname,
         "instructor_email": instructor_email,
-        "school_district": school_district_name,
+        "school_district_name": school_district_name,
         "academic_year": academic_year,
         "academic_year_short": academic_year_short,
         "course_name": course_name,
         "course_shortname": maybe_course_shortname,
-        "creator": current_user["email"],
+        "creator_email": current_user["email"],
         "status": status,
     }
 

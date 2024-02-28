@@ -102,7 +102,7 @@ def test_create_course_build(
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
         "instructor_email": "fsaint@rice.edu",
-        "school_district": school_district_name,
+        "school_district_name": school_district_name,
     }
     response = test_client.post("/moodle/course/build", json=course_build_settings)
     course_build = db.query(CourseBuild).all()
@@ -119,11 +119,11 @@ def test_create_course_build(
     assert data["course_id"] is None
     assert data["course_enrollment_url"] is None
     assert data["course_enrollment_key"] is None
-    assert data["school_district"] == "snowfall_isd"
+    assert data["school_district_name"] == "snowfall_isd"
     assert data["academic_year"] == "AY 2024"
     assert data["academic_year_short"] == "AY24"
     assert data["status"] == "created"
-    assert data["creator"] == "manager@rice.edu"
+    assert data["creator_email"] == "manager@rice.edu"
 
 
 def test_create_course_build_duplicate_shortname(
@@ -147,13 +147,13 @@ def test_create_course_build_duplicate_shortname(
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
         "instructor_email": "fsaint@rice.edu",
-        "school_district": school_district_name,
+        "school_district_name": school_district_name,
     }
     course_build_settings2 = {
         "instructor_firstname": "Freya",
         "instructor_lastname": "Santiago",
         "instructor_email": "fsantiago@rice.edu",
-        "school_district": school_district_name,
+        "school_district_name": school_district_name,
     }
     first_course_response = test_client.post(
         "/moodle/course/build", json=course_build_settings1
@@ -176,11 +176,11 @@ def test_create_course_build_duplicate_shortname(
     assert first_course_data["course_id"] is None
     assert first_course_data["course_enrollment_url"] is None
     assert first_course_data["course_enrollment_key"] is None
-    assert first_course_data["school_district"] == "snowfall_isd"
+    assert first_course_data["school_district_name"] == "snowfall_isd"
     assert first_course_data["academic_year"] == "AY 2024"
     assert first_course_data["academic_year_short"] == "AY24"
     assert first_course_data["status"] == "created"
-    assert first_course_data["creator"] == "manager@rice.edu"
+    assert first_course_data["creator_email"] == "manager@rice.edu"
 
     assert second_course_response.status_code == 200
     assert secound_course_data["instructor_firstname"] == "Freya"
@@ -191,11 +191,11 @@ def test_create_course_build_duplicate_shortname(
     assert secound_course_data["course_id"] is None
     assert secound_course_data["course_enrollment_url"] is None
     assert secound_course_data["course_enrollment_key"] is None
-    assert secound_course_data["school_district"] == "snowfall_isd"
+    assert secound_course_data["school_district_name"] == "snowfall_isd"
     assert secound_course_data["academic_year"] == "AY 2024"
     assert secound_course_data["academic_year_short"] == "AY24"
     assert secound_course_data["status"] == "created"
-    assert secound_course_data["creator"] == "manager@rice.edu"
+    assert secound_course_data["creator_email"] == "manager@rice.edu"
 
 
 def test_create_course_build_duplicate_shortname_moodle(
@@ -212,7 +212,7 @@ def test_create_course_build_duplicate_shortname_moodle(
         "instructor_firstname": "Reed",
         "instructor_lastname": "Thompson",
         "instructor_email": "rthompson@rice.edu",
-        "school_district": school_district_name,
+        "school_district_name": school_district_name,
     }
     mocker.patch(
         "rope.api.routers.moodle.moodle_client.get_course_by_shortname",
@@ -236,11 +236,11 @@ def test_create_course_build_duplicate_shortname_moodle(
     assert data["course_id"] is None
     assert data["course_enrollment_url"] is None
     assert data["course_enrollment_key"] is None
-    assert data["school_district"] == "snowfall_isd"
+    assert data["school_district_name"] == "snowfall_isd"
     assert data["academic_year"] == "AY 2024"
     assert data["academic_year_short"] == "AY24"
     assert data["status"] == "created"
-    assert data["creator"] == "manager@rice.edu"
+    assert data["creator_email"] == "manager@rice.edu"
 
 
 def test_get_course_build_by_academic_year_and_instructor_email(

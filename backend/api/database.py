@@ -169,12 +169,12 @@ def create_course_build(
         course_name=course_name,
         course_shortname=course_shortname,
         course_category=course_category,
-        school_district=school_district_id,
+        school_district_id=school_district_id,
         academic_year=academic_year,
         academic_year_short=academic_year_short,
         base_course_id=base_course_id,
         status=status,
-        creator=creator,
+        creator_id=creator,
     )
     db.add(new_course_build)
     db.commit()

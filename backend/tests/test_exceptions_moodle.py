@@ -29,7 +29,7 @@ def test_non_manager_access_manager_endpoint(
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
         "instructor_email": "fsaint@rice.edu",
-        "school_district": 21,
+        "school_district_name": "snowfall_isd",
     }
     response = test_client.post("/moodle/course/build", json=course_build_settings)
 
@@ -53,7 +53,7 @@ def test_create_course_build_missing_moodle_settings(
             "instructor_firstname": "Franklin",
             "instructor_lastname": "Saint",
             "instructor_email": "fsaint@rice.edu",
-            "school_district": "school_isd",
+            "school_district_name": "school_isd",
         }
         test_client.post("/moodle/course/build", json=course_build_settings)
 
