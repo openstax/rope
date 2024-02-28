@@ -77,6 +77,13 @@ def get_district_by_name(db: Session, school_district_name):
     return school_district
 
 
+def get_district_by_id(db: Session, school_district_id):
+    school_district = (
+        db.query(SchoolDistrict).filter(SchoolDistrict.id == school_district_id).first()
+    )
+    return school_district
+
+
 def create_district(db: Session, district):
     lower_case_district_name = district.name.lower()
     new_district = SchoolDistrict(name=lower_case_district_name, active=district.active)
@@ -175,6 +182,20 @@ def create_course_build(
     return new_course_build
 
 
+def get_course_build(db: Session, academic_year, instructor_email):
+    course_build = db.query(CourseBuild)
+
+    if academic_year:
+        course_build = course_build.filter(CourseBuild.academic_year == academic_year)
+
+    if instructor_email:
+        course_build = course_build.filter(
+            CourseBuild.instructor_email == instructor_email
+        )
+
+    return course_build.all()
+
+
 def get_course_by_shortname(db: Session, course_shortname):
     course = (
         db.query(CourseBuild)
@@ -182,3 +203,8 @@ def get_course_by_shortname(db: Session, course_shortname):
         .first()
     )
     return course
+
+
+def get_creator_by_id(db: Session, creator_id):
+    creator = db.query(UserAccount).filter(UserAccount.id == creator_id).first()
+    return creator

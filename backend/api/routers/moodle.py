@@ -99,6 +99,25 @@ def create_course_build(
     }
 
 
+@router.get("/moodle/course/build", dependencies=[Depends(verify_user)])
+def get_course_builds(
+    db: Session = Depends(database.get_db),
+    academic_year: str = None,
+    instructor_email: str = None,
+):
+    course_build = database.get_course_build(db, academic_year, instructor_email)
+    for course in course_build:
+        if course.school_district_id:
+            school_district_name = course.school_district.name
+            course.school_district_id = school_district_name
+
+        if course.creator_id:
+            creator_email = course.creator.email
+            course.creator_id = creator_email
+
+    return course_build
+
+
 @router.get("/moodle/user", dependencies=[Depends(verify_user)])
 def get_moodle_user(email: str = "") -> Optional[MoodleUser]:
     user_data = moodle_client.get_user_by_email(email)
