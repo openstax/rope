@@ -1,4 +1,4 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import UniqueConstraint, ForeignKey
 
 from datetime import datetime, timezone
@@ -79,9 +79,12 @@ class CourseBuild(Base):
     course_id: Mapped[Optional[int]]
     course_enrollment_url: Mapped[Optional[str]]
     course_enrollment_key: Mapped[Optional[str]]
-    school_district: Mapped[int] = mapped_column(ForeignKey("school_district.id"))
+    school_district_id: Mapped[int] = mapped_column(ForeignKey("school_district.id"))
     academic_year: Mapped[str]
     academic_year_short: Mapped[str]
     base_course_id: Mapped[int]
     status: Mapped[CourseBuildStatus]
-    creator: Mapped[int] = mapped_column(ForeignKey("user_account.id"))
+    creator_id: Mapped[int] = mapped_column(ForeignKey("user_account.id"))
+
+    school_district: Mapped[SchoolDistrict] = relationship()
+    creator: Mapped[UserAccount] = relationship()
