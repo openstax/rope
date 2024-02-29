@@ -12,6 +12,7 @@ from rope.api.models import (
     BaseCourseBuildSettings,
     FullCourseBuildSettings,
     MoodleUser,
+    GetCourseBuildSettings,
 )
 
 router = APIRouter(
@@ -104,7 +105,7 @@ def get_course_builds(
     db: Session = Depends(database.get_db),
     academic_year: str = None,
     instructor_email: str = None,
-):
+) -> list[GetCourseBuildSettings]:
     course_build = database.get_course_build(db, academic_year, instructor_email)
     for course in course_build:
         if course.school_district_id:
@@ -114,6 +115,9 @@ def get_course_builds(
         if course.creator_id:
             creator_email = course.creator.email
             course.creator_id = creator_email
+
+        if course.status:
+            course.status = course.status.value
 
     return course_build
 

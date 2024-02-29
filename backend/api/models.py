@@ -54,6 +54,22 @@ class FullCourseBuildSettings(BaseCourseBuildSettings):
     status: Literal["created", "processing", "completed", "failed"]
 
 
+class GetCourseBuildSettings(BaseModel):
+    instructor_firstname: str
+    instructor_lastname: str
+    instructor_email: str
+    school_district_id: str
+    course_name: str
+    course_shortname: str
+    course_id: Optional[int] = None
+    course_enrollment_url: Optional[str] = None
+    course_enrollment_key: Optional[str] = None
+    academic_year: str
+    academic_year_short: str
+    creator_id: str
+    status: Literal["created", "processing", "completed", "failed"]
+
+
 class MoodleUser(BaseModel):
     first_name: str
     last_name: str
