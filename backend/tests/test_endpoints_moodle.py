@@ -296,7 +296,6 @@ def test_create_course_build_duplicate_shortname_moodle(
 
 def test_get_course_build_by_academic_year_and_instructor_email(
     test_client,
-    db,
     setup_nonadmin_authenticated_user_session,
     setup_school_district,
     setup_new_user_manager,
@@ -328,7 +327,6 @@ def test_get_course_build_by_academic_year_and_instructor_email(
 
 def test_get_course_build_by_academic_year(
     test_client,
-    db,
     setup_nonadmin_authenticated_user_session,
     setup_school_district,
     setup_new_user_manager,
@@ -386,7 +384,6 @@ def test_get_course_build_by_academic_year(
 
 def test_get_course_build_by_instructor_email(
     test_client,
-    db,
     setup_nonadmin_authenticated_user_session,
     setup_school_district,
     setup_new_user_manager,
@@ -430,7 +427,6 @@ def test_get_course_build_by_instructor_email(
 
 def test_get_all_course_builds(
     test_client,
-    db,
     setup_nonadmin_authenticated_user_session,
     setup_school_district,
     setup_new_user_manager,
