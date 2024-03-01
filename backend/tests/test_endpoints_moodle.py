@@ -48,6 +48,90 @@ def setup_moodle_settings(db):
     return moodle_settings
 
 
+@pytest.fixture
+def setup_get_course_builds(
+    db,
+    setup_nonadmin_authenticated_user_session,
+    setup_school_district,
+    setup_new_user_manager,
+):
+    school_district_id = setup_school_district.id
+    user_id = setup_new_user_manager.id
+    add_db_course_build1 = CourseBuild(
+        instructor_firstname="Franklin",
+        instructor_lastname="Saint",
+        instructor_email="fsaint@rice.edu",
+        course_name="Algebra 1 - Franklin Saint (AY 2025)",
+        course_shortname="Alg1 FS AY25",
+        course_category="21",
+        course_id=None,
+        course_enrollment_url=None,
+        course_enrollment_key=None,
+        school_district_id=school_district_id,
+        academic_year="AY 2025",
+        academic_year_short="AY25",
+        base_course_id="2121",
+        status="created",
+        creator_id=user_id,
+    )
+    add_db_course_build2 = CourseBuild(
+        instructor_firstname="Leon",
+        instructor_lastname="Simmons",
+        instructor_email="lsimmons@rice.edu",
+        course_name="Algebra 1 - Leon Simmons (AY 2025)",
+        course_shortname="Alg1 LS AY25",
+        course_category="21",
+        course_id=None,
+        course_enrollment_url=None,
+        course_enrollment_key=None,
+        school_district_id=school_district_id,
+        academic_year="AY 2025",
+        academic_year_short="AY25",
+        base_course_id="2121",
+        status="created",
+        creator_id=user_id,
+    )
+    add_db_course_build3 = CourseBuild(
+        instructor_firstname="Franklin",
+        instructor_lastname="Saint",
+        instructor_email="fsaint@rice.edu",
+        course_name="Algebra 1 - Franklin Saint (AY 2030)",
+        course_shortname="Alg1 FS AY30",
+        course_category="41",
+        course_id=None,
+        course_enrollment_url=None,
+        course_enrollment_key=None,
+        school_district_id=school_district_id,
+        academic_year="AY 2030",
+        academic_year_short="AY30",
+        base_course_id="4141",
+        status="created",
+        creator_id=user_id,
+    )
+    add_db_course_build4 = CourseBuild(
+        instructor_firstname="Reed",
+        instructor_lastname="Thompson",
+        instructor_email="lthompson@rice.edu",
+        course_name="Algebra 1 - Reed Thompson (AY 2025)",
+        course_shortname="Alg1 RT AY25",
+        course_category="21",
+        course_id=None,
+        course_enrollment_url=None,
+        course_enrollment_key=None,
+        school_district_id=school_district_id,
+        academic_year="AY 2025",
+        academic_year_short="AY25",
+        base_course_id="2121",
+        status="created",
+        creator_id=user_id,
+    )
+    db.add(add_db_course_build1)
+    db.add(add_db_course_build2)
+    db.add(add_db_course_build3)
+    db.add(add_db_course_build4)
+    db.commit()
+
+
 def test_create_course_build(
     test_client,
     db,
@@ -216,34 +300,15 @@ def test_get_course_build_by_academic_year_and_instructor_email(
     setup_nonadmin_authenticated_user_session,
     setup_school_district,
     setup_new_user_manager,
-    mocker,
+    setup_get_course_builds,
 ):
-    school_district_id = setup_school_district.id
     school_district_name = setup_school_district.name
-    user_id = setup_new_user_manager.id
-    add_db_course_build = CourseBuild(
-        instructor_firstname="Franklin",
-        instructor_lastname="Saint",
-        instructor_email="fsaint@rice.edu",
-        course_name="Algebra 1 - Franklin Saint (AY 2025)",
-        course_shortname="Alg1 FS AY25",
-        course_category="21",
-        course_id=None,
-        course_enrollment_url=None,
-        course_enrollment_key=None,
-        school_district_id=school_district_id,
-        academic_year="AY 2025",
-        academic_year_short="AY25",
-        base_course_id="2121",
-        status="created",
-        creator_id=user_id,
-    )
-    db.add(add_db_course_build)
-    db.commit()
     response = test_client.get(
         "/moodle/course/build?academic_year=AY 2025&instructor_email=fsaint@rice.edu"
     )
     data = response.json()
+
+    assert len(data) == 1
 
     assert response.status_code == 200
     assert data[0].get("instructor_firstname") == "Franklin"
@@ -267,52 +332,13 @@ def test_get_course_build_by_academic_year(
     setup_nonadmin_authenticated_user_session,
     setup_school_district,
     setup_new_user_manager,
-    mocker,
+    setup_get_course_builds,
 ):
-    school_district_id = setup_school_district.id
     school_district_name = setup_school_district.name
-    user_id = setup_new_user_manager.id
-    add_db_course_build1 = CourseBuild(
-        instructor_firstname="Franklin",
-        instructor_lastname="Saint",
-        instructor_email="fsaint@rice.edu",
-        course_name="Algebra 1 - Franklin Saint (AY 2025)",
-        course_shortname="Alg1 FS AY25",
-        course_category="21",
-        course_id=None,
-        course_enrollment_url=None,
-        course_enrollment_key=None,
-        school_district_id=school_district_id,
-        academic_year="AY 2025",
-        academic_year_short="AY25",
-        base_course_id="2121",
-        status="created",
-        creator_id=user_id,
-    )
-    add_db_course_build2 = CourseBuild(
-        instructor_firstname="Leon",
-        instructor_lastname="Simmons",
-        instructor_email="lsimmons@rice.edu",
-        course_name="Algebra 1 - Leon Simmons (AY 2025)",
-        course_shortname="Alg1 LS AY25",
-        course_category="21",
-        course_id=None,
-        course_enrollment_url=None,
-        course_enrollment_key=None,
-        school_district_id=school_district_id,
-        academic_year="AY 2025",
-        academic_year_short="AY25",
-        base_course_id="2121",
-        status="created",
-        creator_id=user_id,
-    )
-    db.add(add_db_course_build1)
-    db.add(add_db_course_build2)
-    db.commit()
     response = test_client.get("/moodle/course/build?academic_year=AY 2025")
     data = response.json()
 
-    assert len(data) == 2
+    assert len(data) == 3
 
     assert response.status_code == 200
     assert data[0].get("instructor_firstname") == "Franklin"
@@ -343,6 +369,20 @@ def test_get_course_build_by_academic_year(
     assert data[1].get("status") == "created"
     assert data[1].get("creator_email") == "manager@rice.edu"
 
+    assert data[2].get("instructor_firstname") == "Reed"
+    assert data[2].get("instructor_lastname") == "Thompson"
+    assert data[2].get("instructor_email") == "lthompson@rice.edu"
+    assert data[2].get("course_name") == "Algebra 1 - Reed Thompson (AY 2025)"
+    assert data[2].get("course_shortname") == "Alg1 RT AY25"
+    assert data[2].get("course_id") is None
+    assert data[2].get("course_enrollment_url") is None
+    assert data[2].get("course_enrollment_key") is None
+    assert data[2].get("school_district_name") == school_district_name
+    assert data[2].get("academic_year") == "AY 2025"
+    assert data[2].get("academic_year_short") == "AY25"
+    assert data[2].get("status") == "created"
+    assert data[2].get("creator_email") == "manager@rice.edu"
+
 
 def test_get_course_build_by_instructor_email(
     test_client,
@@ -350,48 +390,9 @@ def test_get_course_build_by_instructor_email(
     setup_nonadmin_authenticated_user_session,
     setup_school_district,
     setup_new_user_manager,
-    mocker,
+    setup_get_course_builds,
 ):
-    school_district_id = setup_school_district.id
     school_district_name = setup_school_district.name
-    user_id = setup_new_user_manager.id
-    add_db_course_build1 = CourseBuild(
-        instructor_firstname="Franklin",
-        instructor_lastname="Saint",
-        instructor_email="fsaint@rice.edu",
-        course_name="Algebra 1 - Franklin Saint (AY 2025)",
-        course_shortname="Alg1 FS AY25",
-        course_category="21",
-        course_id=None,
-        course_enrollment_url=None,
-        course_enrollment_key=None,
-        school_district_id=school_district_id,
-        academic_year="AY 2025",
-        academic_year_short="AY25",
-        base_course_id="2121",
-        status="created",
-        creator_id=user_id,
-    )
-    add_db_course_build2 = CourseBuild(
-        instructor_firstname="Franklin",
-        instructor_lastname="Saint",
-        instructor_email="fsaint@rice.edu",
-        course_name="Algebra 1 - Franklin Saint (AY 2030)",
-        course_shortname="Alg1 FS AY30",
-        course_category="41",
-        course_id=None,
-        course_enrollment_url=None,
-        course_enrollment_key=None,
-        school_district_id=school_district_id,
-        academic_year="AY 2030",
-        academic_year_short="AY30",
-        base_course_id="4141",
-        status="created",
-        creator_id=user_id,
-    )
-    db.add(add_db_course_build1)
-    db.add(add_db_course_build2)
-    db.commit()
     response = test_client.get("/moodle/course/build?instructor_email=fsaint@rice.edu")
     data = response.json()
 
@@ -433,52 +434,13 @@ def test_get_all_course_builds(
     setup_nonadmin_authenticated_user_session,
     setup_school_district,
     setup_new_user_manager,
-    mocker,
+    setup_get_course_builds,
 ):
-    school_district_id = setup_school_district.id
     school_district_name = setup_school_district.name
-    user_id = setup_new_user_manager.id
-    add_db_course_build1 = CourseBuild(
-        instructor_firstname="Franklin",
-        instructor_lastname="Saint",
-        instructor_email="fsaint@rice.edu",
-        course_name="Algebra 1 - Franklin Saint (AY 2025)",
-        course_shortname="Alg1 FS AY25",
-        course_category="21",
-        course_id=None,
-        course_enrollment_url=None,
-        course_enrollment_key=None,
-        school_district_id=school_district_id,
-        academic_year="AY 2025",
-        academic_year_short="AY25",
-        base_course_id="2121",
-        status="created",
-        creator_id=user_id,
-    )
-    add_db_course_build2 = CourseBuild(
-        instructor_firstname="Leon",
-        instructor_lastname="Simmons",
-        instructor_email="lsimmons@rice.edu",
-        course_name="Algebra 1 - Leon Simmons (AY 2030)",
-        course_shortname="Alg1 LS AY30",
-        course_category="41",
-        course_id=None,
-        course_enrollment_url=None,
-        course_enrollment_key=None,
-        school_district_id=school_district_id,
-        academic_year="AY 2030",
-        academic_year_short="AY30",
-        base_course_id="4141",
-        status="created",
-        creator_id=user_id,
-    )
-    db.add(add_db_course_build1)
-    db.add(add_db_course_build2)
-    db.commit()
     response = test_client.get("/moodle/course/build")
     data = response.json()
 
-    assert len(data) == 2
+    assert len(data) == 4
 
     assert response.status_code == 200
     assert data[0].get("instructor_firstname") == "Franklin"
@@ -498,16 +460,44 @@ def test_get_all_course_builds(
     assert data[1].get("instructor_firstname") == "Leon"
     assert data[1].get("instructor_lastname") == "Simmons"
     assert data[1].get("instructor_email") == "lsimmons@rice.edu"
-    assert data[1].get("course_name") == "Algebra 1 - Leon Simmons (AY 2030)"
-    assert data[1].get("course_shortname") == "Alg1 LS AY30"
+    assert data[1].get("course_name") == "Algebra 1 - Leon Simmons (AY 2025)"
+    assert data[1].get("course_shortname") == "Alg1 LS AY25"
     assert data[1].get("course_id") is None
     assert data[1].get("course_enrollment_url") is None
     assert data[1].get("course_enrollment_key") is None
     assert data[1].get("school_district_name") == school_district_name
-    assert data[1].get("academic_year") == "AY 2030"
-    assert data[1].get("academic_year_short") == "AY30"
+    assert data[1].get("academic_year") == "AY 2025"
+    assert data[1].get("academic_year_short") == "AY25"
     assert data[1].get("status") == "created"
     assert data[1].get("creator_email") == "manager@rice.edu"
+
+    assert data[2].get("instructor_firstname") == "Franklin"
+    assert data[2].get("instructor_lastname") == "Saint"
+    assert data[2].get("instructor_email") == "fsaint@rice.edu"
+    assert data[2].get("course_name") == "Algebra 1 - Franklin Saint (AY 2030)"
+    assert data[2].get("course_shortname") == "Alg1 FS AY30"
+    assert data[2].get("course_id") is None
+    assert data[2].get("course_enrollment_url") is None
+    assert data[2].get("course_enrollment_key") is None
+    assert data[2].get("school_district_name") == school_district_name
+    assert data[2].get("academic_year") == "AY 2030"
+    assert data[2].get("academic_year_short") == "AY30"
+    assert data[2].get("status") == "created"
+    assert data[2].get("creator_email") == "manager@rice.edu"
+
+    assert data[3].get("instructor_firstname") == "Reed"
+    assert data[3].get("instructor_lastname") == "Thompson"
+    assert data[3].get("instructor_email") == "lthompson@rice.edu"
+    assert data[3].get("course_name") == "Algebra 1 - Reed Thompson (AY 2025)"
+    assert data[3].get("course_shortname") == "Alg1 RT AY25"
+    assert data[3].get("course_id") is None
+    assert data[3].get("course_enrollment_url") is None
+    assert data[3].get("course_enrollment_key") is None
+    assert data[3].get("school_district_name") == school_district_name
+    assert data[3].get("academic_year") == "AY 2025"
+    assert data[3].get("academic_year_short") == "AY25"
+    assert data[3].get("status") == "created"
+    assert data[3].get("creator_email") == "manager@rice.edu"
 
 
 def test_get_moodle_user(
