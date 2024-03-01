@@ -36,6 +36,23 @@ def test_non_manager_access_manager_endpoint(
     assert response.status_code == 403
 
 
+def test_unauthenticated_user(test_client, setup_override_get_request_session, mocker):
+    user = {
+        "ABCDEFG": {
+            "email": "test@rice.edu",
+            "is_manager": False,
+            "is_admin": False,
+        }
+    }
+    mocker.patch(
+        "rope.api.sessions.session_store",
+        user,
+    )
+    response = test_client.get("/moodle/course/build")
+
+    assert response.status_code == 401
+
+
 def test_missing_session_id(test_client, setup_override_empty_get_request_session):
     response = test_client.get("/moodle/user")
 
