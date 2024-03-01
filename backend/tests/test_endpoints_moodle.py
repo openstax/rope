@@ -254,11 +254,11 @@ def test_get_course_build_by_academic_year_and_instructor_email(
     assert data[0].get("course_id") is None
     assert data[0].get("course_enrollment_url") is None
     assert data[0].get("course_enrollment_key") is None
-    assert data[0].get("school_district_id") == school_district_name
+    assert data[0].get("school_district_name") == school_district_name
     assert data[0].get("academic_year") == "AY 2025"
     assert data[0].get("academic_year_short") == "AY25"
     assert data[0].get("status") == "created"
-    assert data[0].get("creator_id") == "manager@rice.edu"
+    assert data[0].get("creator_email") == "manager@rice.edu"
 
 
 def test_get_course_build_by_academic_year(
@@ -323,11 +323,11 @@ def test_get_course_build_by_academic_year(
     assert data[0].get("course_id") is None
     assert data[0].get("course_enrollment_url") is None
     assert data[0].get("course_enrollment_key") is None
-    assert data[0].get("school_district_id") == school_district_name
+    assert data[0].get("school_district_name") == school_district_name
     assert data[0].get("academic_year") == "AY 2025"
     assert data[0].get("academic_year_short") == "AY25"
     assert data[0].get("status") == "created"
-    assert data[0].get("creator_id") == "manager@rice.edu"
+    assert data[0].get("creator_email") == "manager@rice.edu"
 
     assert data[1].get("instructor_firstname") == "Leon"
     assert data[1].get("instructor_lastname") == "Simmons"
@@ -337,11 +337,11 @@ def test_get_course_build_by_academic_year(
     assert data[1].get("course_id") is None
     assert data[1].get("course_enrollment_url") is None
     assert data[1].get("course_enrollment_key") is None
-    assert data[1].get("school_district_id") == school_district_name
+    assert data[1].get("school_district_name") == school_district_name
     assert data[1].get("academic_year") == "AY 2025"
     assert data[1].get("academic_year_short") == "AY25"
     assert data[1].get("status") == "created"
-    assert data[1].get("creator_id") == "manager@rice.edu"
+    assert data[1].get("creator_email") == "manager@rice.edu"
 
 
 def test_get_course_build_by_instructor_email(
@@ -406,11 +406,11 @@ def test_get_course_build_by_instructor_email(
     assert data[0].get("course_id") is None
     assert data[0].get("course_enrollment_url") is None
     assert data[0].get("course_enrollment_key") is None
-    assert data[0].get("school_district_id") == school_district_name
+    assert data[0].get("school_district_name") == school_district_name
     assert data[0].get("academic_year") == "AY 2025"
     assert data[0].get("academic_year_short") == "AY25"
     assert data[0].get("status") == "created"
-    assert data[0].get("creator_id") == "manager@rice.edu"
+    assert data[0].get("creator_email") == "manager@rice.edu"
 
     assert data[1].get("instructor_firstname") == "Franklin"
     assert data[1].get("instructor_lastname") == "Saint"
@@ -420,11 +420,11 @@ def test_get_course_build_by_instructor_email(
     assert data[1].get("course_id") is None
     assert data[1].get("course_enrollment_url") is None
     assert data[1].get("course_enrollment_key") is None
-    assert data[1].get("school_district_id") == school_district_name
+    assert data[1].get("school_district_name") == school_district_name
     assert data[1].get("academic_year") == "AY 2030"
     assert data[1].get("academic_year_short") == "AY30"
     assert data[1].get("status") == "created"
-    assert data[1].get("creator_id") == "manager@rice.edu"
+    assert data[1].get("creator_email") == "manager@rice.edu"
 
 
 def test_get_all_course_builds(
@@ -489,11 +489,11 @@ def test_get_all_course_builds(
     assert data[0].get("course_id") is None
     assert data[0].get("course_enrollment_url") is None
     assert data[0].get("course_enrollment_key") is None
-    assert data[0].get("school_district_id") == school_district_name
+    assert data[0].get("school_district_name") == school_district_name
     assert data[0].get("academic_year") == "AY 2025"
     assert data[0].get("academic_year_short") == "AY25"
     assert data[0].get("status") == "created"
-    assert data[0].get("creator_id") == "manager@rice.edu"
+    assert data[0].get("creator_email") == "manager@rice.edu"
 
     assert data[1].get("instructor_firstname") == "Leon"
     assert data[1].get("instructor_lastname") == "Simmons"
@@ -503,11 +503,11 @@ def test_get_all_course_builds(
     assert data[1].get("course_id") is None
     assert data[1].get("course_enrollment_url") is None
     assert data[1].get("course_enrollment_key") is None
-    assert data[1].get("school_district_id") == school_district_name
+    assert data[1].get("school_district_name") == school_district_name
     assert data[1].get("academic_year") == "AY 2030"
     assert data[1].get("academic_year_short") == "AY30"
     assert data[1].get("status") == "created"
-    assert data[1].get("creator_id") == "manager@rice.edu"
+    assert data[1].get("creator_email") == "manager@rice.edu"
 
 
 def test_get_moodle_user(

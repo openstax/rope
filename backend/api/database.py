@@ -175,18 +175,18 @@ def create_course_build(
     return new_course_build
 
 
-def get_course_build(db: Session, academic_year, instructor_email):
-    course_build = db.query(CourseBuild)
+def get_course_builds(db: Session, academic_year, instructor_email):
+    course_builds = db.query(CourseBuild)
 
     if academic_year:
-        course_build = course_build.filter(CourseBuild.academic_year == academic_year)
+        course_builds = course_builds.filter(CourseBuild.academic_year == academic_year)
 
     if instructor_email:
-        course_build = course_build.filter(
+        course_builds = course_builds.filter(
             CourseBuild.instructor_email == instructor_email
         )
 
-    return course_build.all()
+    return course_builds.all()
 
 
 def get_course_by_shortname(db: Session, course_shortname):

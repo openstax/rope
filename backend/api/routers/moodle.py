@@ -12,7 +12,6 @@ from rope.api.models import (
     BaseCourseBuildSettings,
     FullCourseBuildSettings,
     MoodleUser,
-    GetCourseBuildSettings,
 )
 
 router = APIRouter(
@@ -105,21 +104,24 @@ def get_course_builds(
     db: Session = Depends(database.get_db),
     academic_year: str = None,
     instructor_email: str = None,
-) -> list[GetCourseBuildSettings]:
-    course_build = database.get_course_build(db, academic_year, instructor_email)
-    for course in course_build:
-        if course.school_district_id:
-            school_district_name = course.school_district.name
-            course.school_district_id = school_district_name
+) -> list[FullCourseBuildSettings]:
+    course_builds = database.get_course_builds(db, academic_year, instructor_email)
+    response = []
+    for course in course_builds:
+        response.append({
+            "instructor_firstname": course.instructor_firstname,
+            "instructor_lastname": course.instructor_lastname,
+            "instructor_email": course.instructor_email,
+            "school_district_name": course.school_district.name,
+            "academic_year": course.academic_year,
+            "academic_year_short": course.academic_year_short,
+            "course_name": course.course_name,
+            "course_shortname": course.course_shortname,
+            "creator_email": course.creator.email,
+            "status": course.status.value,
+        })
 
-        if course.creator_id:
-            creator_email = course.creator.email
-            course.creator_id = creator_email
-
-        if course.status:
-            course.status = course.status.value
-
-    return course_build
+    return response
 
 
 @router.get("/moodle/user", dependencies=[Depends(verify_user)])
