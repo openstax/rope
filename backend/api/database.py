@@ -162,17 +162,31 @@ def create_course_build(
         course_name=course_name,
         course_shortname=course_shortname,
         course_category=course_category,
-        school_district=school_district_id,
+        school_district_id=school_district_id,
         academic_year=academic_year,
         academic_year_short=academic_year_short,
         base_course_id=base_course_id,
         status=status,
-        creator=creator,
+        creator_id=creator,
     )
     db.add(new_course_build)
     db.commit()
     db.refresh(new_course_build)
     return new_course_build
+
+
+def get_course_builds(db: Session, academic_year, instructor_email):
+    course_builds = db.query(CourseBuild)
+
+    if academic_year:
+        course_builds = course_builds.filter(CourseBuild.academic_year == academic_year)
+
+    if instructor_email:
+        course_builds = course_builds.filter(
+            CourseBuild.instructor_email == instructor_email
+        )
+
+    return course_builds.all()
 
 
 def get_course_by_shortname(db: Session, course_shortname):
