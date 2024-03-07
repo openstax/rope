@@ -5,6 +5,18 @@ export interface User {
   id: number
 }
 
+export interface MoodleSettings {
+  id?: number
+  name: string
+  value: string
+}
+
+export interface SchoolDistrict {
+  id: number
+  name: string
+  active: boolean
+}
+
 function convertApiUserToUser(apiUser: { email: string, is_admin: boolean, is_manager: boolean, id: number }): User {
   return {
     email: apiUser.email,
@@ -37,7 +49,6 @@ export const ropeApi = {
       body: JSON.stringify({ email, is_admin: isAdmin, is_manager: isManager })
     })
     if (!response.ok) {
-      console.log(response)
       throw new Error('Failed to add user')
     }
 
@@ -70,5 +81,84 @@ export const ropeApi = {
 
     const updatedUserFromApi: { id: number, email: string, is_admin: boolean, is_manager: boolean } = await response.json()
     return convertApiUserToUser(updatedUserFromApi)
+  },
+  getMoodleSettings: async (): Promise<MoodleSettings[]> => {
+    const response = await fetch('/api/admin/settings/moodle')
+    if (!response.ok) {
+      throw new Error('Failed to get Moodle settings')
+    }
+    const settings: MoodleSettings[] = await response.json()
+    return settings
+  },
+  createMoodleSetting: async (setting: MoodleSettings): Promise<MoodleSettings> => {
+    const response = await fetch('/api/admin/settings/moodle', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(setting)
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to create Moodle setting')
+    }
+    const newSetting: MoodleSettings = await response.json()
+    return newSetting
+  },
+  updateMoodleSettings: async (id: number, settings: MoodleSettings): Promise<MoodleSettings> => {
+    const response = await fetch(`/api/admin/settings/moodle/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(settings)
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to update Moodle setting')
+    }
+    const updatedSetting: MoodleSettings = await response.json()
+    return updatedSetting
+  },
+  getDistricts: async (): Promise<SchoolDistrict[]> => {
+    const response = await fetch('/api/admin/settings/district')
+
+    if (!response.ok) {
+      throw new Error('Failed to get school districts')
+    }
+    const districts: SchoolDistrict[] = await response.json()
+    return districts
+  },
+
+  createDistrict: async (district: SchoolDistrict): Promise<SchoolDistrict> => {
+    const response = await fetch('/api/admin/settings/district', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(district)
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to create school district')
+    }
+    const newDistrict: SchoolDistrict = await response.json()
+    return newDistrict
+  },
+
+  updateDistrict: async (district: SchoolDistrict): Promise<SchoolDistrict> => {
+    const response = await fetch(`/api/admin/settings/district/${district.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(district)
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to update school district')
+    }
+    const updatedDistrict: SchoolDistrict = await response.json()
+    return updatedDistrict
   }
 }
