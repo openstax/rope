@@ -65,7 +65,7 @@ def create_course_build(
         )
         nonce += 1
     user_db = database.get_user_by_email(db, current_user["email"])
-    school_district_name = course_build_settings.school_district
+    school_district_name = course_build_settings.school_district_name
     school_district = database.get_district_by_name(db, school_district_name)
     school_district_id = school_district.id
     creator = user_db.id
@@ -89,14 +89,39 @@ def create_course_build(
         "instructor_firstname": instructor_firstname,
         "instructor_lastname": instructor_lastname,
         "instructor_email": instructor_email,
-        "school_district": school_district_name,
+        "school_district_name": school_district_name,
         "academic_year": academic_year,
         "academic_year_short": academic_year_short,
         "course_name": course_name,
         "course_shortname": maybe_course_shortname,
-        "creator": current_user["email"],
+        "creator_email": current_user["email"],
         "status": status,
     }
+
+
+@router.get("/moodle/course/build", dependencies=[Depends(verify_user)])
+def get_course_builds(
+    db: Session = Depends(database.get_db),
+    academic_year: str = None,
+    instructor_email: str = None,
+) -> list[FullCourseBuildSettings]:
+    course_builds = database.get_course_builds(db, academic_year, instructor_email)
+    response = []
+    for course in course_builds:
+        response.append({
+            "instructor_firstname": course.instructor_firstname,
+            "instructor_lastname": course.instructor_lastname,
+            "instructor_email": course.instructor_email,
+            "school_district_name": course.school_district.name,
+            "academic_year": course.academic_year,
+            "academic_year_short": course.academic_year_short,
+            "course_name": course.course_name,
+            "course_shortname": course.course_shortname,
+            "creator_email": course.creator.email,
+            "status": course.status.value,
+        })
+
+    return response
 
 
 @router.get("/moodle/user", dependencies=[Depends(verify_user)])

@@ -39,7 +39,7 @@ class BaseCourseBuildSettings(BaseModel):
     instructor_firstname: str
     instructor_lastname: str
     instructor_email: str
-    school_district: str
+    school_district_name: str
 
 
 class FullCourseBuildSettings(BaseCourseBuildSettings):
@@ -50,7 +50,7 @@ class FullCourseBuildSettings(BaseCourseBuildSettings):
     course_enrollment_key: Optional[str] = None
     academic_year: str
     academic_year_short: str
-    creator: str
+    creator_email: str
     status: Literal["created", "processing", "completed", "failed"]
 
 
