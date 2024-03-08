@@ -186,5 +186,19 @@ export const ropeApi = {
     }
     const updatedDistrict: SchoolDistrict = await response.json()
     return updatedDistrict
+  },
+  login: async (token: string): Promise<void> => {
+    const resp = await fetch('/api/session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        token
+      })
+    })
+    if (resp.status !== 200) {
+      throw new Error('Login failed')
+    }
   }
 }
