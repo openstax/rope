@@ -107,6 +107,7 @@ export const ropeApi = {
       console.error('Logout error:', error)
       return false
     }
+  },
   getMoodleSettings: async (): Promise<MoodleSettings[]> => {
     const response = await fetch('/api/admin/settings/moodle')
     if (!response.ok) {
