@@ -122,7 +122,8 @@ function Page(): JSX.Element {
         if (setting.id !== undefined) {
           return await ropeApi.updateMoodleSettings(setting.id, { ...setting, value: setting.value })
         } else {
-          return await ropeApi.createMoodleSetting({ name: setting.name, value: setting.value })
+          const newSetting = await ropeApi.createMoodleSetting({ name: setting.name, value: setting.value })
+          setting.id = newSetting.id
         }
       }))
       setSettingsMessage('Settings saved successfully')
@@ -139,8 +140,7 @@ function Page(): JSX.Element {
     try {
       const newDistrict: SchoolDistrict = await ropeApi.createDistrict({
         name: newDistrictName,
-        active: true,
-        id: 0
+        active: true
       })
       setDistricts([...districts, newDistrict])
       setNewDistrictName('')
@@ -196,7 +196,11 @@ function Page(): JSX.Element {
             {district.name}
             <StatusButtonGroup>
               <span>Active: {district.active ? 'Yes' : 'No'}</span>
-              <Button onClick={() => { void handleToggleActive(district.id, !district.active, district.name) }}>
+              <Button onClick={() => {
+                if (district.id !== undefined) {
+                  void handleToggleActive(district.id, !district.active, district.name)
+                }
+              }}>
                 Toggle Active
               </Button>
             </StatusButtonGroup>

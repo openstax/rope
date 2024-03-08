@@ -160,7 +160,7 @@ describe('Settings page', async () => {
       expect(global.fetch).toHaveBeenCalledWith('/api/admin/settings/district', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'New District', active: true, id: 0 })
+        body: JSON.stringify({ name: 'New District', active: true })
       })
     })
   })

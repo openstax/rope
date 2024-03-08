@@ -12,7 +12,7 @@ export interface MoodleSettings {
 }
 
 export interface SchoolDistrict {
-  id: number
+  id?: number
   name: string
   active: boolean
 }
