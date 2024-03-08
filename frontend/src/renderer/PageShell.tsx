@@ -6,51 +6,45 @@ import { Header } from '../components/Header'
 import { AuthGuard } from '../components/AuthGuard'
 import { Content } from '../components/Content'
 import { AuthContext, AuthStatus, type AuthState } from '../components/useAuthContext'
+import { ropeApi } from '../utils/ropeApi'
 
 export function PageShell({ children, pageContext }: { children: React.ReactNode, pageContext: PageContext }): JSX.Element {
   const [authState, setAuthState] = useState<AuthState>({ status: AuthStatus.Unknown, email: undefined, isAdmin: false, isManager: false })
 
   useEffect(() => {
-    const getCurrentUser = async (): Promise<void> => {
-      const resp = await fetch('/api/user/current')
-      if (resp.status !== 200) {
+    const fetchCurrentUser = async (): Promise<void> => {
+      const user = await ropeApi.getCurrentUser()
+
+      if (user != null) {
+        setAuthState({
+          status: AuthStatus.SignedIn,
+          email: user.email,
+          isAdmin: user.isAdmin,
+          isManager: user.isManager
+        })
+      } else {
         setAuthState({
           status: AuthStatus.NotSignedIn,
           email: undefined,
           isAdmin: false,
           isManager: false
         })
-        return
       }
-      const data = await resp.json()
-      setAuthState({
-        status: AuthStatus.SignedIn,
-        email: data.email,
-        isAdmin: data.is_admin,
-        isManager: data.is_manager
-      })
     }
 
-    getCurrentUser().catch((err) => {
-      console.error(err)
-    })
+    fetchCurrentUser().catch(console.error)
   }, [])
 
-  const logout = (): void => {
-    fetch('/api/session', { method: 'DELETE' })
-      .then(resp => {
-        if (resp.status === 200) {
-          setAuthState({
-            status: AuthStatus.NotSignedIn,
-            email: undefined,
-            isAdmin: false,
-            isManager: false
-          })
-        }
+  const logout = async (): Promise<void> => {
+    const success = await ropeApi.logoutUser()
+    if (success) {
+      setAuthState({
+        status: AuthStatus.NotSignedIn,
+        email: undefined,
+        isAdmin: false,
+        isManager: false
       })
-      .catch(error => {
-        console.error('Logout error:', error)
-      })
+    }
   }
 
   return (
@@ -58,7 +52,7 @@ export function PageShell({ children, pageContext }: { children: React.ReactNode
       <PageContextProvider pageContext={pageContext}>
         <AuthContext.Provider value={authState}>
           <AuthGuard>
-              <Header logout={logout}>
+              <Header logout={() => { void logout() }}>
               </Header>
               <Content>{children}</Content>
           </AuthGuard>

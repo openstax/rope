@@ -70,5 +70,31 @@ export const ropeApi = {
 
     const updatedUserFromApi: { id: number, email: string, is_admin: boolean, is_manager: boolean } = await response.json()
     return convertApiUserToUser(updatedUserFromApi)
+  },
+  getCurrentUser: async (): Promise<{ email?: string, isAdmin?: boolean, isManager?: boolean } | null> => {
+    try {
+      const response = await fetch('/api/user/current')
+      if (!response.ok) {
+        throw new Error('Failed to fetch current user')
+      }
+      const data = await response.json()
+      return {
+        email: data.email,
+        isAdmin: data.is_admin,
+        isManager: data.is_manager
+      }
+    } catch (error) {
+      console.error(error)
+      return null
+    }
+  },
+  logoutUser: async (): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/session', { method: 'DELETE' })
+      return response.ok
+    } catch (error) {
+      console.error('Logout error:', error)
+      return false
+    }
   }
 }
