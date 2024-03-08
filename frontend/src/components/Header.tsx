@@ -55,9 +55,13 @@ export function Header({ children, logout }: HeaderProps): JSX.Element {
           Courses
         </Link>
         {authContext.isAdmin
-          ? <Link className="navitem" href="/users">
+          ? <> <Link className="navitem" href="/users">
           Users
         </Link>
+        <Link className="navitem" href="/settings">
+          Settings
+        </Link>
+        </>
           : <></>}
         {authContext.status === AuthStatus.SignedIn
           ? <a className="right-element" href="#" onClick={logout}>Logout</a>
