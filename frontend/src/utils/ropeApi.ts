@@ -17,6 +17,25 @@ export interface SchoolDistrict {
   active: boolean
 }
 
+export interface MoodleUser {
+  first_name: string
+  last_name: string
+  email: string
+}
+
+export interface CourseBuild {
+  instructor_firstname: string
+  instructor_lastname: string
+  instructor_email: string
+  school_district_name: string
+  academic_year: string
+  academic_year_short: string
+  course_name: string
+  course_shortname: string
+  creator_email: string
+  status: string
+}
+
 function convertApiUserToUser(apiUser: { email: string, is_admin: boolean, is_manager: boolean, id: number }): User {
   return {
     email: apiUser.email,
@@ -82,6 +101,18 @@ export const ropeApi = {
     const updatedUserFromApi: { id: number, email: string, is_admin: boolean, is_manager: boolean } = await response.json()
     return convertApiUserToUser(updatedUserFromApi)
   },
+
+  getMoodleUser: async (email: string): Promise<MoodleUser> => {
+    const response = await fetch(`/api/moodle/user?email=${email}`)
+
+    if (!response.ok) {
+      throw new Error('Failed to get the user')
+    }
+
+    const instructor: MoodleUser = await response.json()
+    return instructor
+  },
+
   getMoodleSettings: async (): Promise<MoodleSettings[]> => {
     const response = await fetch('/api/admin/settings/moodle')
     if (!response.ok) {
@@ -90,6 +121,7 @@ export const ropeApi = {
     const settings: MoodleSettings[] = await response.json()
     return settings
   },
+
   createMoodleSetting: async (setting: MoodleSettings): Promise<MoodleSettings> => {
     const response = await fetch('/api/admin/settings/moodle', {
       method: 'POST',
@@ -105,6 +137,7 @@ export const ropeApi = {
     const newSetting: MoodleSettings = await response.json()
     return newSetting
   },
+
   updateMoodleSettings: async (id: number, settings: MoodleSettings): Promise<MoodleSettings> => {
     const response = await fetch(`/api/admin/settings/moodle/${id}`, {
       method: 'PUT',
@@ -120,6 +153,7 @@ export const ropeApi = {
     const updatedSetting: MoodleSettings = await response.json()
     return updatedSetting
   },
+
   getDistricts: async (): Promise<SchoolDistrict[]> => {
     const response = await fetch('/api/admin/settings/district')
 
@@ -160,5 +194,39 @@ export const ropeApi = {
     }
     const updatedDistrict: SchoolDistrict = await response.json()
     return updatedDistrict
+  },
+
+  getCourseBuilds: async (academicYear: string, instructorEmail: string): Promise<CourseBuild[]> => {
+    const response = await fetch(`/api/moodle/course/build?academic_year=${academicYear}&instructor_email=${instructorEmail}`)
+
+    if (!response.ok) {
+      throw new Error('Failed to get course builds')
+    }
+
+    const courseBuilds: CourseBuild[] = await response.json()
+    return courseBuilds
+  },
+
+  createCourseBuild: async (instructorFirstName: string, instructorLastName: string, instructorEmail: string, schoolDistrictName: string): Promise<CourseBuild> => {
+    const courseSettings = {
+      instructor_firstname: instructorFirstName,
+      instructor_lastname: instructorLastName,
+      instructor_email: instructorEmail,
+      school_district_name: schoolDistrictName
+    }
+    const response = await fetch('/api/moodle/course/build', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(courseSettings)
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to create course build setting')
+    }
+
+    const newSetting: CourseBuild = await response.json()
+    return newSetting
   }
 }
