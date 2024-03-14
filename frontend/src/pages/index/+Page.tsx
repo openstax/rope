@@ -176,8 +176,10 @@ function Page(): JSX.Element {
           return
         }
       }
-      await fetchDistricts()
-      setShowCourseBuildForm(true)
+      if (authContext.isAdmin || authContext.isManager) {
+        await fetchDistricts()
+        setShowCourseBuildForm(true)
+      }
       setCourseBuildFormMessage('A course build does not exist for that instructor')
     } catch (error) {
       console.error('Error fetching course builds:', error)
