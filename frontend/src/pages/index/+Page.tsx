@@ -231,8 +231,8 @@ function Page(): JSX.Element {
       <h2>Instructor Information</h2>
       {(moodleUser !== null) && <BaseContainer>
         <div>
-          <p><InstructorSpan>First Name:</InstructorSpan> {moodleUser?.first_name}</p>
-          <p><InstructorSpan>Last Name:</InstructorSpan> {moodleUser?.last_name}</p>
+          <p><InstructorSpan>First Name:</InstructorSpan> {moodleUser?.firstName}</p>
+          <p><InstructorSpan>Last Name:</InstructorSpan> {moodleUser?.lastName}</p>
           <p><InstructorSpan>Email:</InstructorSpan> {moodleUser?.email}</p>
         </div>
         <Button onClick={() => { void fetchCourseBuilds() }}>Find Course Build</Button>
@@ -241,18 +241,18 @@ function Page(): JSX.Element {
       <h2>Course Build Information</h2>
       {(courseBuild !== null) && <CourseBuildResultsContainer>
         <div>
-          <p><InstructorSpan>Creator:</InstructorSpan> {courseBuild[0].creator_email}</p>
+          <p><InstructorSpan>Creator:</InstructorSpan> {courseBuild[0].creatorEmail}</p>
           <p><InstructorSpan>Status:</InstructorSpan> {courseBuild[0].status}</p>
-          <p><InstructorSpan>Instructor First Name:</InstructorSpan> {courseBuild[0].instructor_firstname}</p>
-          <p><InstructorSpan>Instructor Last Name:</InstructorSpan> {courseBuild[0].instructor_lastname}</p>
-          <p><InstructorSpan>Instructor Email:</InstructorSpan> {courseBuild[0].instructor_email}</p>
+          <p><InstructorSpan>Instructor First Name:</InstructorSpan> {courseBuild[0].instructorFirstName}</p>
+          <p><InstructorSpan>Instructor Last Name:</InstructorSpan> {courseBuild[0].instructorLastName}</p>
+          <p><InstructorSpan>Instructor Email:</InstructorSpan> {courseBuild[0].instructorEmail}</p>
         </div>
         <div>
-          <p><InstructorSpan>School District:</InstructorSpan> {courseBuild[0].school_district_name}</p>
-          <p><InstructorSpan>Academic Year:</InstructorSpan> {courseBuild[0].academic_year}</p>
-          <p><InstructorSpan>Academic Year Short:</InstructorSpan> {courseBuild[0].academic_year_short}</p>
-          <p><InstructorSpan>Course Name:</InstructorSpan> {courseBuild[0].course_name}</p>
-          <p><InstructorSpan>Course Short Name:</InstructorSpan> {courseBuild[0].course_shortname}</p>
+          <p><InstructorSpan>School District:</InstructorSpan> {courseBuild[0].schoolDistrictName}</p>
+          <p><InstructorSpan>Academic Year:</InstructorSpan> {courseBuild[0].academicYear}</p>
+          <p><InstructorSpan>Academic Year Short:</InstructorSpan> {courseBuild[0].academicYearShort}</p>
+          <p><InstructorSpan>Course Name:</InstructorSpan> {courseBuild[0].courseName}</p>
+          <p><InstructorSpan>Course Short Name:</InstructorSpan> {courseBuild[0].courseShortName}</p>
         </div>
       </CourseBuildResultsContainer>}
       {(authContext.isManager || authContext.isAdmin) &&

@@ -17,13 +17,35 @@ export interface SchoolDistrict {
   active: boolean
 }
 
-export interface MoodleUser {
-  first_name: string
-  last_name: string
+export type MoodleUser = {
+  firstName: string
+  lastName: string
   email: string
-}
+} | null
 
 export interface CourseBuild {
+  instructorFirstName: string
+  instructorLastName: string
+  instructorEmail: string
+  schoolDistrictName: string
+  academicYear: string
+  academicYearShort: string
+  courseName: string
+  courseShortName: string
+  creatorEmail: string
+  status: string
+}
+
+function convertApiUserToUser(apiUser: { email: string, is_admin: boolean, is_manager: boolean, id: number }): User {
+  return {
+    email: apiUser.email,
+    isAdmin: apiUser.is_admin,
+    isManager: apiUser.is_manager,
+    id: apiUser.id
+  }
+}
+
+function convertApiCourseBuildToCourseBuild(apiCourseBuild: {
   instructor_firstname: string
   instructor_lastname: string
   instructor_email: string
@@ -34,14 +56,29 @@ export interface CourseBuild {
   course_shortname: string
   creator_email: string
   status: string
+}): CourseBuild {
+  return {
+    instructorFirstName: apiCourseBuild.instructor_firstname,
+    instructorLastName: apiCourseBuild.instructor_lastname,
+    instructorEmail: apiCourseBuild.instructor_email,
+    schoolDistrictName: apiCourseBuild.school_district_name,
+    academicYear: apiCourseBuild.academic_year,
+    academicYearShort: apiCourseBuild.academic_year_short,
+    courseName: apiCourseBuild.course_name,
+    courseShortName: apiCourseBuild.course_shortname,
+    creatorEmail: apiCourseBuild.creator_email,
+    status: apiCourseBuild.status
+  }
 }
 
-function convertApiUserToUser(apiUser: { email: string, is_admin: boolean, is_manager: boolean, id: number }): User {
+function convertApiMoodleUsertoMoodleUser(apiMoodleUser: { first_name: string, last_name: string, email: string }): MoodleUser | null {
+  if (apiMoodleUser === null) {
+    return null
+  }
   return {
-    email: apiUser.email,
-    isAdmin: apiUser.is_admin,
-    isManager: apiUser.is_manager,
-    id: apiUser.id
+    firstName: apiMoodleUser.first_name,
+    lastName: apiMoodleUser.last_name,
+    email: apiMoodleUser.email
   }
 }
 
@@ -104,13 +141,12 @@ export const ropeApi = {
 
   getMoodleUser: async (email: string): Promise<MoodleUser> => {
     const response = await fetch(`/api/moodle/user?email=${email}`)
-
     if (!response.ok) {
       throw new Error('Failed to get the user')
     }
 
-    const instructor: MoodleUser = await response.json()
-    return instructor
+    const newMoodleUserFromApi: { first_name: string, last_name: string, email: string } = await response.json()
+    return convertApiMoodleUsertoMoodleUser(newMoodleUserFromApi)
   },
 
   getMoodleSettings: async (): Promise<MoodleSettings[]> => {
@@ -203,7 +239,18 @@ export const ropeApi = {
       throw new Error('Failed to get course builds')
     }
 
-    const courseBuilds: CourseBuild[] = await response.json()
+    const courseBuildsFromApi = await response.json()
+    const courseBuilds: CourseBuild[] = courseBuildsFromApi.map((courseBuild: {
+      instructor_firstname: string
+      instructor_lastname: string
+      instructor_email: string
+      school_district_name: string
+      academic_year: string
+      academic_year_short: string
+      course_name: string
+      course_shortname: string
+      creator_email: string
+      status: string }) => convertApiCourseBuildToCourseBuild(courseBuild))
     return courseBuilds
   },
 
@@ -226,7 +273,19 @@ export const ropeApi = {
       throw new Error('Failed to create course build setting')
     }
 
-    const newSetting: CourseBuild = await response.json()
-    return newSetting
+    const newCourseBuildFromApi: {
+      instructor_firstname: string
+      instructor_lastname: string
+      instructor_email: string
+      school_district_name: string
+      academic_year: string
+      academic_year_short: string
+      course_name: string
+      course_shortname: string
+      creator_email: string
+      status: string
+    } = await response.json()
+    // const newSetting: CourseBuild = await response.json()
+    return convertApiCourseBuildToCourseBuild(newCourseBuildFromApi)
   }
 }
