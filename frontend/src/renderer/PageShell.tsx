@@ -32,7 +32,7 @@ export function PageShell({ children, pageContext }: { children: React.ReactNode
       }
     }
 
-    fetchCurrentUser().catch(console.error)
+    void fetchCurrentUser()
   }, [])
 
   const logout = async (): Promise<void> => {
