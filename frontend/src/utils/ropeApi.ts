@@ -17,6 +17,19 @@ export interface SchoolDistrict {
   active: boolean
 }
 
+export interface CourseBuild {
+  instructor_firstname: string
+  instructor_lastname: string
+  instructor_email: string
+  school_district_name: string
+  academic_year: string
+  academic_year_short: string
+  course_name: string
+  course_shortname: string
+  creator_email: string
+  status: string
+}
+
 function convertApiUserToUser(apiUser: { email: string, is_admin: boolean, is_manager: boolean, id: number }): User {
   return {
     email: apiUser.email,
@@ -160,5 +173,98 @@ export const ropeApi = {
     }
     const updatedDistrict: SchoolDistrict = await response.json()
     return updatedDistrict
+  },
+  getCourseBuilds: async (academicYear?: string, instructorEmail?: string): Promise<CourseBuild[]> => {
+    let url = '/api/moodle/course/build'
+    const params = new URLSearchParams()
+
+    if (academicYear != null) {
+      params.append('academic_year', academicYear)
+    }
+    if (instructorEmail != null) {
+      params.append('instructor_email', instructorEmail)
+    }
+
+    // Append params to the URL only if any exist
+    if (Array.from(params).length > 0) {
+      url += `?${params.toString()}`
+    }
+    console.log('url:', url)
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error('Failed to get course builds')
+    }
+
+    const courseBuilds: CourseBuild[] = await response.json()
+    return courseBuilds
+  },
+  fakeGetCourseBuilds: async (academicYear?: string, instructorEmail?: string): Promise<CourseBuild[]> => {
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    const fakeCourseBuilds: CourseBuild[] = [
+      {
+        instructor_firstname: 'John',
+        instructor_lastname: 'Doe',
+        instructor_email: 'john.doe@example.com',
+        school_district_name: 'Springfield School District',
+        academic_year: '2024',
+        academic_year_short: '23-24',
+        course_name: 'Introduction to Chemistry',
+        course_shortname: 'CHEM101',
+        creator_email: 'admin@example.com',
+        status: 'active'
+      },
+      {
+        instructor_firstname: 'Jane',
+        instructor_lastname: 'Smith',
+        instructor_email: 'jane.smith@example.com',
+        school_district_name: 'Riverside School District',
+        academic_year: '2024',
+        academic_year_short: '23-24',
+        course_name: 'Advanced Mathematics',
+        course_shortname: 'MATH301',
+        creator_email: 'admin@example.com',
+        status: 'active'
+      },
+      {
+        instructor_firstname: 'Jane',
+        instructor_lastname: 'Smith',
+        instructor_email: 'jane.smith@example.com',
+        school_district_name: 'Riverside School District',
+        academic_year: '2024',
+        academic_year_short: '23-24',
+        course_name: 'Advanced Mathematics',
+        course_shortname: 'MATH301',
+        creator_email: 'admin@example.com',
+        status: 'active'
+      },
+      {
+        instructor_firstname: 'Jane',
+        instructor_lastname: 'Smith',
+        instructor_email: 'jane.smith@example.com',
+        school_district_name: 'Riverside School District',
+        academic_year: '2024',
+        academic_year_short: '23-24',
+        course_name: 'Advanced Mathematics',
+        course_shortname: 'MATH301',
+        creator_email: 'admin@example.com',
+        status: 'active'
+      },
+      {
+        instructor_firstname: 'Jane',
+        instructor_lastname: 'Smith',
+        instructor_email: 'jane.smith@example.com',
+        school_district_name: 'Riverside School District',
+        academic_year: '2024',
+        academic_year_short: '23-24',
+        course_name: 'Advanced Mathematics',
+        course_shortname: 'MATH301',
+        creator_email: 'admin@example.com',
+        status: 'active'
+      }
+    ]
+    return fakeCourseBuilds
   }
+
 }
