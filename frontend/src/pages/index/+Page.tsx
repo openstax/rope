@@ -109,6 +109,7 @@ function Page(): JSX.Element {
   const [showCourseBuildForm, setShowCourseBuildForm] = useState<boolean>(false)
   const [courseBuildFormMessage, setCourseBuildFormMessage] = useState<string>('')
   const [districts, setDistricts] = useState<SchoolDistrict[]>([])
+  const [dropdownDisabled, setDropdownDisabled] = useState<boolean>(false)
 
   const courseBuildFormSchema = Yup.object().shape({
     instructorFirstName: Yup.string().required('Instructor first name required'),
@@ -143,6 +144,7 @@ function Page(): JSX.Element {
     setCourseBuildFormMessage('')
     setCourseBuild(null)
     setShowCourseBuildForm(false)
+    setDropdownDisabled(false)
   }
 
   const handleUserMoodleSearch = async (values: InstructorEmailValue): Promise<void> => {
@@ -195,6 +197,7 @@ function Page(): JSX.Element {
         values.schoolDistrictName
       )
       setCourseBuildFormMessage('Course build successfully created!')
+      setDropdownDisabled(true)
     } catch (error) {
       console.error('Failed to save course build settings')
       setCourseBuildFormMessage('Unable to create course build!')
@@ -304,7 +307,7 @@ function Page(): JSX.Element {
                   <Select
                     as='select'
                     name='schoolDistrictName'
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || dropdownDisabled}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       setCourseBuildFormMessage('')
                       void setFieldValue('schoolDistrictName',
@@ -320,7 +323,7 @@ function Page(): JSX.Element {
                   </Select>
                   </Label>
                   <StyledErrorMessage component='p' name='schoolDistrictName' />
-                  <Button type='submit' disabled={isSubmitting}>Create Course Build</Button>
+                  <Button type='submit' disabled={isSubmitting || dropdownDisabled}>Create Course Build</Button>
                 </StyledForm>
               )}
             </Formik>
