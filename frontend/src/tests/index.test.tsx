@@ -5,7 +5,7 @@ import { type PageContext } from 'vike/types'
 import { AuthContext, AuthStatus } from '../components/useAuthContext'
 import { PageContextProvider } from '../components/usePageContext'
 
-const createFetchResponse = (data) => {
+const createFetchResponse = (data: unknown): unknown => {
   return {
     ok: true,
     json: async () => await Promise.resolve(data)
