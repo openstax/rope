@@ -231,9 +231,9 @@ function Page(): JSX.Element {
       <h2>Instructor Information</h2>
       {(moodleUser !== null) && <BaseContainer>
         <div>
-          <p><InstructorSpan>First Name:</InstructorSpan> {moodleUser?.firstName}</p>
-          <p><InstructorSpan>Last Name:</InstructorSpan> {moodleUser?.lastName}</p>
-          <p><InstructorSpan>Email:</InstructorSpan> {moodleUser?.email}</p>
+          <p><InstructorSpan>First Name:</InstructorSpan> {moodleUser.firstName}</p>
+          <p><InstructorSpan>Last Name:</InstructorSpan> {moodleUser.lastName}</p>
+          <p><InstructorSpan>Email:</InstructorSpan> {moodleUser.email}</p>
         </div>
         <Button onClick={() => { void fetchCourseBuilds() }}>Find Course Build</Button>
       </BaseContainer>
@@ -257,14 +257,14 @@ function Page(): JSX.Element {
       </CourseBuildResultsContainer>}
       {(authContext.isManager || authContext.isAdmin) &&
         <>
-          {(showCourseBuildForm) &&
+          {(showCourseBuildForm && moodleUser !== null) &&
           <>
             <Formik
             initialValues={
               {
-                instructorFirstName: '',
-                instructorLastName: '',
-                instructorEmail: '',
+                instructorFirstName: moodleUser.firstName,
+                instructorLastName: moodleUser.lastName,
+                instructorEmail: moodleUser.email,
                 schoolDistrictName: ''
               }
             }
@@ -278,12 +278,7 @@ function Page(): JSX.Element {
                     name='instructorFirstName'
                     type='text'
                     placeholder='Enter instructor first name'
-                    disabled={isSubmitting}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setCourseBuildFormMessage('')
-                      void setFieldValue('instructorFirstName',
-                        e.target.value)
-                    }}
+                    disabled={true}
                   />
                   </Label>
                   <StyledErrorMessage component='p' name='instructorFirstName' />
@@ -292,12 +287,7 @@ function Page(): JSX.Element {
                     name='instructorLastName'
                     type='text'
                     placeholder='Enter instructor last name'
-                    disabled={isSubmitting}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setCourseBuildFormMessage('')
-                      void setFieldValue('instructorLastName',
-                        e.target.value)
-                    }}
+                    disabled={true}
                   />
                   </Label>
                   <StyledErrorMessage component='p' name='instructorLastName' />
@@ -306,12 +296,7 @@ function Page(): JSX.Element {
                     name='instructorEmail'
                     type='email'
                     placeholder='Enter instructor email'
-                    disabled={isSubmitting}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setCourseBuildFormMessage('')
-                      void setFieldValue('instructorEmail',
-                        e.target.value)
-                    }}
+                    disabled={true}
                   />
                   </Label>
                   <StyledErrorMessage component='p' name='instructorEmail' />
