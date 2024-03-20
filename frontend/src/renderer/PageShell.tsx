@@ -15,7 +15,7 @@ export function PageShell({ children, pageContext }: { children: React.ReactNode
     const fetchCurrentUser = async (): Promise<void> => {
       const user = await ropeApi.getCurrentUser()
 
-      if (user?.isAdmin !== undefined && user.isManager !== undefined) {
+      if (user !== null) {
         setAuthState({
           status: AuthStatus.SignedIn,
           email: user.email,
