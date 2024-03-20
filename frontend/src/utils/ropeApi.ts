@@ -17,7 +17,35 @@ export interface SchoolDistrict {
   active: boolean
 }
 
+export type MoodleUser = {
+  firstName: string
+  lastName: string
+  email: string
+} | null
+
 export interface CourseBuild {
+  instructorFirstName: string
+  instructorLastName: string
+  instructorEmail: string
+  schoolDistrictName: string
+  academicYear: string
+  academicYearShort: string
+  courseName: string
+  courseShortName: string
+  creatorEmail: string
+  status: string
+}
+
+function convertApiUserToUser(apiUser: { email: string, is_admin: boolean, is_manager: boolean, id: number }): User {
+  return {
+    email: apiUser.email,
+    isAdmin: apiUser.is_admin,
+    isManager: apiUser.is_manager,
+    id: apiUser.id
+  }
+}
+
+function convertApiCourseBuildToCourseBuild(apiCourseBuild: {
   instructor_firstname: string
   instructor_lastname: string
   instructor_email: string
@@ -28,14 +56,29 @@ export interface CourseBuild {
   course_shortname: string
   creator_email: string
   status: string
+}): CourseBuild {
+  return {
+    instructorFirstName: apiCourseBuild.instructor_firstname,
+    instructorLastName: apiCourseBuild.instructor_lastname,
+    instructorEmail: apiCourseBuild.instructor_email,
+    schoolDistrictName: apiCourseBuild.school_district_name,
+    academicYear: apiCourseBuild.academic_year,
+    academicYearShort: apiCourseBuild.academic_year_short,
+    courseName: apiCourseBuild.course_name,
+    courseShortName: apiCourseBuild.course_shortname,
+    creatorEmail: apiCourseBuild.creator_email,
+    status: apiCourseBuild.status
+  }
 }
 
-function convertApiUserToUser(apiUser: { email: string, is_admin: boolean, is_manager: boolean, id: number }): User {
+function convertApiMoodleUsertoMoodleUser(apiMoodleUser: { first_name: string, last_name: string, email: string }): MoodleUser | null {
+  if (apiMoodleUser === null) {
+    return null
+  }
   return {
-    email: apiUser.email,
-    isAdmin: apiUser.is_admin,
-    isManager: apiUser.is_manager,
-    id: apiUser.id
+    firstName: apiMoodleUser.first_name,
+    lastName: apiMoodleUser.last_name,
+    email: apiMoodleUser.email
   }
 }
 
@@ -95,6 +138,17 @@ export const ropeApi = {
     const updatedUserFromApi: { id: number, email: string, is_admin: boolean, is_manager: boolean } = await response.json()
     return convertApiUserToUser(updatedUserFromApi)
   },
+
+  getMoodleUser: async (email: string): Promise<MoodleUser> => {
+    const response = await fetch(`/api/moodle/user?email=${email}`)
+    if (!response.ok) {
+      throw new Error('Failed to get the user')
+    }
+
+    const newMoodleUserFromApi: { first_name: string, last_name: string, email: string } = await response.json()
+    return convertApiMoodleUsertoMoodleUser(newMoodleUserFromApi)
+  },
+
   getMoodleSettings: async (): Promise<MoodleSettings[]> => {
     const response = await fetch('/api/admin/settings/moodle')
     if (!response.ok) {
@@ -103,6 +157,7 @@ export const ropeApi = {
     const settings: MoodleSettings[] = await response.json()
     return settings
   },
+
   createMoodleSetting: async (setting: MoodleSettings): Promise<MoodleSettings> => {
     const response = await fetch('/api/admin/settings/moodle', {
       method: 'POST',
@@ -118,6 +173,7 @@ export const ropeApi = {
     const newSetting: MoodleSettings = await response.json()
     return newSetting
   },
+
   updateMoodleSettings: async (id: number, settings: MoodleSettings): Promise<MoodleSettings> => {
     const response = await fetch(`/api/admin/settings/moodle/${id}`, {
       method: 'PUT',
@@ -133,6 +189,7 @@ export const ropeApi = {
     const updatedSetting: MoodleSettings = await response.json()
     return updatedSetting
   },
+
   getDistricts: async (): Promise<SchoolDistrict[]> => {
     const response = await fetch('/api/admin/settings/district')
 
@@ -191,80 +248,92 @@ export const ropeApi = {
     }
     console.log('url:', url)
     const response = await fetch(url)
-
     if (!response.ok) {
       throw new Error('Failed to get course builds')
     }
 
-    const courseBuilds: CourseBuild[] = await response.json()
+    const courseBuildsFromApi = await response.json()
+    const courseBuilds: CourseBuild[] = courseBuildsFromApi.map((courseBuild: {
+      instructor_firstname: string
+      instructor_lastname: string
+      instructor_email: string
+      school_district_name: string
+      academic_year: string
+      academic_year_short: string
+      course_name: string
+      course_shortname: string
+      creator_email: string
+      status: string }) => convertApiCourseBuildToCourseBuild(courseBuild))
     return courseBuilds
   },
-  fakeGetCourseBuilds: async (academicYear?: string, instructorEmail?: string): Promise<CourseBuild[]> => {
-    await new Promise(resolve => setTimeout(resolve, 100))
+  createCourseBuild: async (instructorFirstName: string, instructorLastName: string, instructorEmail: string, schoolDistrictName: string): Promise<CourseBuild> => {
+    const courseSettings = {
+      instructor_firstname: instructorFirstName,
+      instructor_lastname: instructorLastName,
+      instructor_email: instructorEmail,
+      school_district_name: schoolDistrictName
+    }
+    const response = await fetch('/api/moodle/course/build', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(courseSettings)
+    })
 
-    const fakeCourseBuilds: CourseBuild[] = [
-      {
-        instructor_firstname: 'John',
-        instructor_lastname: 'Doe',
-        instructor_email: 'john.doe@example.com',
-        school_district_name: 'Springfield School District',
-        academic_year: '2024',
-        academic_year_short: '23-24',
-        course_name: 'Introduction to Chemistry',
-        course_shortname: 'CHEM101',
-        creator_email: 'admin@example.com',
-        status: 'active'
+    if (!response.ok) {
+      throw new Error('Failed to create course build setting')
+    }
+
+    const newCourseBuildFromApi: {
+      instructor_firstname: string
+      instructor_lastname: string
+      instructor_email: string
+      school_district_name: string
+      academic_year: string
+      academic_year_short: string
+      course_name: string
+      course_shortname: string
+      creator_email: string
+      status: string
+    } = await response.json()
+    // const newSetting: CourseBuild = await response.json()
+    return convertApiCourseBuildToCourseBuild(newCourseBuildFromApi)
+  },
+  getCurrentUser: async (): Promise<{ email: string, isAdmin: boolean, isManager: boolean } | null> => {
+    const response = await fetch('/api/user/current')
+    if (!response.ok) {
+      console.error('Failed to fetch current user')
+      return null
+    }
+    const data = await response.json()
+    return {
+      email: data.email,
+      isAdmin: data.is_admin,
+      isManager: data.is_manager
+    }
+  },
+  logoutUser: async (): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/session', { method: 'DELETE' })
+      return response.ok
+    } catch (error) {
+      console.error('Logout error:', error)
+      return false
+    }
+  },
+  login: async (token: string): Promise<void> => {
+    const response = await fetch('/api/session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
       },
-      {
-        instructor_firstname: 'Jane',
-        instructor_lastname: 'Smith',
-        instructor_email: 'jane.smith@example.com',
-        school_district_name: 'Riverside School District',
-        academic_year: '2024',
-        academic_year_short: '23-24',
-        course_name: 'Advanced Mathematics',
-        course_shortname: 'MATH301',
-        creator_email: 'admin@example.com',
-        status: 'active'
-      },
-      {
-        instructor_firstname: 'Jane',
-        instructor_lastname: 'Smith',
-        instructor_email: 'jane.smith@example.com',
-        school_district_name: 'Riverside School District',
-        academic_year: '2024',
-        academic_year_short: '23-24',
-        course_name: 'Advanced Mathematics',
-        course_shortname: 'MATH301',
-        creator_email: 'admin@example.com',
-        status: 'active'
-      },
-      {
-        instructor_firstname: 'Jane',
-        instructor_lastname: 'Smith',
-        instructor_email: 'jane.smith@example.com',
-        school_district_name: 'Riverside School District',
-        academic_year: '2024',
-        academic_year_short: '23-24',
-        course_name: 'Advanced Mathematics',
-        course_shortname: 'MATH301',
-        creator_email: 'admin@example.com',
-        status: 'active'
-      },
-      {
-        instructor_firstname: 'Jane',
-        instructor_lastname: 'Smith',
-        instructor_email: 'jane.smith@example.com',
-        school_district_name: 'Riverside School District',
-        academic_year: '2024',
-        academic_year_short: '23-24',
-        course_name: 'Advanced Mathematics',
-        course_shortname: 'MATH301',
-        creator_email: 'admin@example.com',
-        status: 'active'
-      }
-    ]
-    return fakeCourseBuilds
+      body: JSON.stringify({
+        token
+      })
+    })
+    if (!response.ok) {
+      throw new Error('Login failed')
+    }
   }
-
 }
