@@ -128,12 +128,7 @@ def get_course_builds(
 def get_moodle_user(email: str = "") -> Optional[MoodleUser]:
     user_data = moodle_client.get_user_by_email(email)
     if not user_data:
-        first_name = "Prabhdip"
-        last_name = "Gill"
-        user_email = "pg53@rice.edu"
-
-        return {"first_name": first_name, "last_name": last_name, "email": user_email}
-
+        return None
     first_name = user_data.get("firstname")
     last_name = user_data.get("lastname")
     user_email = user_data.get("email")
