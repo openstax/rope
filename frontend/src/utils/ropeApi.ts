@@ -308,5 +308,41 @@ export const ropeApi = {
     } = await response.json()
     // const newSetting: CourseBuild = await response.json()
     return convertApiCourseBuildToCourseBuild(newCourseBuildFromApi)
+  },
+  getCurrentUser: async (): Promise<{ email: string, isAdmin: boolean, isManager: boolean } | null> => {
+    const response = await fetch('/api/user/current')
+    if (!response.ok) {
+      console.error('Failed to fetch current user')
+      return null
+    }
+    const data = await response.json()
+    return {
+      email: data.email,
+      isAdmin: data.is_admin,
+      isManager: data.is_manager
+    }
+  },
+  logoutUser: async (): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/session', { method: 'DELETE' })
+      return response.ok
+    } catch (error) {
+      console.error('Logout error:', error)
+      return false
+    }
+  },
+  login: async (token: string): Promise<void> => {
+    const response = await fetch('/api/session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        token
+      })
+    })
+    if (!response.ok) {
+      throw new Error('Login failed')
+    }
   }
 }

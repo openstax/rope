@@ -2,7 +2,7 @@ import { GoogleOAuthProvider, GoogleLogin, type CredentialResponse } from '@reac
 import { ENV } from '../../lib/env'
 import styled from 'styled-components'
 import { useState } from 'react'
-
+import { ropeApi } from '../../utils/ropeApi'
 const CenteredContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -19,37 +19,20 @@ const ErrorMessage = styled.p`
 function Page(): JSX.Element {
   const [error, setError] = useState<string>('')
 
-  const login = async (token: string): Promise<void> => {
-    const resp = await fetch(
-      '/api/session',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          token
-        })
-      }
-    )
-
-    if (resp.status !== 200) {
-      setError('Login failed')
-      throw new Error('Error: Login failed')
-    }
-  }
   const handleLogin = (credentialResponse: CredentialResponse): void => {
     const token = credentialResponse.credential
     if (token !== undefined) {
-      login(token)
+      ropeApi.login(token)
         .then(() => {
           window.location.href = '/'
         })
         .catch(error => {
           console.error('Error establishing session:', error)
+          setError('Login failed')
         })
     } else {
       console.error('Credential is undefined')
+      setError('Login failed')
     }
   }
 
