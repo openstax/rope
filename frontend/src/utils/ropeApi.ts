@@ -231,23 +231,10 @@ export const ropeApi = {
     const updatedDistrict: SchoolDistrict = await response.json()
     return updatedDistrict
   },
-  getCourseBuilds: async (academicYear?: string, instructorEmail?: string): Promise<CourseBuild[]> => {
-    let url = '/api/moodle/course/build'
-    const params = new URLSearchParams()
 
-    if (academicYear != null) {
-      params.append('academic_year', academicYear)
-    }
-    if (instructorEmail != null) {
-      params.append('instructor_email', instructorEmail)
-    }
+  getCourseBuilds: async (academicYear: string, instructorEmail: string): Promise<CourseBuild[]> => {
+    const response = await fetch(`/api/moodle/course/build?academic_year=${academicYear}&instructor_email=${instructorEmail}`)
 
-    // Append params to the URL only if any exist
-    if (Array.from(params).length > 0) {
-      url += `?${params.toString()}`
-    }
-    console.log('url:', url)
-    const response = await fetch(url)
     if (!response.ok) {
       throw new Error('Failed to get course builds')
     }
@@ -266,6 +253,28 @@ export const ropeApi = {
       status: string }) => convertApiCourseBuildToCourseBuild(courseBuild))
     return courseBuilds
   },
+  getAllCourseBuilds: async (): Promise<CourseBuild[]> => {
+    const response = await fetch('/api/moodle/course/build')
+
+    if (!response.ok) {
+      throw new Error('Failed to get all course builds')
+    }
+
+    const courseBuildsFromApi = await response.json()
+    const courseBuilds: CourseBuild[] = courseBuildsFromApi.map((courseBuild: {
+      instructor_firstname: string
+      instructor_lastname: string
+      instructor_email: string
+      school_district_name: string
+      academic_year: string
+      academic_year_short: string
+      course_name: string
+      course_shortname: string
+      creator_email: string
+      status: string }) => convertApiCourseBuildToCourseBuild(courseBuild))
+    return courseBuilds
+  },
+
   createCourseBuild: async (instructorFirstName: string, instructorLastName: string, instructorEmail: string, schoolDistrictName: string): Promise<CourseBuild> => {
     const courseSettings = {
       instructor_firstname: instructorFirstName,
@@ -299,41 +308,5 @@ export const ropeApi = {
     } = await response.json()
     // const newSetting: CourseBuild = await response.json()
     return convertApiCourseBuildToCourseBuild(newCourseBuildFromApi)
-  },
-  getCurrentUser: async (): Promise<{ email: string, isAdmin: boolean, isManager: boolean } | null> => {
-    const response = await fetch('/api/user/current')
-    if (!response.ok) {
-      console.error('Failed to fetch current user')
-      return null
-    }
-    const data = await response.json()
-    return {
-      email: data.email,
-      isAdmin: data.is_admin,
-      isManager: data.is_manager
-    }
-  },
-  logoutUser: async (): Promise<boolean> => {
-    try {
-      const response = await fetch('/api/session', { method: 'DELETE' })
-      return response.ok
-    } catch (error) {
-      console.error('Logout error:', error)
-      return false
-    }
-  },
-  login: async (token: string): Promise<void> => {
-    const response = await fetch('/api/session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        token
-      })
-    })
-    if (!response.ok) {
-      throw new Error('Login failed')
-    }
   }
 }

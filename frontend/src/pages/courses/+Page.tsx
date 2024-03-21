@@ -1,120 +1,159 @@
-import { useState, useEffect, useMemo } from 'react'
-import DataTable from 'react-data-table-component'
+import { useState, useEffect } from 'react'
+import DataTable, { type TableColumn } from 'react-data-table-component'
 import { ropeApi, type CourseBuild } from '../../utils/ropeApi'
-import styled from 'styled-components'
-function Page(): JSX.Element {
-  const Title = styled.h2`
+import { styled } from 'styled-components'
+import { useAuthContext } from '../../components/useAuthContext'
+
+const Title = styled.h2`
   color: #333;
   text-align: center;
   margin-bottom: 20px;
 `
-  const Container = styled.div`
-  display: flex;
+const Container = styled.div`
+  display: flex; 
   justify-content: center;
   align-items: center;
   flex-direction: column;
   margin-top: 50px;
+  padding: 8px
+`
+const FiltersContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  
+  span {
+    margin: 8px;
+  }
+  input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    maxwidth: 200px;
+
+    &:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+  }
 `
 
-  const [filterText, setFilterText] = useState('')
-  const [activeAcademicYear, setActiveAcademicYear] = useState<string | null>(null)
-  const [courses, setCourses] = useState<CourseBuild[]>([])
+function Page(): JSX.Element {
+  const authContext = useAuthContext()
+
+  const [courseBuilds, setCourseBuilds] = useState<CourseBuild[]>([])
+  const [filteredData, setFilteredData] = useState<CourseBuild[]>([])
+  const [filters, setFilters] = useState<{ email: string, academicYear: string }>({
+    email: '',
+    academicYear: ''
+  })
 
   useEffect(() => {
-    const fetchSettings = async (): Promise<void> => {
-      try {
-        const settings = await ropeApi.getMoodleSettings()
-        const activeAYSetting = settings.find(setting => setting.name === 'academic_year')
-        if ((activeAYSetting?.value) != null) {
-          setActiveAcademicYear(activeAYSetting.value)
-        }
-      } catch (error) {
-        console.error('Failed to fetch Moodle settings:', error)
-      }
+    if (authContext.isAdmin || authContext.isManager) {
+      void fetchData()
     }
+  }, [authContext.isAdmin, authContext.isManager])
 
-    void fetchSettings()
-  }, [])
-
-  useEffect(() => {
-    void fetchCourses()
-  }, [])
-
-  const fetchCourses = async (academicYear?: string, instructorEmail?: string): Promise<void> => {
+  const fetchData = async (): Promise<void> => {
     try {
-      const courseBuilds = await ropeApi.fakeGetCourseBuilds()
-      console.log(courseBuilds)
-      setCourses(courseBuilds)
+      const data = await ropeApi.getAllCourseBuilds()
+      setCourseBuilds(data)
     } catch (error) {
-      console.error('Failed to fetch courses:', error)
-      setCourses([])
+      console.error('Error fetching course builds:', error)
     }
   }
 
-  const filteredItems = courses.filter(item => {
-    const matchesEmail = item.instructor_email.includes(filterText)
-    const isInActiveYear = item.academic_year === activeAcademicYear
-    return matchesEmail && isInActiveYear
-  })
-  const columns = useMemo(() => [
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target
+    setFilters({ ...filters, [name]: value })
+  }
+
+  useEffect(() => {
+    let filteredResults = courseBuilds
+
+    if (filters.email !== '') {
+      filteredResults = filteredResults.filter(
+        (build) => build.instructorEmail.toLowerCase().includes(filters.email.toLowerCase())
+      )
+    }
+
+    if (filters.academicYear !== '') {
+      filteredResults = filteredResults.filter(
+        (build) => build.academicYear.toLowerCase().includes(filters.academicYear.toLowerCase())
+      )
+    }
+
+    setFilteredData(filteredResults)
+  }, [filters, courseBuilds])
+
+  const columns: Array<TableColumn<CourseBuild>> = [
     {
       name: 'Instructor Name',
-      selector: row => `${row.instructor_firstname} ${row.instructor_lastname}`,
-      sortable: true
+      selector: row => `${row.instructorFirstName} ${row.instructorLastName}`
     },
     {
-      name: 'Email',
-      selector: row => row.instructor_email,
-      sortable: true
+      name: 'Instructor Email',
+      selector: row => row.instructorEmail
     },
     {
-      name: 'Course Name',
-      selector: row => row.course_name,
-      sortable: true
+      name: 'School District Name',
+      selector: row => row.schoolDistrictName
     },
     {
       name: 'Academic Year',
-      selector: row => row.academic_year,
-      sortable: true
+      selector: row => row.academicYear
+    },
+    {
+      name: 'Course Name',
+      selector: row => row.courseName,
+      grow: 2
+    },
+    {
+      name: 'Creator Email',
+      selector: row => row.creatorEmail
+    },
+    {
+      name: 'Status',
+      selector: row => row.status
     }
-  ], [])
-
-  const subHeaderComponentMemo = useMemo(() => {
-    const handleClear = (): void => {
-      if (filterText.length > 0) {
-        setFilterText('')
-      }
-    }
-
-    return (
-      <div>
-        Filter:
-        <input
-          id="search"
-          type="text"
-          placeholder="Filter By Email"
-          aria-label="Search Input"
-          value={filterText}
-          onChange={e => { setFilterText(e.target.value) }}
-        />
-        <button onClick={handleClear}>Clear</button>
-      </div>
-    )
-  }, [filterText])
+  ]
 
   return (
     <Container>
-      <Title>Courses</Title>
+    {authContext.isAdmin || authContext.isManager
+      ? <>
 
-    <DataTable
-      columns={columns}
-      data={filteredItems}
-      pagination
-      subHeader
-      subHeaderComponent={subHeaderComponentMemo}
-      persistTableHead
-    />
-    </Container>
+      <Title>Courses</Title>
+      <FiltersContainer>
+        <span>Email Filter </span>
+        <input
+          type="text"
+          name="email"
+          placeholder="Filter by Email"
+          value={filters.email}
+          onChange={handleFilterChange}
+        />
+        <span>Academic Year Filter </span>
+        <input
+          type="text"
+          name="academicYear"
+          placeholder="Filter by Academic Year"
+          value={filters.academicYear}
+          onChange={handleFilterChange}
+        />
+      </FiltersContainer>
+      <DataTable
+        columns={columns}
+        data={filteredData}
+        pagination
+        highlightOnHover
+        striped
+      />
+    </>
+      : <p>This page is an admin or manager page</p>}
+            </Container>
+
   )
 }
+
 export { Page }
