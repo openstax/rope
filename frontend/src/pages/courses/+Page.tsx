@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import DataTable, { type TableColumn } from 'react-data-table-component'
 import { ropeApi, type CourseBuild } from '../../utils/ropeApi'
 import { styled } from 'styled-components'
-import { useAuthContext } from '../../components/useAuthContext'
 
 const Title = styled.h2`
   color: #333;
@@ -39,8 +38,6 @@ const FiltersContainer = styled.div`
 `
 
 function Page(): JSX.Element {
-  const authContext = useAuthContext()
-
   const [courseBuilds, setCourseBuilds] = useState<CourseBuild[]>([])
   const [filteredData, setFilteredData] = useState<CourseBuild[]>([])
   const [filters, setFilters] = useState<{ email: string, academicYear: string }>({
@@ -49,10 +46,8 @@ function Page(): JSX.Element {
   })
 
   useEffect(() => {
-    if (authContext.isAdmin || authContext.isManager) {
-      void fetchData()
-    }
-  }, [authContext.isAdmin, authContext.isManager])
+    void fetchData()
+  }, [])
 
   const fetchData = async (): Promise<void> => {
     try {
@@ -109,20 +104,29 @@ function Page(): JSX.Element {
       grow: 2
     },
     {
-      name: 'Creator Email',
-      selector: row => row.creatorEmail
+      name: 'Course ID',
+      selector: row => row.courseId ?? ''
+    },
+    {
+      name: 'Course Enrollment Url',
+      selector: row => row.courseEnrollmentUrl ?? ''
+    },
+    {
+      name: 'Course Enrollment Key',
+      selector: row => row.courseEnrollmentKey ?? ''
     },
     {
       name: 'Status',
       selector: row => row.status
+    },
+    {
+      name: 'Creator Email',
+      selector: row => row.creatorEmail
     }
   ]
 
   return (
     <Container>
-    {authContext.isAdmin || authContext.isManager
-      ? <>
-
       <Title>Courses</Title>
       <FiltersContainer>
         <span>Email Filter </span>
@@ -149,8 +153,6 @@ function Page(): JSX.Element {
         highlightOnHover
         striped
       />
-    </>
-      : <p>This page is an admin or manager page</p>}
             </Container>
 
   )
