@@ -115,7 +115,7 @@ def setup_get_course_builds(
         course_name="Algebra 1 - Reed Thompson (AY 2025)",
         course_shortname="Alg1 RT AY25",
         course_category="21",
-        course_id= 47,
+        course_id=47,
         course_enrollment_url="url.com",
         course_enrollment_key="12345",
         school_district_id=school_district_id,
