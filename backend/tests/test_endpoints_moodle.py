@@ -115,9 +115,9 @@ def setup_get_course_builds(
         course_name="Algebra 1 - Reed Thompson (AY 2025)",
         course_shortname="Alg1 RT AY25",
         course_category="21",
-        course_id=None,
-        course_enrollment_url=None,
-        course_enrollment_key=None,
+        course_id=47,
+        course_enrollment_url="url.com",
+        course_enrollment_key="12345",
         school_district_id=school_district_id,
         academic_year="AY 2025",
         academic_year_short="AY25",
@@ -372,9 +372,9 @@ def test_get_course_build_by_academic_year(
     assert data[2].get("instructor_email") == "lthompson@rice.edu"
     assert data[2].get("course_name") == "Algebra 1 - Reed Thompson (AY 2025)"
     assert data[2].get("course_shortname") == "Alg1 RT AY25"
-    assert data[2].get("course_id") is None
-    assert data[2].get("course_enrollment_url") is None
-    assert data[2].get("course_enrollment_key") is None
+    assert data[2].get("course_id") == 47
+    assert data[2].get("course_enrollment_url") == "url.com"
+    assert data[2].get("course_enrollment_key") == "12345"
     assert data[2].get("school_district_name") == school_district_name
     assert data[2].get("academic_year") == "AY 2025"
     assert data[2].get("academic_year_short") == "AY25"
@@ -486,9 +486,9 @@ def test_get_all_course_builds(
     assert data[3].get("instructor_email") == "lthompson@rice.edu"
     assert data[3].get("course_name") == "Algebra 1 - Reed Thompson (AY 2025)"
     assert data[3].get("course_shortname") == "Alg1 RT AY25"
-    assert data[3].get("course_id") is None
-    assert data[3].get("course_enrollment_url") is None
-    assert data[3].get("course_enrollment_key") is None
+    assert data[3].get("course_id") == 47
+    assert data[3].get("course_enrollment_url") == "url.com"
+    assert data[3].get("course_enrollment_key") == "12345"
     assert data[3].get("school_district_name") == school_district_name
     assert data[3].get("academic_year") == "AY 2025"
     assert data[3].get("academic_year_short") == "AY25"
