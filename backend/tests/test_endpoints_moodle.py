@@ -1,6 +1,9 @@
 import pytest
 
 from rope.db.schema import CourseBuild, MoodleSetting, SchoolDistrict, UserAccount
+import boto3
+import botocore.stub
+import json
 
 
 @pytest.fixture(autouse=True)
@@ -148,6 +151,11 @@ def test_create_course_build(
             "warnings": [],
         },
     )
+    mocker.patch(
+        "rope.api.routers.moodle.sqs_client.send_message",
+        return_value={"MessageId": "message_id"},
+    )
+
     school_district_name = setup_school_district.name
     course_build_settings = {
         "instructor_firstname": "Franklin",
@@ -177,6 +185,61 @@ def test_create_course_build(
     assert data["creator_email"] == "manager@rice.edu"
 
 
+def test_create_course_build_sqs_message(    
+    test_client,
+    db,
+    setup_school_district,
+    setup_moodle_settings,
+    setup_new_user_manager,
+    setup_manager_session,
+    mocker,
+):
+    mocker.patch(
+        "rope.api.routers.moodle.moodle_client.get_course_by_shortname",
+        return_value={
+            "courses": [],
+            "warnings": [],
+        },
+    )
+
+    sqs_client = boto3.client("sqs", region_name="nor-cal")
+    stubber = botocore.stub.Stubber(sqs_client)
+    # mocker.patch('rope.api.routers.moodle.sqs_client', sqs_client)
+    mocker_map = {
+        "sqs": sqs_client
+    }
+    mocker.patch("boto3.client", lambda client: mocker_map[client])
+
+    school_district_name = setup_school_district.name
+
+    course_build_settings = {
+        "instructor_firstname": "Franklin",
+        "instructor_lastname": "Saint",
+        "instructor_email": "fsaint@rice.edu",
+        "school_district_name": school_district_name,
+    }
+
+    response = test_client.post("/moodle/course/build", json=course_build_settings)
+    course_build = db.query(CourseBuild).all()
+    data = response.json()
+
+    expected_params = {
+        'QueueUrl': 'https://testqueue',
+        'MessageBody': json.dumps({"course_build_id": 1})
+    }
+
+    stubber.add_response('send_message', {}, expected_params)
+    stubber.activate()
+
+    stubber.assert_no_pending_responses()
+    assert len(course_build) == 1
+
+    assert response.status_code == 200
+    assert response.json()["instructor_firstname"] == "John"
+    assert data["instructor_firstname"] == "Franklin"
+    assert data["instructor_lastname"] == "Saint"
+
+
 def test_create_course_build_duplicate_shortname(
     test_client,
     db,
@@ -193,6 +256,11 @@ def test_create_course_build_duplicate_shortname(
             "warnings": [],
         },
     )
+    mocker.patch(
+        "rope.api.routers.moodle.sqs_client.send_message",
+        return_value={"MessageId": "message_id"},
+    )
+
     school_district_name = setup_school_district.name
     course_build_settings1 = {
         "instructor_firstname": "Franklin",
@@ -272,6 +340,11 @@ def test_create_course_build_duplicate_shortname_moodle(
             {"courses": []},
         ],
     )
+    mocker.patch(
+        "rope.api.routers.moodle.sqs_client.send_message",
+        return_value={"MessageId": "message_id"},
+    )  
+
     response = test_client.post("/moodle/course/build", json=course_build_settings)
     course_build = db.query(CourseBuild).all()
     data = response.json()
