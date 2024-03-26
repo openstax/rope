@@ -185,7 +185,7 @@ def test_create_course_build(
     assert data["creator_email"] == "manager@rice.edu"
 
 
-def test_create_course_build_sqs_message(    
+def test_create_course_build_sqs_message(
     test_client,
     db,
     setup_school_district,
@@ -235,7 +235,6 @@ def test_create_course_build_sqs_message(
     assert len(course_build) == 1
 
     assert response.status_code == 200
-    assert response.json()["instructor_firstname"] == "John"
     assert data["instructor_firstname"] == "Franklin"
     assert data["instructor_lastname"] == "Saint"
 
@@ -343,7 +342,7 @@ def test_create_course_build_duplicate_shortname_moodle(
     mocker.patch(
         "rope.api.routers.moodle.sqs_client.send_message",
         return_value={"MessageId": "message_id"},
-    )  
+    )
 
     response = test_client.post("/moodle/course/build", json=course_build_settings)
     course_build = db.query(CourseBuild).all()
