@@ -1,14 +1,6 @@
-import json
+from functools import cache
 import boto3
 from rope.api import database
-from rope.api.settings import SQS_QUEUE
-
-sqs_client = boto3.client('sqs')
-
-queue_url_data = sqs_client.get_queue_url(
-        QueueName=SQS_QUEUE
-    )
-queue_url = queue_url_data["QueueUrl"]
 
 
 def create_course_name(instructor_firstname, instructor_lastname, academic_year):
@@ -39,8 +31,13 @@ def check_course_shortname_uniqueness(db, moodle_client, course_shortname):
     return True
 
 
-def send_message_to_sqs(message_body):
-    sqs_client.send_message(
-        QueueUrl=queue_url,
-        MessageBody=json.dumps(message_body)
-    )
+def get_sqs_client():
+    return boto3.client('sqs')
+
+
+@cache
+def get_sqs_queue_url(client, queue_name):
+    queue_url_data = client.get_queue_url(
+            QueueName=queue_name
+        )
+    return queue_url_data["QueueUrl"]

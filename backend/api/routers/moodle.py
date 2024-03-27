@@ -27,7 +27,7 @@ def create_course_build(
     current_user: Annotated[dict, Depends(verify_manager)],
     course_build_settings: BaseCourseBuildSettings,
     db: Session = Depends(database.get_db),
-    send_message: utils.send_message_to_sqs = Depends()
+    sqs_client=Depends(utils.get_sqs_client)
 ) -> FullCourseBuildSettings:
     academic_year = database.get_moodle_setting_by_name(db, "academic_year")
     academic_year_short = database.get_moodle_setting_by_name(db, "academic_year_short")
@@ -83,10 +83,15 @@ def create_course_build(
         status,
         creator,
     )
+    queue_url = utils.get_sqs_queue_url(sqs_client, settings.SQS_QUEUE)
     message_body = {
         "course_build_id": new_course_build.id
     }
-    send_message(message_body)
+    sqs_client.send_message(
+        QueueUrl=queue_url,
+        MessageBody=json.dumps(message_body)
+    )
+
     return {
         "instructor_firstname": instructor_firstname,
         "instructor_lastname": instructor_lastname,
