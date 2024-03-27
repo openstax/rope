@@ -83,14 +83,15 @@ def create_course_build(
         status,
         creator,
     )
-    queue_url = utils.get_sqs_queue_url(sqs_client, settings.SQS_QUEUE)
-    message_body = {
-        "course_build_id": new_course_build.id
-    }
-    sqs_client.send_message(
-        QueueUrl=queue_url,
-        MessageBody=json.dumps(message_body)
-    )
+    if settings.SQS_QUEUE:
+        queue_url = utils.get_sqs_queue_url(sqs_client, settings.SQS_QUEUE)
+        message_body = {
+            "course_build_id": new_course_build.id
+        }
+        sqs_client.send_message(
+            QueueUrl=queue_url,
+            MessageBody=json.dumps(message_body)
+        )
 
     return {
         "instructor_firstname": instructor_firstname,
