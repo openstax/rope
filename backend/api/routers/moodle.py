@@ -1,10 +1,8 @@
 import json
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-import boto3
 from typing import Annotated, Optional
 import requests
-from rope.api.settings import SQS_QUEUE
 from rope.api.auth import verify_user, verify_manager
 from rope.api import database, settings, utils
 from rope.db.schema import CourseBuildStatus
@@ -14,15 +12,9 @@ from rope.api.models import (
     FullCourseBuildSettings,
     MoodleUser,
 )
-sqs_client = boto3.client('sqs')
 router = APIRouter(
     tags=["moodle"],
 )
-queue_url_data = sqs_client.get_queue_url(
-        QueueName=SQS_QUEUE
-    )
-queue_url = queue_url_data["QueueUrl"]
-
 moodle_client = MoodleClient(
     requests.Session(),
     settings.MOODLE_URL,
@@ -35,6 +27,7 @@ def create_course_build(
     current_user: Annotated[dict, Depends(verify_manager)],
     course_build_settings: BaseCourseBuildSettings,
     db: Session = Depends(database.get_db),
+    send_message: utils.send_message_to_sqs = Depends()
 ) -> FullCourseBuildSettings:
     academic_year = database.get_moodle_setting_by_name(db, "academic_year")
     academic_year_short = database.get_moodle_setting_by_name(db, "academic_year_short")
@@ -93,10 +86,7 @@ def create_course_build(
     message_body = {
         "course_build_id": new_course_build.id
     }
-    sqs_client.send_message(
-        QueueUrl=queue_url,
-        MessageBody=json.dumps(message_body)
-    )
+    send_message(message_body)
     return {
         "instructor_firstname": instructor_firstname,
         "instructor_lastname": instructor_lastname,
