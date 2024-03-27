@@ -126,6 +126,9 @@ def get_course_builds(
             "course_shortname": course.course_shortname,
             "creator_email": course.creator.email,
             "status": course.status.value,
+            "course_id": course.course_id,
+            "course_enrollment_url": course.course_enrollment_url,
+            "course_enrollment_key": course.course_enrollment_key
         })
 
     return response

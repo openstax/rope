@@ -34,6 +34,9 @@ export interface CourseBuild {
   courseShortName: string
   creatorEmail: string
   status: string
+  courseId?: string
+  courseEnrollmentUrl?: string
+  courseEnrollmentKey?: string
 }
 
 function convertApiUserToUser(apiUser: { email: string, is_admin: boolean, is_manager: boolean, id: number }): User {
@@ -56,6 +59,10 @@ function convertApiCourseBuildToCourseBuild(apiCourseBuild: {
   course_shortname: string
   creator_email: string
   status: string
+  course_id?: string
+  course_enrollment_url?: string
+  course_enrollment_key?: string
+
 }): CourseBuild {
   return {
     instructorFirstName: apiCourseBuild.instructor_firstname,
@@ -67,7 +74,10 @@ function convertApiCourseBuildToCourseBuild(apiCourseBuild: {
     courseName: apiCourseBuild.course_name,
     courseShortName: apiCourseBuild.course_shortname,
     creatorEmail: apiCourseBuild.creator_email,
-    status: apiCourseBuild.status
+    status: apiCourseBuild.status,
+    courseId: apiCourseBuild.course_id,
+    courseEnrollmentUrl: apiCourseBuild.course_enrollment_url,
+    courseEnrollmentKey: apiCourseBuild.course_enrollment_key
   }
 }
 
@@ -250,7 +260,33 @@ export const ropeApi = {
       course_name: string
       course_shortname: string
       creator_email: string
-      status: string }) => convertApiCourseBuildToCourseBuild(courseBuild))
+      status: string
+    }) => convertApiCourseBuildToCourseBuild(courseBuild))
+    return courseBuilds
+  },
+  getAllCourseBuilds: async (): Promise<CourseBuild[]> => {
+    const response = await fetch('/api/moodle/course/build')
+
+    if (!response.ok) {
+      throw new Error('Failed to get all course builds')
+    }
+
+    const courseBuildsFromApi = await response.json()
+    const courseBuilds: CourseBuild[] = courseBuildsFromApi.map((courseBuild: {
+      instructor_firstname: string
+      instructor_lastname: string
+      instructor_email: string
+      school_district_name: string
+      academic_year: string
+      academic_year_short: string
+      course_name: string
+      course_shortname: string
+      creator_email: string
+      status: string
+      course_id: string
+      course_enrollment_url: string
+      course_enrollment_key: string
+    }) => convertApiCourseBuildToCourseBuild(courseBuild))
     return courseBuilds
   },
 
@@ -285,7 +321,6 @@ export const ropeApi = {
       creator_email: string
       status: string
     } = await response.json()
-    // const newSetting: CourseBuild = await response.json()
     return convertApiCourseBuildToCourseBuild(newCourseBuildFromApi)
   },
   getCurrentUser: async (): Promise<{ email: string, isAdmin: boolean, isManager: boolean } | null> => {
