@@ -15,7 +15,7 @@ $ export MOODLE_TOKEN=<moodle_token>
 ```
 
 ```bash
-$ docker compose up --build -d
+$ docker compose up --build -d -V
 ```
 
 Once running, the application components can be accessed at the following URLs:
@@ -31,7 +31,7 @@ $ docker compose exec postgres psql -U pguser -d ropedb -c "INSERT INTO user_acc
 Devs can also test the deployment build of the frontend by running the following:
 
 ```bash
-$ ROPE_APP_TARGET=deploy docker compose up --build -d
+$ ROPE_APP_TARGET=deploy docker compose up --build -d -V
 ```
 
 When developing backend code, developers may want to install the package in an editable virtual environment. That can be done as follows (to avoid unresolved imports per [this issue](https://github.com/microsoft/pylance-release/issues/3473)). If the imports remain unresolved, the language server may need to be restarted:
