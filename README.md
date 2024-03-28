@@ -14,6 +14,11 @@ $ export MOODLE_URL=<moodle_url>
 $ export MOODLE_TOKEN=<moodle_token>
 ```
 
+If you would like to test with AWS you can optionally set the credentials using the `set_aws_creds` script in  `aws-access/scripts` and you can set the `SQS_QUEUE` environment variable using the following command:
+```bash
+$ export SQS_QUEUE=<SQS_QUEUE>
+```
+
 ```bash
 $ docker compose up --build -d -V
 ```
