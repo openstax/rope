@@ -1,4 +1,3 @@
-from functools import cache
 import boto3
 from rope.api import database
 
@@ -35,7 +34,6 @@ def get_sqs_client():
     return boto3.client('sqs')
 
 
-@cache
 def get_sqs_queue_url(client, queue_name):
     queue_url_data = client.get_queue_url(
             QueueName=queue_name
