@@ -1,3 +1,4 @@
+import boto3
 from rope.api import database
 
 
@@ -27,3 +28,14 @@ def check_course_shortname_uniqueness(db, moodle_client, course_shortname):
     if db_course_shortname is not None:
         return False
     return True
+
+
+def get_sqs_client():
+    return boto3.client('sqs')
+
+
+def get_sqs_queue_url(client, queue_name):
+    queue_url_data = client.get_queue_url(
+            QueueName=queue_name
+        )
+    return queue_url_data["QueueUrl"]

@@ -1,6 +1,11 @@
 import pytest
-
+from sqlalchemy import text
 from rope.db.schema import CourseBuild, MoodleSetting, SchoolDistrict, UserAccount
+from rope.api.main import app
+from rope.api.utils import get_sqs_client
+import boto3
+import botocore.stub
+import json
 
 
 @pytest.fixture(autouse=True)
@@ -9,6 +14,7 @@ def clear_database_table(db):
     db.query(UserAccount).delete()
     db.query(SchoolDistrict).delete()
     db.query(MoodleSetting).delete()
+    db.execute(text("ALTER SEQUENCE course_build_id_seq RESTART WITH 1"))
     db.commit()
 
 
@@ -148,6 +154,7 @@ def test_create_course_build(
             "warnings": [],
         },
     )
+    app.dependency_overrides[get_sqs_client] = lambda : mocker.MagicMock()
     school_district_name = setup_school_district.name
     course_build_settings = {
         "instructor_firstname": "Franklin",
@@ -177,6 +184,65 @@ def test_create_course_build(
     assert data["creator_email"] == "manager@rice.edu"
 
 
+def test_create_course_build_sqs_message(
+    test_client,
+    db,
+    setup_school_district,
+    setup_moodle_settings,
+    setup_new_user_manager,
+    setup_manager_session,
+    mocker,
+):
+    mocker.patch(
+        "rope.api.routers.moodle.moodle_client.get_course_by_shortname",
+        return_value={
+            "courses": [],
+            "warnings": [],
+        },
+    )
+    mock_settings = mocker.Mock()
+    setattr(mock_settings, 'SQS_QUEUE', 'testqueue')
+    mocker.patch(
+        "rope.api.routers.moodle.settings",
+        mock_settings
+    )
+    sqs_client = boto3.client("sqs", region_name="nor-cal")
+    stubber = botocore.stub.Stubber(sqs_client)
+
+    expected_params = {
+        'QueueUrl': 'https://testqueue',
+        'MessageBody': json.dumps({"course_build_id": 1})
+    }
+
+    stubber.add_response('get_queue_url', {'QueueUrl': 'https://testqueue'},
+                                          {'QueueName': 'testqueue'})
+
+    stubber.add_response('send_message', {}, expected_params)
+
+    app.dependency_overrides[get_sqs_client] = lambda : sqs_client
+    stubber.activate()
+
+    school_district_name = setup_school_district.name
+
+    course_build_settings = {
+        "instructor_firstname": "Franklin",
+        "instructor_lastname": "Saint",
+        "instructor_email": "fsaint@rice.edu",
+        "school_district_name": school_district_name,
+    }
+
+    response = test_client.post("/moodle/course/build", json=course_build_settings)
+    course_build = db.query(CourseBuild).all()
+    data = response.json()
+
+    stubber.assert_no_pending_responses()
+    assert len(course_build) == 1
+
+    assert response.status_code == 200
+    assert data["instructor_firstname"] == "Franklin"
+    assert data["instructor_lastname"] == "Saint"
+
+
 def test_create_course_build_duplicate_shortname(
     test_client,
     db,
@@ -193,6 +259,8 @@ def test_create_course_build_duplicate_shortname(
             "warnings": [],
         },
     )
+    app.dependency_overrides[get_sqs_client] = lambda : mocker.MagicMock()
+
     school_district_name = setup_school_district.name
     course_build_settings1 = {
         "instructor_firstname": "Franklin",
@@ -272,6 +340,8 @@ def test_create_course_build_duplicate_shortname_moodle(
             {"courses": []},
         ],
     )
+    app.dependency_overrides[get_sqs_client] = lambda : mocker.MagicMock()
+
     response = test_client.post("/moodle/course/build", json=course_build_settings)
     course_build = db.query(CourseBuild).all()
     data = response.json()
