@@ -38,7 +38,7 @@ def setup_new_user_manager(db):
 
 
 @pytest.fixture
-def initial_course_build(
+def create_course_builds(
     db,
     setup_nonadmin_authenticated_user_session,
     setup_school_district,
@@ -63,16 +63,53 @@ def initial_course_build(
         status="created",
         creator_id=user_id,
     )
+    course_build2 = CourseBuild(
+        instructor_firstname="Thomas",
+        instructor_lastname="Stormrage",
+        instructor_email="tstormrage@blacktemple.edu",
+        course_name="Algebra 1 - Thomas Stormrage (AY 2024)",
+        course_shortname="Alg1 TS AY24",
+        course_category=6,
+        course_id=None,
+        course_enrollment_url=None,
+        course_enrollment_key=None,
+        school_district_id=school_district_id,
+        academic_year="AY 2024",
+        academic_year_short="AY24",
+        base_course_id=70,
+        status="processing",
+        creator_id=user_id,
+    )
+    course_build3 = CourseBuild(
+        instructor_firstname="Michael",
+        instructor_lastname="Stormrage",
+        instructor_email="mstormrage@blacktemple.edu",
+        course_name="Algebra 1 - Michael Stormrage (AY 2024)",
+        course_shortname="Alg1 MS AY24",
+        course_category=6,
+        course_id=None,
+        course_enrollment_url=None,
+        course_enrollment_key=None,
+        school_district_id=school_district_id,
+        academic_year="AY 2024",
+        academic_year_short="AY24",
+        base_course_id=70,
+        status="completed",
+        creator_id=user_id,
+    )
     db.add(course_build)
+    db.add(course_build2)
+    db.add(course_build3)
     db.commit()
-    db.refresh(course_build)
-
-    return course_build
 
 
-def test_course_build_processor(mocker, initial_course_build):
+def test_course_build_processor(mocker, db, create_course_builds):
     sqs_client = boto3.client("sqs", region_name="azeroth")
     sqs_stubber = botocore.stub.Stubber(sqs_client)
+
+    course_builds = db.query(CourseBuild).all()
+
+    initial_course_build = course_builds[0]
 
     mock_sqs_data = {"course_build_id": initial_course_build.id}
 
@@ -164,3 +201,278 @@ def test_course_build_processor(mocker, initial_course_build):
         )
 
     sqs_stubber.assert_no_pending_responses()
+
+
+def test_non_existing_course_build(mocker):
+    with pytest.raises(
+        Exception,
+        match="A course build with the id: 0 does not exist in the course_build table",
+    ) as exc_info:
+        sqs_client = boto3.client("sqs", region_name="azeroth")
+        sqs_stubber = botocore.stub.Stubber(sqs_client)
+
+        mock_sqs_data = {"course_build_id": 0}
+
+        mock_settings = mocker.Mock()
+        setattr(mock_settings, "SQS_QUEUE", "testqueue")
+        setattr(mock_settings, "SQS_POLL_INTERVAL_MINS", "1")
+        mocker.patch(
+            "rope.api.processors.course_build_processor.settings",
+            mock_settings,
+        )
+
+        engine = create_engine("postgresql://pguser:pgpassword@localhost/ropedb")
+        mock_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+        mocker.patch(
+            "rope.api.processors.course_build_processor.get_db",
+            lambda: mock_factory,
+        )
+
+        sqs_stubber.add_response(
+            "get_queue_url",
+            {"QueueUrl": "https://testqueue"},
+            expected_params={"QueueName": "testqueue"},
+        )
+        sqs_stubber.add_response(
+            "receive_message",
+            {
+                "Messages": [
+                    {
+                        "ReceiptHandle": "message1",
+                        "Body": json.dumps(mock_sqs_data),
+                    }
+                ]
+            },
+            expected_params={
+                "QueueUrl": "https://testqueue",
+                "MaxNumberOfMessages": 10,
+                "WaitTimeSeconds": 20,
+            },
+        )
+        sqs_stubber.add_response(
+            "delete_message",
+            {},
+            expected_params={
+                "QueueUrl": "https://testqueue",
+                "ReceiptHandle": "message1",
+            },
+        )
+
+        sqs_stubber.activate()
+        mocker_map = {"sqs": sqs_client}
+        mocker.patch("boto3.client", lambda client: mocker_map[client])
+        mocker.patch("sys.argv", [""])
+        course_build_processor.main()
+
+    assert exc_info.type == Exception
+
+
+def test_course_build_status_processing(mocker, db, create_course_builds):
+    course_builds = db.query(CourseBuild).all()
+
+    course_build = course_builds[1]
+
+    with pytest.raises(
+        Exception,
+        match=f"Course build id: {course_build.id} status is processing",
+    ) as exc_info:
+        sqs_client = boto3.client("sqs", region_name="azeroth")
+        sqs_stubber = botocore.stub.Stubber(sqs_client)
+
+        mock_sqs_data = {"course_build_id": course_build.id}
+
+        mock_settings = mocker.Mock()
+        setattr(mock_settings, "SQS_QUEUE", "testqueue")
+        setattr(mock_settings, "SQS_POLL_INTERVAL_MINS", "1")
+        mocker.patch(
+            "rope.api.processors.course_build_processor.settings",
+            mock_settings,
+        )
+
+        engine = create_engine("postgresql://pguser:pgpassword@localhost/ropedb")
+        mock_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+        mocker.patch(
+            "rope.api.processors.course_build_processor.get_db",
+            lambda: mock_factory,
+        )
+
+        sqs_stubber.add_response(
+            "get_queue_url",
+            {"QueueUrl": "https://testqueue"},
+            expected_params={"QueueName": "testqueue"},
+        )
+        sqs_stubber.add_response(
+            "receive_message",
+            {
+                "Messages": [
+                    {
+                        "ReceiptHandle": "message1",
+                        "Body": json.dumps(mock_sqs_data),
+                    }
+                ]
+            },
+            expected_params={
+                "QueueUrl": "https://testqueue",
+                "MaxNumberOfMessages": 10,
+                "WaitTimeSeconds": 20,
+            },
+        )
+        sqs_stubber.add_response(
+            "delete_message",
+            {},
+            expected_params={
+                "QueueUrl": "https://testqueue",
+                "ReceiptHandle": "message1",
+            },
+        )
+
+        sqs_stubber.activate()
+        mocker_map = {"sqs": sqs_client}
+        mocker.patch("boto3.client", lambda client: mocker_map[client])
+        mocker.patch("sys.argv", [""])
+        course_build_processor.main()
+
+    assert exc_info.type == Exception
+
+
+def test_course_build_status_completed(mocker, db, create_course_builds):
+    course_builds = db.query(CourseBuild).all()
+
+    course_build = course_builds[2]
+
+    sqs_client = boto3.client("sqs", region_name="azeroth")
+    sqs_stubber = botocore.stub.Stubber(sqs_client)
+
+    mock_sqs_data = {"course_build_id": course_build.id}
+
+    mock_settings = mocker.Mock()
+    setattr(mock_settings, "SQS_QUEUE", "testqueue")
+    setattr(mock_settings, "SQS_POLL_INTERVAL_MINS", "1")
+    mocker.patch(
+        "rope.api.processors.course_build_processor.settings",
+        mock_settings,
+    )
+
+    engine = create_engine("postgresql://pguser:pgpassword@localhost/ropedb")
+    mock_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    mocker.patch(
+        "rope.api.processors.course_build_processor.get_db",
+        lambda: mock_factory,
+    )
+
+    sqs_stubber.add_response(
+        "get_queue_url",
+        {"QueueUrl": "https://testqueue"},
+        expected_params={"QueueName": "testqueue"},
+    )
+    sqs_stubber.add_response(
+        "receive_message",
+        {
+            "Messages": [
+                {
+                    "ReceiptHandle": "message1",
+                    "Body": json.dumps(mock_sqs_data),
+                }
+            ]
+        },
+        expected_params={
+            "QueueUrl": "https://testqueue",
+            "MaxNumberOfMessages": 10,
+            "WaitTimeSeconds": 20,
+        },
+    )
+    sqs_stubber.add_response(
+        "delete_message",
+        {},
+        expected_params={
+            "QueueUrl": "https://testqueue",
+            "ReceiptHandle": "message1",
+        },
+    )
+
+    sqs_stubber.activate()
+    mocker_map = {"sqs": sqs_client}
+    mocker.patch("boto3.client", lambda client: mocker_map[client])
+    mocker.patch("sys.argv", [""])
+    course_build_processor.main()
+
+    sqs_stubber.assert_no_pending_responses()
+
+
+def test_failed_course_build_missing_instructor_user_id(
+    mocker, db, create_course_builds
+):
+    with pytest.raises(Exception, match="id") as exc_info:
+        sqs_client = boto3.client("sqs", region_name="azeroth")
+        sqs_stubber = botocore.stub.Stubber(sqs_client)
+
+        course_builds = db.query(CourseBuild).all()
+
+        initial_course_build = course_builds[0]
+
+        mock_sqs_data = {"course_build_id": initial_course_build.id}
+
+        mock_settings = mocker.Mock()
+        setattr(mock_settings, "SQS_QUEUE", "testqueue")
+        setattr(mock_settings, "SQS_POLL_INTERVAL_MINS", "1")
+        mocker.patch(
+            "rope.api.processors.course_build_processor.settings",
+            mock_settings,
+        )
+
+        engine = create_engine("postgresql://pguser:pgpassword@localhost/ropedb")
+        mock_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+        mocker.patch(
+            "rope.api.processors.course_build_processor.get_db",
+            lambda: mock_factory,
+        )
+        mocker.patch(
+            "rope.api.processors.course_build_processor.get_moodle_user_role_by_shortname",  # noqa: E501
+            side_effects=["teacher", "student"],
+        )
+        mocker.patch(
+            "rope.api.routers.moodle.moodle_client.get_user_by_email",
+            return_value={},
+        )
+
+        sqs_stubber.add_response(
+            "get_queue_url",
+            {"QueueUrl": "https://testqueue"},
+            expected_params={"QueueName": "testqueue"},
+        )
+        sqs_stubber.add_response(
+            "receive_message",
+            {
+                "Messages": [
+                    {
+                        "ReceiptHandle": "message1",
+                        "Body": json.dumps(mock_sqs_data),
+                    }
+                ]
+            },
+            expected_params={
+                "QueueUrl": "https://testqueue",
+                "MaxNumberOfMessages": 10,
+                "WaitTimeSeconds": 20,
+            },
+        )
+        sqs_stubber.add_response(
+            "delete_message",
+            {},
+            expected_params={
+                "QueueUrl": "https://testqueue",
+                "ReceiptHandle": "message1",
+            },
+        )
+
+        sqs_stubber.activate()
+        mocker_map = {"sqs": sqs_client}
+        mocker.patch("boto3.client", lambda client: mocker_map[client])
+        mocker.patch("sys.argv", [""])
+        course_build_processor.main()
+
+    assert exc_info.type == KeyError
