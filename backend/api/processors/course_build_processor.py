@@ -28,7 +28,7 @@ class ProcessorException(Exception):
 # This function allows the code to be testable and
 # talk to the mocked sessionmaker in test_course_build_processor.py
 def get_db():
-    return session_factory
+    return session_factory  # pragma: no cover
 
 
 @cache
@@ -46,22 +46,17 @@ def process_course_build(course_build_id):
             .filter(CourseBuild.id == course_build_id["course_build_id"])
             .all()
         )
-        print("here is course_build in main:", course_build)
         if not course_build:
-            raise ProcessorException(
-                f"""A course build with the id: {course_build_id["course_build_id"]}
-                does not exist in the course_build table"""
+            raise Exception(
+                f"""A course build with the id: {course_build_id["course_build_id"]} does not exist in the course_build table"""  # noqa: E501
             )
         course_build_status = course_build[0].status.value
         if course_build_status == "created":
             course_build[0].status = CourseBuildStatus.PROCESSING.value
             session.commit()
         elif course_build_status == "processing":
-            raise ProcessorException(
-                logging.info(
-                    f"""Course build id: {course_build_id["course_build_id"]}
-                    status is processing"""
-                )
+            raise Exception(
+                f"""Course build id: {course_build_id["course_build_id"]} status is processing"""  # noqa: E501
             )
         elif course_build_status == "failed" or course_build_status == "completed":
             logging.info(
@@ -97,6 +92,7 @@ def process_course_build(course_build_id):
             course_build[0].status = CourseBuildStatus.FAILED.value
             session.commit()
             logging.error(f"Failed to build course: {e}")
+            raise
 
 
 def get_sqs_message_processor():
@@ -140,7 +136,7 @@ def processor_runner(
                     ReceiptHandle=receipt_handle,
                 )
             except ProcessorException as e:
-                logging.error(f"Failed processing SQS message: {e}")
+                raise Exception from e
 
         if not daemonize:
             break
@@ -172,4 +168,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover
