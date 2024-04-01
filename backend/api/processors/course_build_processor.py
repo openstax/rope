@@ -46,10 +46,11 @@ def process_course_build(course_build_id):
             .filter(CourseBuild.id == course_build_id["course_build_id"])
             .all()
         )
-        print('here is course_build in main:', course_build)
+        print("here is course_build in main:", course_build)
         if not course_build:
             raise ProcessorException(
-                f"A course build with the id: {course_build_id['course_build_id']} does not exist in the course_build table"
+                f"""A course build with the id: {course_build_id["course_build_id"]}
+                does not exist in the course_build table"""
             )
         course_build_status = course_build[0].status.value
         if course_build_status == "created":
@@ -58,19 +59,23 @@ def process_course_build(course_build_id):
         elif course_build_status == "processing":
             raise ProcessorException(
                 logging.info(
-                    f"Course build id: {course_build_id['course_build_id']} status is processing"
+                    f"""Course build id: {course_build_id["course_build_id"]}
+                    status is processing"""
                 )
             )
         elif course_build_status == "failed" or course_build_status == "completed":
             logging.info(
-                f"Course build id: {course_build_id['course_build_id']} build status is {course_build_status}"
+                f"""Course build id: {course_build_id["course_build_id"]}
+                build status is {course_build_status}"""
             )
             return
         base_course_id = course_build[0].base_course_id
         try:
             instructor_role_id = get_moodle_user_role_by_shortname("teacher")
             student_role_id = get_moodle_user_role_by_shortname("student")
-            instructor_user = moodle_client.get_user_by_email(course_build[0].instructor_email)
+            instructor_user = moodle_client.get_user_by_email(
+                course_build[0].instructor_email
+            )
             instructor_user_id = instructor_user["id"]
             new_course = course_creation(
                 moodle_client,
@@ -141,7 +146,7 @@ def processor_runner(
             break
 
         if len(sqs_messages) == 0:  # pragma: no cover
-            time.sleep(poll_interval_mins*60)
+            time.sleep(poll_interval_mins * 60)
         else:  # pragma: no cover
             logging.info(f"Received {len(sqs_messages)} messages")
 
