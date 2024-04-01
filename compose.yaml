@@ -31,6 +31,11 @@ services:
       - POSTGRES_USER=pguser
       - POSTGRES_PASSWORD=pgpassword
       - POSTGRES_SERVER=postgres
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN:-}
+      - SQS_QUEUE=${SQS_QUEUE:-}
     command: ["uvicorn", "rope.api.main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
     volumes:
       - ./backend:/code

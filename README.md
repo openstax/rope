@@ -14,8 +14,13 @@ $ export MOODLE_URL=<moodle_url>
 $ export MOODLE_TOKEN=<moodle_token>
 ```
 
+If you would like to test with AWS you can optionally set the credentials using the `set_aws_creds` script in  `aws-access/scripts` and you can set the `SQS_QUEUE` environment variable using the following command:
 ```bash
-$ docker compose up --build -d
+$ export SQS_QUEUE=<SQS_QUEUE>
+```
+
+```bash
+$ docker compose up --build -d -V
 ```
 
 Once running, the application components can be accessed at the following URLs:
@@ -31,7 +36,7 @@ $ docker compose exec postgres psql -U pguser -d ropedb -c "INSERT INTO user_acc
 Devs can also test the deployment build of the frontend by running the following:
 
 ```bash
-$ ROPE_APP_TARGET=deploy docker compose up --build -d
+$ ROPE_APP_TARGET=deploy docker compose up --build -d -V
 ```
 
 When developing backend code, developers may want to install the package in an editable virtual environment. That can be done as follows (to avoid unresolved imports per [this issue](https://github.com/microsoft/pylance-release/issues/3473)). If the imports remain unresolved, the language server may need to be restarted:
