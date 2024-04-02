@@ -140,7 +140,7 @@ def test_course_build_processor(mocker, db, create_course_builds):
         },
     )
     mocker.patch(
-        "rope.api.processors.course_build_processor.course_creation",
+        "rope.api.processors.course_build_processor.create_course",
         return_value={
             "course_id": 77,
             "course_enrolment_url": "https://enrolmenturl.com",

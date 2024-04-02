@@ -6,7 +6,7 @@ import json
 import logging
 from functools import cache
 
-from moodlecli.utils import course_creation
+from moodlecli.utils import create_course
 from rope.api.routers.moodle import moodle_client
 from rope.api import database
 from rope.db.schema import CourseBuild, CourseBuildStatus
@@ -72,7 +72,7 @@ def process_course_build(course_build_id):
                 course_build[0].instructor_email
             )
             instructor_user_id = instructor_user["id"]
-            new_course = course_creation(
+            new_course = create_course(
                 moodle_client,
                 base_course_id,
                 course_build[0].course_name,
