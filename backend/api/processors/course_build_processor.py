@@ -1,10 +1,10 @@
 import argparse
-from datetime import timedelta
 import time
 import boto3
 import json
 import logging
 from functools import cache
+from sqlalchemy.exc import NoResultFound
 
 from moodlecli.utils import create_course
 from rope.api.routers.moodle import moodle_client
@@ -13,7 +13,7 @@ from rope.db.schema import CourseBuild, CourseBuildStatus
 from rope.api import settings
 
 SQS_WAIT_TIME_SECS = 20
-SQS_MAX_MESSAGES = 10
+SQS_MAX_MESSAGES = 1
 
 session_factory = database.SessionLocal
 
@@ -41,69 +41,73 @@ def get_moodle_user_role_by_shortname(shortname: str):
 def process_course_build(course_build_id):
     get_sessionmaker = get_db()
     with get_sessionmaker() as session:
-        course_build = (
-            session.query(CourseBuild)
-            .filter(CourseBuild.id == course_build_id["course_build_id"])
-            .all()
-        )
-        if not course_build:
-            raise Exception(
-                f"""A course build with the id: {course_build_id["course_build_id"]} does not exist in the course_build table"""  # noqa: E501
+        try:
+            course_build = (
+                session.query(CourseBuild)
+                .filter(CourseBuild.id == course_build_id)
+                .one()
             )
-        course_build_status = course_build[0].status.value
-        if course_build_status == "created":
-            course_build[0].status = CourseBuildStatus.PROCESSING.value
+        except NoResultFound:
+            raise ProcessorException(
+                f"""A course build with the id: {course_build_id} does not exist in the course_build table"""  # noqa: E501
+            )
+        course_build_status = course_build.status.value
+        if course_build_status == CourseBuildStatus.CREATED.value:
+            course_build.status = CourseBuildStatus.PROCESSING.value
             session.commit()
-        elif course_build_status == "processing":
-            raise Exception(
-                f"""Course build id: {course_build_id["course_build_id"]} status is processing"""  # noqa: E501
+        elif course_build_status == CourseBuildStatus.PROCESSING.value:
+            raise ProcessorException(
+                f"""Course build id: {course_build_id} status is processing"""  # noqa: E501
             )
-        elif course_build_status == "failed" or course_build_status == "completed":
+        elif (
+            course_build_status == CourseBuildStatus.FAILED.value
+            or course_build_status == CourseBuildStatus.COMPLETED.value
+        ):
             logging.info(
-                f"""Course build id: {course_build_id["course_build_id"]}
-                build status is {course_build_status}"""
+                f"""The SQS message for course build id: {course_build_id} \
+                has been deleted because the build has a {course_build_status} status"""
             )
             return
-        base_course_id = course_build[0].base_course_id
         try:
             instructor_role_id = get_moodle_user_role_by_shortname("teacher")
             student_role_id = get_moodle_user_role_by_shortname("student")
             instructor_user = moodle_client.get_user_by_email(
-                course_build[0].instructor_email
+                course_build.instructor_email
             )
             instructor_user_id = instructor_user["id"]
             new_course = create_course(
                 moodle_client,
-                base_course_id,
-                course_build[0].course_name,
-                course_build[0].course_shortname,
-                course_build[0].course_category,
+                course_build.base_course_id,
+                course_build.course_name,
+                course_build.course_shortname,
+                course_build.course_category,
                 instructor_role_id,
                 instructor_user_id,
                 student_role_id,
             )
 
-            course_build[0].status = CourseBuildStatus.COMPLETED.value
-            course_build[0].course_id = new_course["course_id"]
-            course_build[0].course_enrollment_url = new_course["course_enrolment_url"]
-            course_build[0].course_enrollment_key = new_course["course_enrolment_key"]
+            course_build.status = CourseBuildStatus.COMPLETED.value
+            course_build.course_id = new_course["course_id"]
+            course_build.course_enrollment_url = new_course["course_enrolment_url"]
+            course_build.course_enrollment_key = new_course["course_enrolment_key"]
             session.commit()
         except Exception as e:
-            course_build[0].status = CourseBuildStatus.FAILED.value
+            course_build.status = CourseBuildStatus.FAILED.value
             session.commit()
             logging.error(f"Failed to build course: {e}")
-            raise
+            raise ProcessorException
 
 
 def get_sqs_message_processor():
     def inner(sqs_message):
-        course_build_id = json.loads(sqs_message["Body"])
+        message = json.loads(sqs_message["Body"])
         build_start_time = time.perf_counter()
-        process_course_build(course_build_id)
-        build_completion_time = timedelta(
-            seconds=time.perf_counter() - build_start_time
+        process_course_build(message["course_build_id"])
+        build_completion_time = time.perf_counter()
+        logging.info(
+            f"The course build took: \
+                      {(build_start_time - build_completion_time)} seconds"
         )
-        logging.info("The course build took:", build_completion_time)
 
     return inner
 
@@ -136,7 +140,7 @@ def processor_runner(
                     ReceiptHandle=receipt_handle,
                 )
             except ProcessorException as e:
-                raise Exception from e
+                logging.error(f"Failed processing SQS message: {e}")
 
         if not daemonize:
             break
