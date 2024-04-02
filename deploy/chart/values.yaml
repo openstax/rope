@@ -6,6 +6,7 @@ googleClientId:
 sessionSecretKey:
 moodleToken:
 moodleUrl:
+sqsQueue:
 apiImage:
   name: <account>.dkr.ecr.<region>.amazonaws.com/rope-api
   tag: sha
