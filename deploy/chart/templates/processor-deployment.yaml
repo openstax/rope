@@ -1,27 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}-api
+  name: {{ .Chart.Name }}-processor
   labels:
-    app: {{ .Chart.Name }}-api
+    app: {{ .Chart.Name }}-processor
 spec:
   replicas: 1
   strategy:
-    type: RollingUpdate
+    type: Recreate
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}-api
+      app: {{ .Chart.Name }}-processor
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}-api
+        app: {{ .Chart.Name }}-processor
     spec:
       serviceAccountName: rope
       containers:
-        - name: {{ .Chart.Name }}-api
+        - name: {{ .Chart.Name }}-processor
           image: {{ .Values.apiImage.name }}:{{ .Values.apiImage.tag }}
-          command: ["uvicorn", "rope.api.main:app", "--host", "0.0.0.0", "--port", "80", "--timeout-keep-alive", "120"]
           imagePullPolicy: Always
+          command: ["rope-course-processor"]
+          args: ["--daemonize"]
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -33,16 +34,6 @@ spec:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: pgPassword
-            - name: SESSION_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: sessionSecretKey
-            - name: GOOGLE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Chart.Name }}
-                  key: googleClientId
             - name: MOODLE_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -62,5 +53,5 @@ spec:
               value: {{ .Values.pgDatabase }}
             - name: SQS_QUEUE
               value: {{ .Values.sqsQueue }}
-          ports:
-            - containerPort: 80
+            - name: SQS_POLL_INTERVAL_MINS
+              value: {{ .Values.processorPollIntervalMins }}
