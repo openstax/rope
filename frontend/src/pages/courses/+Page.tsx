@@ -84,44 +84,54 @@ function Page(): JSX.Element {
   const columns: Array<TableColumn<CourseBuild>> = [
     {
       name: 'Instructor Name',
-      selector: row => `${row.instructorFirstName} ${row.instructorLastName}`
+      selector: row => `${row.instructorFirstName} ${row.instructorLastName}`,
+      wrap: true,      
     },
     {
       name: 'Instructor Email',
-      selector: row => row.instructorEmail
+      selector: row => row.instructorEmail,
+      wrap: true,
     },
     {
       name: 'School District Name',
-      selector: row => row.schoolDistrictName
+      selector: row => row.schoolDistrictName,
+      wrap: true,
     },
     {
       name: 'Academic Year',
-      selector: row => row.academicYear
+      selector: row => row.academicYear,
+      wrap: true,
     },
     {
       name: 'Course Name',
       selector: row => row.courseName,
-      grow: 2
+      grow: 2,
+      wrap: true,
     },
     {
       name: 'Course ID',
-      selector: row => row.courseId ?? ''
+      selector: row => row.courseId ?? '',
+      wrap: true,
     },
     {
       name: 'Course Enrollment Url',
-      selector: row => row.courseEnrollmentUrl ?? ''
+      selector: row => row.courseEnrollmentUrl ?? '',
+      wrap: true,
     },
     {
       name: 'Course Enrollment Key',
-      selector: row => row.courseEnrollmentKey ?? ''
+      selector: row => row.courseEnrollmentKey ?? '',
+      wrap: true,
     },
     {
       name: 'Status',
-      selector: row => row.status
+      selector: row => row.status,
+      wrap: true,
     },
     {
       name: 'Creator Email',
-      selector: row => row.creatorEmail
+      selector: row => row.creatorEmail,
+      wrap: true,
     }
   ]
 
