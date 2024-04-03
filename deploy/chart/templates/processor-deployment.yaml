@@ -54,4 +54,4 @@ spec:
             - name: SQS_QUEUE
               value: {{ .Values.sqsQueue }}
             - name: SQS_POLL_INTERVAL_MINS
-              value: {{ .Values.processorPollIntervalMins }}
+              value: "{{ .Values.processorPollIntervalMins }}"
