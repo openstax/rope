@@ -131,7 +131,6 @@ def test_course_build_processor(mocker, db, create_course_builds):
 
     mocker.patch(
         "rope.api.routers.moodle.moodle_client.get_role_by_shortname",
-        side_effects=["teacher", "student"],
     )
     mocker.patch(
         "rope.api.routers.moodle.moodle_client.get_user_by_email",
