@@ -106,7 +106,7 @@ def get_sqs_message_processor():
         build_completion_time = time.perf_counter()
         logging.info(
             f"The course build took: \
-                      {(build_start_time - build_completion_time)} seconds"
+                      {(build_completion_time - build_start_time)} seconds"
         )
 
     return inner
