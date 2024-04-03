@@ -2,11 +2,13 @@ deploymentDomain:
 pgServer:
 pgUsername:
 pgPassword:
+pgDatabase:
 googleClientId:
 sessionSecretKey:
 moodleToken:
 moodleUrl:
 sqsQueue:
+processorPollIntervalMins:
 apiImage:
   name: <account>.dkr.ecr.<region>.amazonaws.com/rope-api
   tag: sha
