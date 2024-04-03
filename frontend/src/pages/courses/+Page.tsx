@@ -85,53 +85,53 @@ function Page(): JSX.Element {
     {
       name: 'Instructor Name',
       selector: row => `${row.instructorFirstName} ${row.instructorLastName}`,
-      wrap: true,      
+      wrap: true
     },
     {
       name: 'Instructor Email',
       selector: row => row.instructorEmail,
-      wrap: true,
+      wrap: true
     },
     {
       name: 'School District Name',
       selector: row => row.schoolDistrictName,
-      wrap: true,
+      wrap: true
     },
     {
       name: 'Academic Year',
       selector: row => row.academicYear,
-      wrap: true,
+      wrap: true
     },
     {
       name: 'Course Name',
       selector: row => row.courseName,
       grow: 2,
-      wrap: true,
+      wrap: true
     },
     {
       name: 'Course ID',
       selector: row => row.courseId ?? '',
-      wrap: true,
+      wrap: true
     },
     {
       name: 'Course Enrollment Url',
       selector: row => row.courseEnrollmentUrl ?? '',
-      wrap: true,
+      wrap: true
     },
     {
       name: 'Course Enrollment Key',
       selector: row => row.courseEnrollmentKey ?? '',
-      wrap: true,
+      wrap: true
     },
     {
       name: 'Status',
       selector: row => row.status,
-      wrap: true,
+      wrap: true
     },
     {
       name: 'Creator Email',
       selector: row => row.creatorEmail,
-      wrap: true,
+      wrap: true
     }
   ]
 
