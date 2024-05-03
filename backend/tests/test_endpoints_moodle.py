@@ -42,11 +42,11 @@ def setup_new_user_manager(db):
 def setup_moodle_settings(db):
     academic_year = MoodleSetting(name="academic_year", value="AY 2024")
     academic_year_short = MoodleSetting(name="academic_year_short", value="AY24")
-    course_category = MoodleSetting(name="course_category", value="21")
+    course_category_id = MoodleSetting(name="course_category_id", value="21")
     base_course_id = MoodleSetting(name="base_course_id", value="100")
     db.add(academic_year)
     db.add(academic_year_short)
-    db.add(course_category)
+    db.add(course_category_id)
     db.add(base_course_id)
     db.commit()
 
@@ -69,7 +69,7 @@ def setup_get_course_builds(
         instructor_email="fsaint@rice.edu",
         course_name="Algebra 1 - Franklin Saint (AY 2025)",
         course_shortname="Alg1 FS AY25",
-        course_category="21",
+        course_category_id="21",
         course_id=None,
         course_enrollment_url=None,
         course_enrollment_key=None,
@@ -86,7 +86,7 @@ def setup_get_course_builds(
         instructor_email="lsimmons@rice.edu",
         course_name="Algebra 1 - Leon Simmons (AY 2025)",
         course_shortname="Alg1 LS AY25",
-        course_category="21",
+        course_category_id="21",
         course_id=None,
         course_enrollment_url=None,
         course_enrollment_key=None,
@@ -103,7 +103,7 @@ def setup_get_course_builds(
         instructor_email="fsaint@rice.edu",
         course_name="Algebra 1 - Franklin Saint (AY 2030)",
         course_shortname="Alg1 FS AY30",
-        course_category="41",
+        course_category_id="41",
         course_id=None,
         course_enrollment_url=None,
         course_enrollment_key=None,
@@ -120,7 +120,7 @@ def setup_get_course_builds(
         instructor_email="lthompson@rice.edu",
         course_name="Algebra 1 - Reed Thompson (AY 2025)",
         course_shortname="Alg1 RT AY25",
-        course_category="21",
+        course_category_id="21",
         course_id=47,
         course_enrollment_url="url.com",
         course_enrollment_key="12345",

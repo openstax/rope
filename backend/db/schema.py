@@ -75,7 +75,7 @@ class CourseBuild(Base):
     instructor_email: Mapped[str]
     course_name: Mapped[str]
     course_shortname: Mapped[str]
-    course_category: Mapped[int]
+    course_category_id: Mapped[int]
     course_id: Mapped[Optional[int]]
     course_enrollment_url: Mapped[Optional[str]]
     course_enrollment_key: Mapped[Optional[str]]
