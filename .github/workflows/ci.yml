@@ -36,7 +36,9 @@ jobs:
       - name: Test
         run: pytest --cov-report=term --cov-report=xml --cov=rope
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   frontend:
     timeout-minutes: 10
@@ -58,4 +60,6 @@ jobs:
       - name: Vitest
         run: npm run test:ci
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
