@@ -27,7 +27,7 @@ describe('Settings page', async () => {
   it('fetches settings and districts when admin is logged in', async () => {
     const mockSettings = [
       { id: 1, name: 'academic_year', value: '2024' },
-      { id: 2, name: 'course_category', value: 'Math' },
+      { id: 2, name: 'course_category_id', value: 'Math' },
       { id: 3, name: 'academic_year_short', value: 'short' },
       { id: 4, name: 'base_course_id', value: '42' }
     ]
@@ -75,7 +75,7 @@ describe('Settings page', async () => {
   it('updates Moodle settings when form is submitted', async () => {
     const mockSettings = [
       { id: 1, name: 'academic_year', value: '2024' },
-      { id: 2, name: 'course_category', value: 'Math' },
+      { id: 2, name: 'course_category_id', value: 'Math' },
       { id: 3, name: 'academic_year_short', value: 'short' },
       { id: 4, name: 'base_course_id', value: '42' }
     ]
@@ -95,7 +95,7 @@ describe('Settings page', async () => {
       json: async () => await Promise.resolve({ name: 'academic_year', value: '2025', id: 1 })
     }).mockResolvedValueOnce({
       ok: true,
-      json: async () => await Promise.resolve({ id: 2, name: 'course_category', value: 'Math' })
+      json: async () => await Promise.resolve({ id: 2, name: 'course_category_id', value: 'Math' })
     }).mockResolvedValueOnce({
       ok: true,
       json: async () => await Promise.resolve({ id: 3, name: 'academic_year_short', value: 'short' })

@@ -73,7 +73,7 @@ function Page(): JSX.Element {
   const [settings, setSettings] = useState<MoodleSettings[]>([
     { name: 'academic_year', value: '' },
     { name: 'academic_year_short', value: '' },
-    { name: 'course_category', value: '' },
+    { name: 'course_category_id', value: '' },
     { name: 'base_course_id', value: '' }
   ])
   const [districts, setDistricts] = useState<SchoolDistrict[]>([])

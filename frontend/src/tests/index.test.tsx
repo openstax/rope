@@ -21,7 +21,7 @@ describe('Index page', async () => {
     const mockMoodleUser = { first_name: 'Franklin', last_name: 'Saint', email: 'fsaint@snowfallisd.edu' }
     const mockMoodleSettings = [
       { name: 'academic_year', value: 'AY 2040' },
-      { name: 'course_category', value: '1' },
+      { name: 'course_category_id', value: '1' },
       { name: 'academic_year_short', value: 'AY40' },
       { name: 'base_course_id', value: '21' }
     ]
@@ -124,7 +124,7 @@ describe('Index page', async () => {
     const mockMoodleUser = { first_name: 'Gustavo', last_name: 'Zapata', email: 'gzapata@snowfallisd.edu' }
     const mockMoodleSettings = [
       { name: 'academic_year', value: 'AY 2040' },
-      { name: 'course_category', value: '1' },
+      { name: 'course_category_id', value: '1' },
       { name: 'academic_year_short', value: 'AY40' },
       { name: 'base_course_id', value: '21' }
     ]
@@ -168,7 +168,7 @@ describe('Index page', async () => {
     const mockMoodleUser = { first_name: 'Reed', last_name: 'Thompson', email: 'rthompson@snowfallisd.edu' }
     const mockMoodleSettings = [
       { name: 'academic_year', value: 'AY 2040' },
-      { name: 'course_category', value: '1' },
+      { name: 'course_category_id', value: '1' },
       { name: 'academic_year_short', value: 'AY40' },
       { name: 'base_course_id', value: '21' }
     ]
@@ -262,7 +262,7 @@ describe('Index page', async () => {
     const mockMoodleUser = { first_name: 'Avi', last_name: 'Drexler', email: 'adrexler@snowfallisd.edu' }
     const mockMoodleSettings = [
       { name: 'academic_year', value: 'AY 2040' },
-      { name: 'course_category', value: '1' },
+      { name: 'course_category_id', value: '1' },
       { name: 'academic_year_short', value: 'AY40' },
       { name: 'base_course_id', value: '21' }
     ]
