@@ -31,14 +31,14 @@ def create_course_build(
 ) -> FullCourseBuildSettings:
     academic_year = database.get_moodle_setting_by_name(db, "academic_year")
     academic_year_short = database.get_moodle_setting_by_name(db, "academic_year_short")
-    course_category = database.get_moodle_setting_by_name(db, "course_category")
+    course_category_id = database.get_moodle_setting_by_name(db, "course_category_id")
     base_course_id = database.get_moodle_setting_by_name(db, "base_course_id")
     if any(
         setting is None
         for setting in [
             academic_year,
             academic_year_short,
-            course_category,
+            course_category_id,
             base_course_id,
         ]
     ):
@@ -76,7 +76,7 @@ def create_course_build(
         school_district_id,
         academic_year,
         academic_year_short,
-        course_category,
+        course_category_id,
         base_course_id,
         course_name,
         maybe_course_shortname,

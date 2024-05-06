@@ -80,7 +80,7 @@ def process_course_build(course_build_id):
                 course_build.base_course_id,
                 course_build.course_name,
                 course_build.course_shortname,
-                course_build.course_category,
+                course_build.course_category_id,
                 instructor_role_id,
                 instructor_user_id,
                 student_role_id,
