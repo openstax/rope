@@ -62,5 +62,9 @@ spec:
               value: {{ .Values.pgDatabase }}
             - name: SQS_QUEUE
               value: {{ .Values.sqsQueue }}
+            - name: COURSES_CSV_S3_BUCKET
+              value: {{ .Values.coursesCsvS3Bucket }}
+            - name: COURSES_CSV_S3_KEY
+              value: {{ .Values.coursesCsvS3Key }}
           ports:
             - containerPort: 80

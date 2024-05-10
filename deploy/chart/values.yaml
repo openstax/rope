@@ -9,6 +9,8 @@ moodleToken:
 moodleUrl:
 sqsQueue:
 processorPollIntervalMins:
+coursesCsvS3Bucket:
+coursesCsvS3Key:
 apiImage:
   name: <account>.dkr.ecr.<region>.amazonaws.com/rope-api
   tag: sha
