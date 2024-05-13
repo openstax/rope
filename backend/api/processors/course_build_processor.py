@@ -92,10 +92,10 @@ def process_course_build(course_build_id, s3_client):
             course_build.course_id = new_course["course_id"]
             course_build.course_enrollment_url = new_course["course_enrolment_url"]
             course_build.course_enrollment_key = new_course["course_enrolment_key"]
+            session.commit()
 
             s3_bucket = settings.COURSES_CSV_S3_BUCKET
             s3_key = settings.COURSES_CSV_S3_KEY
-            session.commit()
             response = s3_client.get_object(Bucket=s3_bucket, Key=s3_key)
             csv_data = response["Body"].read().decode("utf-8")
 
