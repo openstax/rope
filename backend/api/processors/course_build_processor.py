@@ -1,8 +1,10 @@
 import argparse
+import io
 import time
 import boto3
 import json
 import logging
+import csv
 from functools import cache
 from sqlalchemy.exc import NoResultFound
 
@@ -38,7 +40,7 @@ def get_moodle_user_role_by_shortname(shortname: str):
     return moodle_user_id
 
 
-def process_course_build(course_build_id):
+def process_course_build(course_build_id, s3_client):
     get_sessionmaker = get_db()
     with get_sessionmaker() as session:
         try:
@@ -91,6 +93,29 @@ def process_course_build(course_build_id):
             course_build.course_enrollment_url = new_course["course_enrolment_url"]
             course_build.course_enrollment_key = new_course["course_enrolment_key"]
             session.commit()
+
+            s3_bucket = settings.COURSES_CSV_S3_BUCKET
+            s3_key = settings.COURSES_CSV_S3_KEY
+            response = s3_client.get_object(Bucket=s3_bucket, Key=s3_key)
+            csv_data = response["Body"].read().decode("utf-8")
+
+            csv_rows = list(csv.DictReader(io.StringIO(csv_data)))
+            csv_rows.append({
+                "course_id": course_build.course_id,
+                "district": course_build.school_district.name,
+                "research_participation": 0
+            })
+
+            updated_csv_data = io.StringIO()
+            csv_writer = csv.DictWriter(
+                updated_csv_data,
+                fieldnames=csv_rows[0].keys()
+            )
+            csv_writer.writeheader()
+            csv_writer.writerows(csv_rows)
+            s3_client.put_object(Bucket=s3_bucket, Key=s3_key,
+                                 Body=updated_csv_data.getvalue().encode("utf-8"))
+
         except Exception as e:
             course_build.status = CourseBuildStatus.FAILED.value
             session.commit()
@@ -98,11 +123,11 @@ def process_course_build(course_build_id):
             raise ProcessorException
 
 
-def get_sqs_message_processor():
+def get_sqs_message_processor(s3_client):
     def inner(sqs_message):
         message = json.loads(sqs_message["Body"])
         build_start_time = time.perf_counter()
-        process_course_build(message["course_build_id"])
+        process_course_build(message["course_build_id"], s3_client)
         build_completion_time = time.perf_counter()
         logging.info(
             f"The course build took: \
@@ -159,8 +184,9 @@ def main():
     daemonize = args.daemonize
 
     sqs_client = boto3.client("sqs")
+    s3_client = boto3.client("s3")
 
-    processor = get_sqs_message_processor()
+    processor = get_sqs_message_processor(s3_client)
 
     processor_runner(
         sqs_client=sqs_client,

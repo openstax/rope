@@ -55,3 +55,7 @@ spec:
               value: {{ .Values.sqsQueue }}
             - name: SQS_POLL_INTERVAL_MINS
               value: "{{ .Values.processorPollIntervalMins }}"
+            - name: COURSES_CSV_S3_BUCKET
+              value: "{{ .Values.coursesCsvS3Bucket }}"
+            - name: COURSES_CSV_S3_KEY
+              value: "{{ .Values.coursesCsvS3Key }}"

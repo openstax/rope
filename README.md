@@ -14,9 +14,11 @@ $ export MOODLE_URL=<moodle_url>
 $ export MOODLE_TOKEN=<moodle_token>
 ```
 
-If you would like to test with AWS you can optionally set the credentials using the `set_aws_creds` script in  `aws-access/scripts` and you can set the `SQS_QUEUE` environment variable using the following command:
+If you would like to test with AWS you can optionally set the credentials using the `set_aws_creds` script in  `aws-access/scripts` and you can set the `SQS and S3` environment variable using the following command:
 ```bash
 $ export SQS_QUEUE=<SQS_QUEUE>
+$ export COURSES_CSV_S3_BUCKET=<COURSES_CSV_S3_BUCKET>
+$ export COURSES_CSV_S3_KEY=<COURSES_CSV_S3_KEY>
 ```
 
 ```bash

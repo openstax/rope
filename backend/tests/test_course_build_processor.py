@@ -4,7 +4,8 @@ import botocore.stub
 import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+import io
+import csv
 from rope.api.processors import course_build_processor
 from rope.db.schema import CourseBuild, SchoolDistrict, UserAccount
 
@@ -106,6 +107,8 @@ def create_course_builds(
 def test_course_build_processor(mocker, db, create_course_builds):
     sqs_client = boto3.client("sqs", region_name="azeroth")
     sqs_stubber = botocore.stub.Stubber(sqs_client)
+    s3_client = boto3.client("s3")
+    s3_stubber = botocore.stub.Stubber(s3_client)
 
     course_builds = db.query(CourseBuild).all()
 
@@ -116,6 +119,9 @@ def test_course_build_processor(mocker, db, create_course_builds):
     mock_settings = mocker.Mock()
     setattr(mock_settings, "SQS_QUEUE", "testqueue")
     setattr(mock_settings, "SQS_POLL_INTERVAL_MINS", "1")
+    setattr(mock_settings, "COURSES_CSV_S3_BUCKET", "test-bucket")
+    setattr(mock_settings, "COURSES_CSV_S3_KEY", "test-key")
+
     mocker.patch(
         "rope.api.processors.course_build_processor.settings",
         mock_settings,
@@ -177,8 +183,49 @@ def test_course_build_processor(mocker, db, create_course_builds):
         },
     )
 
+    csv_data = [
+        ["course_id", "district", "research_participation"],
+        [21, "blacktemple_isd", 0],
+    ]
+    csv_buffer = io.StringIO()
+    csv_writer = csv.writer(csv_buffer)
+    csv_writer.writerows(csv_data)
+    input_csv_data = csv_buffer.getvalue()
+
+    output_csv_data = [
+        ["course_id", "district", "research_participation"],
+        [21, "blacktemple_isd", 0],
+        [77, "blacktemple_isd", 0],
+
+    ]
+    csv_buffer = io.StringIO()
+    csv_writer = csv.writer(csv_buffer)
+    csv_writer.writerows(output_csv_data)
+    output_csv_data = csv_buffer.getvalue()
+    s3_stubber.add_response(
+        "get_object",
+        {
+            "Body": io.BytesIO(input_csv_data.encode("utf-8")),
+        },
+        expected_params={
+            "Bucket": "test-bucket",
+            "Key": "test-key",
+        },
+    )
+
+    s3_stubber.add_response(
+        "put_object",
+        {},
+        expected_params={
+            "Bucket": "test-bucket",
+            "Key": "test-key",
+            "Body": output_csv_data.encode("utf-8"),
+        },
+    )
+
+    s3_stubber.activate()
     sqs_stubber.activate()
-    mocker_map = {"sqs": sqs_client}
+    mocker_map = {"sqs": sqs_client, "s3": s3_client}
     mocker.patch("boto3.client", lambda client: mocker_map[client])
     mocker.patch("sys.argv", [""])
     course_build_processor.main()
@@ -191,8 +238,8 @@ def test_course_build_processor(mocker, db, create_course_builds):
     assert (
         initial_course_build.course_enrollment_url == "https://enrolmenturl.com"
     )
-
     sqs_stubber.assert_no_pending_responses()
+    s3_stubber.assert_no_pending_responses()
 
 
 def test_non_existing_course_build(mocker):
@@ -240,7 +287,7 @@ def test_non_existing_course_build(mocker):
     )
 
     sqs_stubber.activate()
-    mocker_map = {"sqs": sqs_client}
+    mocker_map = {"sqs": sqs_client, "s3": None}
     mocker.patch("boto3.client", lambda client: mocker_map[client])
     mocker.patch("sys.argv", [""])
     course_build_processor.main()
@@ -255,7 +302,6 @@ def test_course_build_status_processing(mocker, db, create_course_builds):
 
     sqs_client = boto3.client("sqs", region_name="azeroth")
     sqs_stubber = botocore.stub.Stubber(sqs_client)
-
     mock_sqs_data = {"course_build_id": course_build.id}
 
     mock_settings = mocker.Mock()
@@ -297,7 +343,7 @@ def test_course_build_status_processing(mocker, db, create_course_builds):
     )
 
     sqs_stubber.activate()
-    mocker_map = {"sqs": sqs_client}
+    mocker_map = {"sqs": sqs_client, "s3": None}
     mocker.patch("boto3.client", lambda client: mocker_map[client])
     mocker.patch("sys.argv", [""])
     course_build_processor.main()
@@ -362,7 +408,7 @@ def test_course_build_status_completed(mocker, db, create_course_builds):
     )
 
     sqs_stubber.activate()
-    mocker_map = {"sqs": sqs_client}
+    mocker_map = {"sqs": sqs_client, "s3": None}
     mocker.patch("boto3.client", lambda client: mocker_map[client])
     mocker.patch("sys.argv", [""])
     course_build_processor.main()
