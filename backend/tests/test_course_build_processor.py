@@ -110,7 +110,7 @@ def test_course_build_processor(mocker, db, create_course_builds):
     s3_client = boto3.client("s3")
     s3_stubber = botocore.stub.Stubber(s3_client)
 
-    course_builds = db.query(CourseBuild).all()
+    course_builds = db.query(CourseBuild).order_by(CourseBuild.id).all()
 
     initial_course_build = course_builds[0]
 
@@ -296,7 +296,7 @@ def test_non_existing_course_build(mocker):
 
 
 def test_course_build_status_processing(mocker, db, create_course_builds):
-    course_builds = db.query(CourseBuild).all()
+    course_builds = db.query(CourseBuild).order_by(CourseBuild.id).all()
 
     course_build = course_builds[1]
 
@@ -352,8 +352,7 @@ def test_course_build_status_processing(mocker, db, create_course_builds):
 
 
 def test_course_build_status_completed(mocker, db, create_course_builds):
-    course_builds = db.query(CourseBuild).all()
-
+    course_builds = db.query(CourseBuild).order_by(CourseBuild.id).all()
     course_build = course_builds[2]
 
     sqs_client = boto3.client("sqs", region_name="azeroth")
