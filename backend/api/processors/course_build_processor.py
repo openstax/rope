@@ -99,15 +99,23 @@ def process_course_build(course_build_id, s3_client):
             response = s3_client.get_object(Bucket=s3_bucket, Key=s3_key)
             csv_data = response["Body"].read().decode("utf-8")
 
-            new_row = [course_build.course_id, course_build.school_district.name, 0]
-            csv_rows = list(csv.reader(csv_data.splitlines(), delimiter=','))
-            csv_rows.append(new_row)
+            csv_rows = list(csv.DictReader(io.StringIO(csv_data)))
+            csv_rows.append({
+                "course_id": course_build.course_id,
+                "district": course_build.school_district.name,
+                "research_participation": 0
+            })
 
             updated_csv_data = io.StringIO()
-            csv_writer = csv.writer(updated_csv_data)
+            csv_writer = csv.DictWriter(
+                updated_csv_data,
+                fieldnames=csv_rows[0].keys()
+            )
+            csv_writer.writeheader()
             csv_writer.writerows(csv_rows)
             s3_client.put_object(Bucket=s3_bucket, Key=s3_key,
                                  Body=updated_csv_data.getvalue().encode("utf-8"))
+
         except Exception as e:
             course_build.status = CourseBuildStatus.FAILED.value
             session.commit()

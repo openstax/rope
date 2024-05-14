@@ -245,7 +245,6 @@ def test_course_build_processor(mocker, db, create_course_builds):
 def test_non_existing_course_build(mocker):
     sqs_client = boto3.client("sqs", region_name="azeroth")
     sqs_stubber = botocore.stub.Stubber(sqs_client)
-    s3_client = boto3.client("s3")
 
     mock_sqs_data = {"course_build_id": 0}
 
@@ -288,7 +287,7 @@ def test_non_existing_course_build(mocker):
     )
 
     sqs_stubber.activate()
-    mocker_map = {"sqs": sqs_client, "s3": s3_client}
+    mocker_map = {"sqs": sqs_client, "s3": None}
     mocker.patch("boto3.client", lambda client: mocker_map[client])
     mocker.patch("sys.argv", [""])
     course_build_processor.main()
@@ -303,7 +302,6 @@ def test_course_build_status_processing(mocker, db, create_course_builds):
 
     sqs_client = boto3.client("sqs", region_name="azeroth")
     sqs_stubber = botocore.stub.Stubber(sqs_client)
-    s3_client = boto3.client("s3")
     mock_sqs_data = {"course_build_id": course_build.id}
 
     mock_settings = mocker.Mock()
@@ -345,7 +343,7 @@ def test_course_build_status_processing(mocker, db, create_course_builds):
     )
 
     sqs_stubber.activate()
-    mocker_map = {"sqs": sqs_client, "s3": s3_client}
+    mocker_map = {"sqs": sqs_client, "s3": None}
     mocker.patch("boto3.client", lambda client: mocker_map[client])
     mocker.patch("sys.argv", [""])
     course_build_processor.main()
@@ -360,7 +358,6 @@ def test_course_build_status_completed(mocker, db, create_course_builds):
 
     sqs_client = boto3.client("sqs", region_name="azeroth")
     sqs_stubber = botocore.stub.Stubber(sqs_client)
-    s3_client = boto3.client("s3")
 
     mock_sqs_data = {"course_build_id": course_build.id}
 
@@ -411,7 +408,7 @@ def test_course_build_status_completed(mocker, db, create_course_builds):
     )
 
     sqs_stubber.activate()
-    mocker_map = {"sqs": sqs_client, "s3": s3_client}
+    mocker_map = {"sqs": sqs_client, "s3": None}
     mocker.patch("boto3.client", lambda client: mocker_map[client])
     mocker.patch("sys.argv", [""])
     course_build_processor.main()
