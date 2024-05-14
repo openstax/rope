@@ -457,9 +457,9 @@ def test_get_course_build_by_academic_year(
         "creator_email": "manager@rice.edu",
     }
 
-    assert any(expected_data_1.items() <= item.items() for item in data)
-    assert any(expected_data_2.items() <= item.items() for item in data)
-    assert any(expected_data_3.items() <= item.items() for item in data)
+    assert any(expected_data_1.items() == item.items() for item in data)
+    assert any(expected_data_2.items() == item.items() for item in data)
+    assert any(expected_data_3.items() == item.items() for item in data)
 
 
 def test_get_course_build_by_instructor_email(
@@ -508,8 +508,8 @@ def test_get_course_build_by_instructor_email(
         "creator_email": "manager@rice.edu",
     }
 
-    assert any(expected_data_1.items() <= item.items() for item in data)
-    assert any(expected_data_2.items() <= item.items() for item in data)
+    assert any(expected_data_1.items() == item.items() for item in data)
+    assert any(expected_data_2.items() == item.items() for item in data)
 
 
 def test_get_all_course_builds(
@@ -590,10 +590,10 @@ def test_get_all_course_builds(
         "creator_email": "manager@rice.edu",
     }
 
-    assert any(expected_data_1.items() <= item.items() for item in data)
-    assert any(expected_data_2.items() <= item.items() for item in data)
-    assert any(expected_data_3.items() <= item.items() for item in data)
-    assert any(expected_data_4.items() <= item.items() for item in data)
+    assert any(expected_data_1.items() == item.items() for item in data)
+    assert any(expected_data_2.items() == item.items() for item in data)
+    assert any(expected_data_3.items() == item.items() for item in data)
+    assert any(expected_data_4.items() == item.items() for item in data)
 
 
 def test_get_moodle_user(
