@@ -280,11 +280,11 @@ def test_create_course_build_duplicate_shortname(
     second_course_response = test_client.post(
         "/moodle/course/build", json=course_build_settings2
     )
-    course_build = db.query(CourseBuild).all()
+    course_builds = db.query(CourseBuild).order_by(CourseBuild.id).all()
     first_course_data = first_course_response.json()
     secound_course_data = second_course_response.json()
 
-    assert len(course_build) == 2
+    assert len(course_builds) == 2
 
     assert first_course_response.status_code == 200
     assert first_course_data["instructor_firstname"] == "Franklin"
@@ -409,47 +409,57 @@ def test_get_course_build_by_academic_year(
     assert len(data) == 3
 
     assert response.status_code == 200
-    assert data[0].get("instructor_firstname") == "Franklin"
-    assert data[0].get("instructor_lastname") == "Saint"
-    assert data[0].get("instructor_email") == "fsaint@rice.edu"
-    assert data[0].get("course_name") == "Algebra 1 - Franklin Saint (AY 2025)"
-    assert data[0].get("course_shortname") == "Alg1 FS AY25"
-    assert data[0].get("course_id") is None
-    assert data[0].get("course_enrollment_url") is None
-    assert data[0].get("course_enrollment_key") is None
-    assert data[0].get("school_district_name") == school_district_name
-    assert data[0].get("academic_year") == "AY 2025"
-    assert data[0].get("academic_year_short") == "AY25"
-    assert data[0].get("status") == "created"
-    assert data[0].get("creator_email") == "manager@rice.edu"
+    expected_data_1 = {
+        "instructor_firstname": "Franklin",
+        "instructor_lastname": "Saint",
+        "instructor_email": "fsaint@rice.edu",
+        "course_name": "Algebra 1 - Franklin Saint (AY 2025)",
+        "course_shortname": "Alg1 FS AY25",
+        "course_id": None,
+        "course_enrollment_url": None,
+        "course_enrollment_key": None,
+        "school_district_name": school_district_name,
+        "academic_year": "AY 2025",
+        "academic_year_short": "AY25",
+        "status": "created",
+        "creator_email": "manager@rice.edu",
+    }
 
-    assert data[1].get("instructor_firstname") == "Leon"
-    assert data[1].get("instructor_lastname") == "Simmons"
-    assert data[1].get("instructor_email") == "lsimmons@rice.edu"
-    assert data[1].get("course_name") == "Algebra 1 - Leon Simmons (AY 2025)"
-    assert data[1].get("course_shortname") == "Alg1 LS AY25"
-    assert data[1].get("course_id") is None
-    assert data[1].get("course_enrollment_url") is None
-    assert data[1].get("course_enrollment_key") is None
-    assert data[1].get("school_district_name") == school_district_name
-    assert data[1].get("academic_year") == "AY 2025"
-    assert data[1].get("academic_year_short") == "AY25"
-    assert data[1].get("status") == "created"
-    assert data[1].get("creator_email") == "manager@rice.edu"
+    expected_data_2 = {
+        "instructor_firstname": "Leon",
+        "instructor_lastname": "Simmons",
+        "instructor_email": "lsimmons@rice.edu",
+        "course_name": "Algebra 1 - Leon Simmons (AY 2025)",
+        "course_shortname": "Alg1 LS AY25",
+        "course_id": None,
+        "course_enrollment_url": None,
+        "course_enrollment_key": None,
+        "school_district_name": school_district_name,
+        "academic_year": "AY 2025",
+        "academic_year_short": "AY25",
+        "status": "created",
+        "creator_email": "manager@rice.edu",
+    }
 
-    assert data[2].get("instructor_firstname") == "Reed"
-    assert data[2].get("instructor_lastname") == "Thompson"
-    assert data[2].get("instructor_email") == "lthompson@rice.edu"
-    assert data[2].get("course_name") == "Algebra 1 - Reed Thompson (AY 2025)"
-    assert data[2].get("course_shortname") == "Alg1 RT AY25"
-    assert data[2].get("course_id") == 47
-    assert data[2].get("course_enrollment_url") == "url.com"
-    assert data[2].get("course_enrollment_key") == "12345"
-    assert data[2].get("school_district_name") == school_district_name
-    assert data[2].get("academic_year") == "AY 2025"
-    assert data[2].get("academic_year_short") == "AY25"
-    assert data[2].get("status") == "created"
-    assert data[2].get("creator_email") == "manager@rice.edu"
+    expected_data_3 = {
+        "instructor_firstname": "Reed",
+        "instructor_lastname": "Thompson",
+        "instructor_email": "lthompson@rice.edu",
+        "course_name": "Algebra 1 - Reed Thompson (AY 2025)",
+        "course_shortname": "Alg1 RT AY25",
+        "course_id": 47,
+        "course_enrollment_url": "url.com",
+        "course_enrollment_key": "12345",
+        "school_district_name": school_district_name,
+        "academic_year": "AY 2025",
+        "academic_year_short": "AY25",
+        "status": "created",
+        "creator_email": "manager@rice.edu",
+    }
+
+    assert any(expected_data_1.items() == item.items() for item in data)
+    assert any(expected_data_2.items() == item.items() for item in data)
+    assert any(expected_data_3.items() == item.items() for item in data)
 
 
 def test_get_course_build_by_instructor_email(
@@ -466,33 +476,40 @@ def test_get_course_build_by_instructor_email(
     assert len(data) == 2
 
     assert response.status_code == 200
-    assert data[0].get("instructor_firstname") == "Franklin"
-    assert data[0].get("instructor_lastname") == "Saint"
-    assert data[0].get("instructor_email") == "fsaint@rice.edu"
-    assert data[0].get("course_name") == "Algebra 1 - Franklin Saint (AY 2025)"
-    assert data[0].get("course_shortname") == "Alg1 FS AY25"
-    assert data[0].get("course_id") is None
-    assert data[0].get("course_enrollment_url") is None
-    assert data[0].get("course_enrollment_key") is None
-    assert data[0].get("school_district_name") == school_district_name
-    assert data[0].get("academic_year") == "AY 2025"
-    assert data[0].get("academic_year_short") == "AY25"
-    assert data[0].get("status") == "created"
-    assert data[0].get("creator_email") == "manager@rice.edu"
+    expected_data_1 = {
+        "instructor_firstname": "Franklin",
+        "instructor_lastname": "Saint",
+        "instructor_email": "fsaint@rice.edu",
+        "course_name": "Algebra 1 - Franklin Saint (AY 2025)",
+        "course_shortname": "Alg1 FS AY25",
+        "course_id": None,
+        "course_enrollment_url": None,
+        "course_enrollment_key": None,
+        "school_district_name": school_district_name,
+        "academic_year": "AY 2025",
+        "academic_year_short": "AY25",
+        "status": "created",
+        "creator_email": "manager@rice.edu",
+    }
 
-    assert data[1].get("instructor_firstname") == "Franklin"
-    assert data[1].get("instructor_lastname") == "Saint"
-    assert data[1].get("instructor_email") == "fsaint@rice.edu"
-    assert data[1].get("course_name") == "Algebra 1 - Franklin Saint (AY 2030)"
-    assert data[1].get("course_shortname") == "Alg1 FS AY30"
-    assert data[1].get("course_id") is None
-    assert data[1].get("course_enrollment_url") is None
-    assert data[1].get("course_enrollment_key") is None
-    assert data[1].get("school_district_name") == school_district_name
-    assert data[1].get("academic_year") == "AY 2030"
-    assert data[1].get("academic_year_short") == "AY30"
-    assert data[1].get("status") == "created"
-    assert data[1].get("creator_email") == "manager@rice.edu"
+    expected_data_2 = {
+        "instructor_firstname": "Franklin",
+        "instructor_lastname": "Saint",
+        "instructor_email": "fsaint@rice.edu",
+        "course_name": "Algebra 1 - Franklin Saint (AY 2030)",
+        "course_shortname": "Alg1 FS AY30",
+        "course_id": None,
+        "course_enrollment_url": None,
+        "course_enrollment_key": None,
+        "school_district_name": school_district_name,
+        "academic_year": "AY 2030",
+        "academic_year_short": "AY30",
+        "status": "created",
+        "creator_email": "manager@rice.edu",
+    }
+
+    assert any(expected_data_1.items() == item.items() for item in data)
+    assert any(expected_data_2.items() == item.items() for item in data)
 
 
 def test_get_all_course_builds(
@@ -509,61 +526,74 @@ def test_get_all_course_builds(
     assert len(data) == 4
 
     assert response.status_code == 200
-    assert data[0].get("instructor_firstname") == "Franklin"
-    assert data[0].get("instructor_lastname") == "Saint"
-    assert data[0].get("instructor_email") == "fsaint@rice.edu"
-    assert data[0].get("course_name") == "Algebra 1 - Franklin Saint (AY 2025)"
-    assert data[0].get("course_shortname") == "Alg1 FS AY25"
-    assert data[0].get("course_id") is None
-    assert data[0].get("course_enrollment_url") is None
-    assert data[0].get("course_enrollment_key") is None
-    assert data[0].get("school_district_name") == school_district_name
-    assert data[0].get("academic_year") == "AY 2025"
-    assert data[0].get("academic_year_short") == "AY25"
-    assert data[0].get("status") == "created"
-    assert data[0].get("creator_email") == "manager@rice.edu"
+    expected_data_1 = {
+        "instructor_firstname": "Franklin",
+        "instructor_lastname": "Saint",
+        "instructor_email": "fsaint@rice.edu",
+        "course_name": "Algebra 1 - Franklin Saint (AY 2025)",
+        "course_shortname": "Alg1 FS AY25",
+        "course_id": None,
+        "course_enrollment_url": None,
+        "course_enrollment_key": None,
+        "school_district_name": school_district_name,
+        "academic_year": "AY 2025",
+        "academic_year_short": "AY25",
+        "status": "created",
+        "creator_email": "manager@rice.edu",
+    }
 
-    assert data[1].get("instructor_firstname") == "Leon"
-    assert data[1].get("instructor_lastname") == "Simmons"
-    assert data[1].get("instructor_email") == "lsimmons@rice.edu"
-    assert data[1].get("course_name") == "Algebra 1 - Leon Simmons (AY 2025)"
-    assert data[1].get("course_shortname") == "Alg1 LS AY25"
-    assert data[1].get("course_id") is None
-    assert data[1].get("course_enrollment_url") is None
-    assert data[1].get("course_enrollment_key") is None
-    assert data[1].get("school_district_name") == school_district_name
-    assert data[1].get("academic_year") == "AY 2025"
-    assert data[1].get("academic_year_short") == "AY25"
-    assert data[1].get("status") == "created"
-    assert data[1].get("creator_email") == "manager@rice.edu"
+    expected_data_2 = {
+        "instructor_firstname": "Leon",
+        "instructor_lastname": "Simmons",
+        "instructor_email": "lsimmons@rice.edu",
+        "course_name": "Algebra 1 - Leon Simmons (AY 2025)",
+        "course_shortname": "Alg1 LS AY25",
+        "course_id": None,
+        "course_enrollment_url": None,
+        "course_enrollment_key": None,
+        "school_district_name": school_district_name,
+        "academic_year": "AY 2025",
+        "academic_year_short": "AY25",
+        "status": "created",
+        "creator_email": "manager@rice.edu",
+    }
 
-    assert data[2].get("instructor_firstname") == "Franklin"
-    assert data[2].get("instructor_lastname") == "Saint"
-    assert data[2].get("instructor_email") == "fsaint@rice.edu"
-    assert data[2].get("course_name") == "Algebra 1 - Franklin Saint (AY 2030)"
-    assert data[2].get("course_shortname") == "Alg1 FS AY30"
-    assert data[2].get("course_id") is None
-    assert data[2].get("course_enrollment_url") is None
-    assert data[2].get("course_enrollment_key") is None
-    assert data[2].get("school_district_name") == school_district_name
-    assert data[2].get("academic_year") == "AY 2030"
-    assert data[2].get("academic_year_short") == "AY30"
-    assert data[2].get("status") == "created"
-    assert data[2].get("creator_email") == "manager@rice.edu"
+    expected_data_3 = {
+        "instructor_firstname": "Franklin",
+        "instructor_lastname": "Saint",
+        "instructor_email": "fsaint@rice.edu",
+        "course_name": "Algebra 1 - Franklin Saint (AY 2030)",
+        "course_shortname": "Alg1 FS AY30",
+        "course_id": None,
+        "course_enrollment_url": None,
+        "course_enrollment_key": None,
+        "school_district_name": school_district_name,
+        "academic_year": "AY 2030",
+        "academic_year_short": "AY30",
+        "status": "created",
+        "creator_email": "manager@rice.edu",
+    }
 
-    assert data[3].get("instructor_firstname") == "Reed"
-    assert data[3].get("instructor_lastname") == "Thompson"
-    assert data[3].get("instructor_email") == "lthompson@rice.edu"
-    assert data[3].get("course_name") == "Algebra 1 - Reed Thompson (AY 2025)"
-    assert data[3].get("course_shortname") == "Alg1 RT AY25"
-    assert data[3].get("course_id") == 47
-    assert data[3].get("course_enrollment_url") == "url.com"
-    assert data[3].get("course_enrollment_key") == "12345"
-    assert data[3].get("school_district_name") == school_district_name
-    assert data[3].get("academic_year") == "AY 2025"
-    assert data[3].get("academic_year_short") == "AY25"
-    assert data[3].get("status") == "created"
-    assert data[3].get("creator_email") == "manager@rice.edu"
+    expected_data_4 = {
+        "instructor_firstname": "Reed",
+        "instructor_lastname": "Thompson",
+        "instructor_email": "lthompson@rice.edu",
+        "course_name": "Algebra 1 - Reed Thompson (AY 2025)",
+        "course_shortname": "Alg1 RT AY25",
+        "course_id": 47,
+        "course_enrollment_url": "url.com",
+        "course_enrollment_key": "12345",
+        "school_district_name": school_district_name,
+        "academic_year": "AY 2025",
+        "academic_year_short": "AY25",
+        "status": "created",
+        "creator_email": "manager@rice.edu",
+    }
+
+    assert any(expected_data_1.items() == item.items() for item in data)
+    assert any(expected_data_2.items() == item.items() for item in data)
+    assert any(expected_data_3.items() == item.items() for item in data)
+    assert any(expected_data_4.items() == item.items() for item in data)
 
 
 def test_get_moodle_user(
