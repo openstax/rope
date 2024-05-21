@@ -38,7 +38,7 @@ phases:
       - yq e -i '.googleClientId=strenv(GOOGLE_CLIENT_ID)' ./values.yaml
       - yq e -i '.sessionSecretKey=strenv(SESSION_SECRET_KEY)' ./values.yaml
       - yq e -i '.moodleToken=strenv(MOODLE_TOKEN)' ./values.yaml
-      - yq e -i '.moodleUrl="https://qa.raiselearning.org"' ./values.yaml
+      - yq e -i '.moodleUrl="https://staging.raiselearning.org"' ./values.yaml
       - yq e -i '.sqsQueue="rope-course-build"' ./values.yaml
       - yq e -i '.processorPollIntervalMins="1"' ./values.yaml
       - yq e -i '.coursesCsvS3Bucket="raise-data"' ./values.yaml
