@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import DataTable, { type TableColumn, Direction } from 'react-data-table-component'
+import DataTable, { type TableColumn } from 'react-data-table-component'
 import { ropeApi, type CourseBuild } from '../../utils/ropeApi'
 import { styled } from 'styled-components'
 
