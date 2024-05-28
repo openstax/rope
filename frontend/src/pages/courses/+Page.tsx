@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import DataTable, { type TableColumn } from 'react-data-table-component'
+import DataTable, { type TableColumn, Direction } from 'react-data-table-component'
 import { ropeApi, type CourseBuild } from '../../utils/ropeApi'
 import { styled } from 'styled-components'
 
@@ -85,16 +85,19 @@ function Page(): JSX.Element {
     {
       name: 'Instructor Name',
       selector: row => `${row.instructorFirstName} ${row.instructorLastName}`,
+      sortable: true,
       wrap: true
     },
     {
       name: 'Instructor Email',
       selector: row => row.instructorEmail,
+      sortable: true,
       wrap: true
     },
     {
       name: 'School District Name',
       selector: row => row.schoolDistrictName,
+      sortable: true,
       wrap: true
     },
     {
@@ -111,6 +114,7 @@ function Page(): JSX.Element {
     {
       name: 'Course ID',
       selector: row => row.courseId ?? '',
+      sortable: true,
       wrap: true
     },
     {
@@ -159,6 +163,8 @@ function Page(): JSX.Element {
       <DataTable
         columns={columns}
         data={filteredData}
+        defaultSortFieldId={6}
+        defaultSortAsc={false}
         pagination
         highlightOnHover
         striped
