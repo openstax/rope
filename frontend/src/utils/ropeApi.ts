@@ -34,7 +34,7 @@ export interface CourseBuild {
   courseShortName: string
   creatorEmail: string
   status: string
-  courseId?: string
+  courseId?: number
   courseEnrollmentUrl?: string
   courseEnrollmentKey?: string
 }
@@ -59,7 +59,7 @@ function convertApiCourseBuildToCourseBuild(apiCourseBuild: {
   course_shortname: string
   creator_email: string
   status: string
-  course_id?: string
+  course_id?: number
   course_enrollment_url?: string
   course_enrollment_key?: string
 
@@ -283,7 +283,7 @@ export const ropeApi = {
       course_shortname: string
       creator_email: string
       status: string
-      course_id: string
+      course_id: number
       course_enrollment_url: string
       course_enrollment_key: string
     }) => convertApiCourseBuildToCourseBuild(courseBuild))

@@ -16,7 +16,7 @@ const mockCourseBuilds = [{
   course_shortname: 'Alg1 AD AY40',
   creator_email: 'admin@rice.edu',
   status: 'created',
-  course_id: '37',
+  course_id: 37,
   course_enrollment_url: 'enrollment_url1',
   course_enrollment_key: 'key1'
 },
@@ -31,7 +31,7 @@ const mockCourseBuilds = [{
   course_shortname: 'Alg1 PG AY39',
   creator_email: 'admin@rice.edu',
   status: 'created',
-  course_id: '47',
+  course_id: 47,
   course_enrollment_url: 'enrollment_url2',
   course_enrollment_key: 'key2'
 
@@ -47,7 +47,7 @@ const mockCourseBuilds = [{
   course_shortname: 'Alg1 PG AY40',
   creator_email: 'admin@rice.edu',
   status: 'created',
-  course_id: '57',
+  course_id: 57,
   course_enrollment_url: 'enrollment_url3',
   course_enrollment_key: 'key3'
 }]
@@ -79,7 +79,7 @@ describe('Courses page', async () => {
     expect(screen.getAllByText('prabhdip@rice.edu').length).toBe(2)
     expect(screen.queryByText('AY 2039')).toBeInTheDocument()
     expect(screen.queryByText('Algebra 1 - Prabhdip Gill (AY 2039)')).toBeInTheDocument()
-    expect(screen.queryByText('37')).toBeInTheDocument()
+    expect(screen.queryByText(37)).toBeInTheDocument()
     expect(screen.queryByText('enrollment_url1')).toBeInTheDocument()
     expect(screen.queryByText('key1')).toBeInTheDocument()
   })
@@ -117,7 +117,7 @@ describe('Courses page', async () => {
     expect(screen.queryByText('Algebra 1 - Prabhdip Gill (AY 2039)')).not.toBeInTheDocument()
     expect(screen.queryByText('Algebra 1 - Avi Drexler (AY 2040)')).not.toBeInTheDocument()
     expect(screen.queryByText('created')).toBeInTheDocument()
-    expect(screen.queryByText('57')).toBeInTheDocument()
+    expect(screen.queryByText(57)).toBeInTheDocument()
     expect(screen.queryByText('enrollment_url3')).toBeInTheDocument()
     expect(screen.queryByText('key3')).toBeInTheDocument()
   })
