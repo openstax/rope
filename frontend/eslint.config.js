@@ -4,7 +4,6 @@ import hooks from "eslint-plugin-react-hooks"
 import reactRefresh from "eslint-plugin-react-refresh"
 import love from "eslint-config-love"
 import tsParser from "@typescript-eslint/parser"
-import globals from "globals"
 import tseslint from 'typescript-eslint'
 import eslint from '@eslint/js'
 
