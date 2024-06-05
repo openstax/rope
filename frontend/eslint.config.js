@@ -52,11 +52,6 @@ export default [
       parser: tsParser,
       parserOptions: {
         ecmaVersion: 'latest'
-      },
-      globals: {
-        ...globals.browser,
-        ...globals.es2020,
-        ...globals.node,
       }
     }
   },
