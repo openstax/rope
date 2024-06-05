@@ -28,7 +28,6 @@ export default [
           asyncArrow: 'always'
         }
       ],
-      'no-undef': 'off'
     }
   },
   {
