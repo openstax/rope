@@ -106,6 +106,7 @@ function Page(): JSX.Element {
       void fetchSettings()
       void fetchDistricts()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authContext.isAdmin])
 
   const handleInputChange = (index: number, value: string): void => {
