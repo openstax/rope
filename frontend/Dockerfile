@@ -1,4 +1,4 @@
-FROM node:20.11.0 as base
+FROM node:20.15.1 as base
 
 WORKDIR /code
 
