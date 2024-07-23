@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { Header } from '../components/Header'
 import { expect, vi } from 'vitest'
 import { PageContextProvider } from '../components/usePageContext'
-import { type PageContext } from 'vike/types'
+import type { PageContext } from 'vike/types'
 import { AuthContext, AuthStatus } from '../components/useAuthContext'
 
 describe('Header component', () => {

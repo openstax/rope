@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { expect, vi } from 'vitest'
 import { Page } from '../pages/users/+Page'
-import { type PageContext } from 'vike/types'
+import type { PageContext } from 'vike/types'
 import { AuthContext, AuthStatus } from '../components/useAuthContext'
 import { PageContextProvider } from '../components/usePageContext'
 

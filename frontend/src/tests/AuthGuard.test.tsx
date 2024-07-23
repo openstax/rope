@@ -3,7 +3,7 @@ import { AuthContext, AuthStatus } from '../components/useAuthContext'
 import { AuthGuard } from '../components/AuthGuard'
 import { expect } from 'vitest'
 import { PageContextProvider } from '../components/usePageContext'
-import { type PageContext } from 'vike/types'
+import type { PageContext } from 'vike/types'
 
 describe('AuthGuard', () => {
   Object.defineProperty(window, 'location', {

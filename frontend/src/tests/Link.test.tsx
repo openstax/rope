@@ -2,7 +2,7 @@ import { render } from '@testing-library/react'
 import { Link } from '../components/Link'
 import { expect } from 'vitest'
 import { PageContextProvider } from '../components/usePageContext'
-import { type PageContext } from 'vike/types'
+import type { PageContext } from 'vike/types'
 
 describe('Link component', () => {
   it('should render without is-active class', () => {

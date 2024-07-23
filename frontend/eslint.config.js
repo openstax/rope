@@ -27,6 +27,7 @@ export default [
           asyncArrow: 'always'
         }
       ],
+      '@typescript-eslint/init-declarations': 'off',
     }
   },
   {
