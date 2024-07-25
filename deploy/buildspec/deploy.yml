@@ -38,11 +38,11 @@ phases:
       - yq e -i '.googleClientId=strenv(GOOGLE_CLIENT_ID)' ./values.yaml
       - yq e -i '.sessionSecretKey=strenv(SESSION_SECRET_KEY)' ./values.yaml
       - yq e -i '.moodleToken=strenv(MOODLE_TOKEN)' ./values.yaml
-      - yq e -i '.moodleUrl="https://staging.raiselearning.org"' ./values.yaml
+      - yq e -i '.moodleUrl="https://raiselearning.org"' ./values.yaml
       - yq e -i '.sqsQueue="rope-course-build"' ./values.yaml
       - yq e -i '.processorPollIntervalMins="1"' ./values.yaml
       - yq e -i '.coursesCsvS3Bucket="raise-data"' ./values.yaml
-      - yq e -i '.coursesCsvS3Key="testing/ay2023/automation/courses.csv"' ./values.yaml
+      - yq e -i '.coursesCsvS3Key="algebra1/ay2024/automation/courses.csv"' ./values.yaml
   build:
     commands:
       - helm upgrade -n raise --install -f ./values.yaml rope deploy/chart/
