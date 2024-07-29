@@ -25,7 +25,10 @@ def get_districts(
 ) -> list[FullSchoolDistrict]:
     active_only = not current_user["is_admin"]
     school_districts = database.get_districts(db, active_only)
-    return school_districts
+    sorted_school_districts = sorted(
+        school_districts, key=lambda district: district.name
+    )
+    return sorted_school_districts
 
 
 @router.post("/admin/settings/district", dependencies=[Depends(verify_admin)])

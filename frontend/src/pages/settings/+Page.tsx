@@ -142,7 +142,9 @@ function Page(): JSX.Element {
         name: newDistrictName,
         active: true
       })
-      setDistricts([...districts, newDistrict])
+      const updatedDistricts = [...districts, newDistrict]
+      updatedDistricts.sort((a, b) => a.name.localeCompare(b.name))
+      setDistricts(updatedDistricts)
       setNewDistrictName('')
       setDistrictMessage('District added successfully')
     } catch (error) {
@@ -190,6 +192,13 @@ function Page(): JSX.Element {
       {(settingsMessage != null) && <Message>{settingsMessage}</Message>}
 
       <Title>District List</Title>
+      <Input
+        type="text"
+        value={newDistrictName}
+        onChange={(e) => { setNewDistrictName(e.target.value) }}
+        placeholder="Enter district name"
+      />
+      <Button onClick={() => { void handleAddDistrict() }}>Add District</Button>
       <DistrictList>
         {districts.map(district => (
           <DistrictListItem key={district.id}>
@@ -207,16 +216,8 @@ function Page(): JSX.Element {
           </DistrictListItem>
         ))}
       </DistrictList>
-      <Input
-        type="text"
-        value={newDistrictName}
-        onChange={(e) => { setNewDistrictName(e.target.value) }}
-        placeholder="Enter district name"
-      />
-      <Button onClick={() => { void handleAddDistrict() }}>Add District</Button>
       {(districtMessage != null) && <Message>{districtMessage}</Message>}
       </>
-
       : <p>This page is admin only</p>}
     </Container>
   )
