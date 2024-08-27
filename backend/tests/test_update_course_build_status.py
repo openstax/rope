@@ -1,6 +1,7 @@
 import pytest
 
 from rope.db.schema import CourseBuild, SchoolDistrict, UserAccount
+from rope.scripts import update_course_build_status
 
 
 @pytest.fixture(autouse=True)
@@ -57,9 +58,7 @@ def test_update_course_build_status(db, setup_school_district, setup_new_user_ma
     course_builds = db.query(CourseBuild).all()
 
     course_build_id = course_builds[0].id
-    course_build = db.query(CourseBuild).filter(CourseBuild.id == course_build_id).one()
-    course_build.status = "CREATED"
-    db.commit()
-    db.refresh(course_build)
+    update_course_build_status.update_course_build_status(course_build_id)
+    db.refresh(course_builds[0])
 
-    assert course_build.status == "created"
+    assert course_builds[0].status == "created"
