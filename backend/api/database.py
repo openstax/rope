@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 from rope.db.schema import UserAccount, SchoolDistrict, MoodleSetting, CourseBuild
@@ -183,7 +183,7 @@ def get_course_builds(db: Session, academic_year, instructor_email):
 
     if instructor_email:
         course_builds = course_builds.filter(
-            CourseBuild.instructor_email == instructor_email
+            func.lower(CourseBuild.instructor_email) == func.lower(instructor_email)
         )
 
     return course_builds.all()
