@@ -2,6 +2,7 @@ import pytest
 
 from rope.db.schema import CourseBuild, SchoolDistrict, UserAccount
 from rope.scripts import update_course_build_status
+from sqlalchemy import text
 
 
 @pytest.fixture(autouse=True)
@@ -9,6 +10,7 @@ def clear_course_build_table(db):
     db.query(CourseBuild).delete()
     db.query(UserAccount).delete()
     db.query(SchoolDistrict).delete()
+    db.execute(text("ALTER SEQUENCE course_build_id_seq RESTART WITH 1"))
     db.commit()
 
 
