@@ -1,5 +1,5 @@
 import argparse
-from rope.db.schema import CourseBuild
+from rope.db.schema import CourseBuild, CourseBuildStatus
 from rope.api import database
 
 
@@ -17,7 +17,7 @@ def update_course_build_status(course_build_id):
         course_build = (
             session.query(CourseBuild).filter(CourseBuild.id == course_build_id).one()
         )
-        course_build.status = "CREATED"
+        course_build.status = CourseBuildStatus.CREATED.value
         session.commit()
 
 
@@ -25,7 +25,7 @@ def main():
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
         "course_build_id",
-        type=str,
+        type=int,
         help="Enter the course_build.id associated with the unsuccessful course build",
     )
 
@@ -36,4 +36,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

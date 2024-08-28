@@ -32,7 +32,9 @@ def setup_new_user_manager(db):
     return user
 
 
-def test_update_course_build_status(db, setup_school_district, setup_new_user_manager):
+def test_update_course_build_status(
+    db, setup_school_district, setup_new_user_manager, mocker
+):
     school_district_id = setup_school_district.id
     user_id = setup_new_user_manager.id
     add_db_course_build = CourseBuild(
@@ -53,12 +55,12 @@ def test_update_course_build_status(db, setup_school_district, setup_new_user_ma
         creator_id=user_id,
     )
 
+    mocker.patch("sys.argv", ["", "1"])
     db.add(add_db_course_build)
     db.commit()
+
+    update_course_build_status.main()
     course_builds = db.query(CourseBuild).all()
+    updated_course_build = course_builds[0]
 
-    course_build_id = course_builds[0].id
-    update_course_build_status.update_course_build_status(course_build_id)
-    db.refresh(course_builds[0])
-
-    assert course_builds[0].status == "created"
+    assert updated_course_build.status == "created"
