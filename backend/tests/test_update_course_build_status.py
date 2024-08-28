@@ -2,7 +2,8 @@ import pytest
 
 from rope.db.schema import CourseBuild, SchoolDistrict, UserAccount
 from rope.scripts import update_course_build_status
-from sqlalchemy import text
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
 
 
 @pytest.fixture(autouse=True)
@@ -58,6 +59,15 @@ def test_update_course_build_status(
     )
 
     mocker.patch("sys.argv", ["", "1"])
+
+    engine = create_engine("postgresql://pguser:pgpassword@localhost/ropedb")
+    mock_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    mocker.patch(
+        "rope.scripts.update_course_build_status.get_db",
+        lambda: mock_factory,
+    )
+
     db.add(add_db_course_build)
     db.commit()
 

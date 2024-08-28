@@ -6,7 +6,8 @@ from rope.api import database
 session_factory = database.SessionLocal
 
 
-# This function allows the code to be testable
+# This function allows the code to be testable and
+# talk to the mocked sessionmaker in test_update_course_build_status.py
 def get_db():
     return session_factory  # pragma: no cover
 
