@@ -24,6 +24,7 @@ export type MoodleUser = {
 } | null
 
 export interface CourseBuild {
+  buildId: number
   instructorFirstName: string
   instructorLastName: string
   instructorEmail: string
@@ -49,6 +50,7 @@ function convertApiUserToUser(apiUser: { email: string, is_admin: boolean, is_ma
 }
 
 function convertApiCourseBuildToCourseBuild(apiCourseBuild: {
+  id: number
   instructor_firstname: string
   instructor_lastname: string
   instructor_email: string
@@ -65,6 +67,7 @@ function convertApiCourseBuildToCourseBuild(apiCourseBuild: {
 
 }): CourseBuild {
   return {
+    buildId: apiCourseBuild.id,
     instructorFirstName: apiCourseBuild.instructor_firstname,
     instructorLastName: apiCourseBuild.instructor_lastname,
     instructorEmail: apiCourseBuild.instructor_email,
@@ -251,6 +254,7 @@ export const ropeApi = {
 
     const courseBuildsFromApi = await response.json()
     const courseBuilds: CourseBuild[] = courseBuildsFromApi.map((courseBuild: {
+      id: number
       instructor_firstname: string
       instructor_lastname: string
       instructor_email: string
