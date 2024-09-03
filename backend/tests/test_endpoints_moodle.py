@@ -169,6 +169,7 @@ def test_create_course_build(
     assert len(course_build) == 1
 
     assert response.status_code == 200
+    assert data["id"] == 1
     assert data["instructor_firstname"] == "Franklin"
     assert data["instructor_lastname"] == "Saint"
     assert data["instructor_email"] == "fsaint@rice.edu"
@@ -282,11 +283,12 @@ def test_create_course_build_duplicate_shortname(
     )
     course_builds = db.query(CourseBuild).order_by(CourseBuild.id).all()
     first_course_data = first_course_response.json()
-    secound_course_data = second_course_response.json()
+    second_course_data = second_course_response.json()
 
     assert len(course_builds) == 2
 
     assert first_course_response.status_code == 200
+    assert first_course_data["id"] == 1
     assert first_course_data["instructor_firstname"] == "Franklin"
     assert first_course_data["instructor_lastname"] == "Saint"
     assert first_course_data["instructor_email"] == "fsaint@rice.edu"
@@ -302,19 +304,20 @@ def test_create_course_build_duplicate_shortname(
     assert first_course_data["creator_email"] == "manager@rice.edu"
 
     assert second_course_response.status_code == 200
-    assert secound_course_data["instructor_firstname"] == "Freya"
-    assert secound_course_data["instructor_lastname"] == "Santiago"
-    assert secound_course_data["instructor_email"] == "fsantiago@rice.edu"
-    assert secound_course_data["course_name"] == "Algebra 1 - Freya Santiago (AY 2024)"
-    assert secound_course_data["course_shortname"] == "Alg1 FS1 AY24"
-    assert secound_course_data["course_id"] is None
-    assert secound_course_data["course_enrollment_url"] is None
-    assert secound_course_data["course_enrollment_key"] is None
-    assert secound_course_data["school_district_name"] == "snowfall_isd"
-    assert secound_course_data["academic_year"] == "AY 2024"
-    assert secound_course_data["academic_year_short"] == "AY24"
-    assert secound_course_data["status"] == "created"
-    assert secound_course_data["creator_email"] == "manager@rice.edu"
+    assert second_course_data["id"] == 2
+    assert second_course_data["instructor_firstname"] == "Freya"
+    assert second_course_data["instructor_lastname"] == "Santiago"
+    assert second_course_data["instructor_email"] == "fsantiago@rice.edu"
+    assert second_course_data["course_name"] == "Algebra 1 - Freya Santiago (AY 2024)"
+    assert second_course_data["course_shortname"] == "Alg1 FS1 AY24"
+    assert second_course_data["course_id"] is None
+    assert second_course_data["course_enrollment_url"] is None
+    assert second_course_data["course_enrollment_key"] is None
+    assert second_course_data["school_district_name"] == "snowfall_isd"
+    assert second_course_data["academic_year"] == "AY 2024"
+    assert second_course_data["academic_year_short"] == "AY24"
+    assert second_course_data["status"] == "created"
+    assert second_course_data["creator_email"] == "manager@rice.edu"
 
 
 def test_create_course_build_duplicate_shortname_moodle(
@@ -349,6 +352,7 @@ def test_create_course_build_duplicate_shortname_moodle(
     assert len(course_build) == 1
 
     assert response.status_code == 200
+    assert data["id"] == 1
     assert data["instructor_firstname"] == "Reed"
     assert data["instructor_lastname"] == "Thompson"
     assert data["instructor_email"] == "rthompson@rice.edu"
@@ -380,6 +384,7 @@ def test_get_course_build_by_academic_year_and_instructor_email(
     assert len(data) == 1
 
     assert response.status_code == 200
+    assert data[0].get("id") == 1
     assert data[0].get("instructor_firstname") == "Franklin"
     assert data[0].get("instructor_lastname") == "Saint"
     assert data[0].get("instructor_email") == "fsaint@rice.edu"
@@ -410,6 +415,7 @@ def test_get_course_build_by_academic_year(
 
     assert response.status_code == 200
     expected_data_1 = {
+        "id": 1,
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
         "instructor_email": "fsaint@rice.edu",
@@ -426,6 +432,7 @@ def test_get_course_build_by_academic_year(
     }
 
     expected_data_2 = {
+        "id": 2,
         "instructor_firstname": "Leon",
         "instructor_lastname": "Simmons",
         "instructor_email": "lsimmons@rice.edu",
@@ -442,6 +449,7 @@ def test_get_course_build_by_academic_year(
     }
 
     expected_data_3 = {
+        "id": 4,
         "instructor_firstname": "Reed",
         "instructor_lastname": "Thompson",
         "instructor_email": "lthompson@rice.edu",
@@ -477,6 +485,7 @@ def test_get_course_build_by_instructor_email(
 
     assert response.status_code == 200
     expected_data_1 = {
+        "id": 1,
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
         "instructor_email": "fsaint@rice.edu",
@@ -493,6 +502,7 @@ def test_get_course_build_by_instructor_email(
     }
 
     expected_data_2 = {
+        "id": 3,
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
         "instructor_email": "fsaint@rice.edu",
@@ -527,6 +537,7 @@ def test_get_all_course_builds(
 
     assert response.status_code == 200
     expected_data_1 = {
+        "id": 1,
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
         "instructor_email": "fsaint@rice.edu",
@@ -543,6 +554,7 @@ def test_get_all_course_builds(
     }
 
     expected_data_2 = {
+        "id": 2,
         "instructor_firstname": "Leon",
         "instructor_lastname": "Simmons",
         "instructor_email": "lsimmons@rice.edu",
@@ -559,6 +571,7 @@ def test_get_all_course_builds(
     }
 
     expected_data_3 = {
+        "id": 3,
         "instructor_firstname": "Franklin",
         "instructor_lastname": "Saint",
         "instructor_email": "fsaint@rice.edu",
@@ -575,6 +588,7 @@ def test_get_all_course_builds(
     }
 
     expected_data_4 = {
+        "id": 4,
         "instructor_firstname": "Reed",
         "instructor_lastname": "Thompson",
         "instructor_email": "lthompson@rice.edu",
