@@ -277,6 +277,7 @@ export const ropeApi = {
 
     const courseBuildsFromApi = await response.json()
     const courseBuilds: CourseBuild[] = courseBuildsFromApi.map((courseBuild: {
+      id: number
       instructor_firstname: string
       instructor_lastname: string
       instructor_email: string
@@ -314,6 +315,7 @@ export const ropeApi = {
     }
 
     const newCourseBuildFromApi: {
+      id: number
       instructor_firstname: string
       instructor_lastname: string
       instructor_email: string
