@@ -94,6 +94,7 @@ def create_course_build(
         )
 
     return {
+        "id": new_course_build.id,
         "instructor_firstname": instructor_firstname,
         "instructor_lastname": instructor_lastname,
         "instructor_email": instructor_email,
@@ -117,6 +118,7 @@ def get_course_builds(
     response = []
     for course in course_builds:
         response.append({
+            "id": course.id,
             "instructor_firstname": course.instructor_firstname,
             "instructor_lastname": course.instructor_lastname,
             "instructor_email": course.instructor_email,

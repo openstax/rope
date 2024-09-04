@@ -118,6 +118,12 @@ function Page(): JSX.Element {
       wrap: true
     },
     {
+      name: 'Build ID',
+      selector: row => row.buildId ?? '',
+      sortable: true,
+      wrap: true
+    },
+    {
       name: 'Course Enrollment Url',
       selector: row => row.courseEnrollmentUrl ?? '',
       wrap: true
