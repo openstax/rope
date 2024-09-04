@@ -1,12 +1,10 @@
 import json
 import argparse
-from rope.api import settings
-import boto3
+from rope.api import settings, utils
 
 
 def inject_course_build(sqs_client, sqs_queue_name, course_build_id):
-    queue_url_data = sqs_client.get_queue_url(QueueName=sqs_queue_name)
-    queue_url = queue_url_data["QueueUrl"]
+    queue_url = utils.get_sqs_queue_url(sqs_client, sqs_queue_name)
     message_body = {
         "course_build_id": course_build_id
     }
@@ -22,7 +20,7 @@ def main():
     args = parser.parse_args()
     course_build_id = args.course_build_id
 
-    sqs_client = boto3.client("sqs")
+    sqs_client = utils.get_sqs_client()
     sqs_queue_name = settings.SQS_QUEUE
     inject_course_build(sqs_client, sqs_queue_name, course_build_id)
 
