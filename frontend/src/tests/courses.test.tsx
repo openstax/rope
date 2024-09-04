@@ -6,6 +6,7 @@ import { AuthContext, AuthStatus } from '../components/useAuthContext'
 import { PageContextProvider } from '../components/usePageContext'
 
 const mockCourseBuilds = [{
+  id: 99,
   instructor_firstname: 'Avi',
   instructor_lastname: 'Drexler',
   instructor_email: 'adrexler@snowfallisd.edu',
@@ -21,6 +22,7 @@ const mockCourseBuilds = [{
   course_enrollment_key: 'key1'
 },
 {
+  id: 100,
   instructor_firstname: 'Prabhdip',
   instructor_lastname: 'Gill',
   instructor_email: 'prabhdip@rice.edu',
@@ -37,6 +39,7 @@ const mockCourseBuilds = [{
 
 },
 {
+  id: 200,
   instructor_firstname: 'Prabhdip',
   instructor_lastname: 'Gill',
   instructor_email: 'prabhdip@rice.edu',
@@ -80,6 +83,7 @@ describe('Courses page', async () => {
     expect(screen.queryByText('AY 2039')).toBeInTheDocument()
     expect(screen.queryByText('Algebra 1 - Prabhdip Gill (AY 2039)')).toBeInTheDocument()
     expect(screen.queryByText(37)).toBeInTheDocument()
+    expect(screen.queryByText(99)).toBeInTheDocument()
     expect(screen.queryByText('enrollment_url1')).toBeInTheDocument()
     expect(screen.queryByText('key1')).toBeInTheDocument()
   })
@@ -117,6 +121,7 @@ describe('Courses page', async () => {
     expect(screen.queryByText('Algebra 1 - Prabhdip Gill (AY 2039)')).not.toBeInTheDocument()
     expect(screen.queryByText('Algebra 1 - Avi Drexler (AY 2040)')).not.toBeInTheDocument()
     expect(screen.queryByText('created')).toBeInTheDocument()
+    expect(screen.queryByText(200)).toBeInTheDocument()
     expect(screen.queryByText(57)).toBeInTheDocument()
     expect(screen.queryByText('enrollment_url3')).toBeInTheDocument()
     expect(screen.queryByText('key3')).toBeInTheDocument()

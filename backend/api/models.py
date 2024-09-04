@@ -43,6 +43,7 @@ class BaseCourseBuildSettings(BaseModel):
 
 
 class FullCourseBuildSettings(BaseCourseBuildSettings):
+    id: int
     course_name: str
     course_shortname: str
     course_id: Optional[int] = None
